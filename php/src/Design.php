@@ -19,6 +19,8 @@ final class Design
     public const CATEGORIES = ['luxury', 'floral', 'modern', 'minimal', 'oriental', 'boho'];
     public const STATUSES   = ['draft', 'active', 'inactive'];
     public const TYPES      = ['image', 'text', 'photo', 'shape', 'button', 'video'];
+    /** Was gruen.js aus einem Film herausstanzen kann. */
+    public const STANZEN    = ['gruen', 'schwarz'];
     public const ALIGNS     = ['left', 'center', 'right'];
 
     /** Welche dynamischen Felder eine Vorlage einsetzen darf. */
@@ -688,7 +690,7 @@ final class Design
             'box'         => [],
             'src'         => '',
             'poster'      => '',
-            'gruen'       => false,
+            'stanze'      => '',
             'bind'        => '',
             'text'        => ['de' => '', 'en' => ''],
             'style'       => [],
@@ -710,9 +712,17 @@ final class Design
         // nur frueher, weil hier kein Zweig ihn spaeter noch abfangen wuerde.
         $el['poster'] = self::safeSrc((string) $el['poster']);
 
-        // Yeşil ekran: nur ein Film hat Gruen, das gruen.js herausstanzen
-        // kann. An jeder anderen Ebene waere die Marke eine Luege.
-        $el['gruen'] = $el['type'] === 'video' && (bool) $el['gruen'];
+        // Was gruen.js aus dem Film herausstanzt: das Gruen eines
+        // Greenscreens oder das Schwarz eines Films, der auf Schwarz gedreht
+        // ist (Ayhans Rosenbogen vom 02.10.2026: H.264 ohne Alpha, innen
+        // 0,0,0). Nur ein Film hat etwas zum Stanzen. Das alte Feld gruen
+        // (ein Haken, einen Tag lang) wird als "gruen" gelesen.
+        $stanze = (string) $el['stanze'];
+        if ($stanze === '' && !empty($el['gruen'])) {
+            $stanze = 'gruen';
+        }
+        unset($el['gruen']);
+        $el['stanze'] = $el['type'] === 'video' && in_array($stanze, self::STANZEN, true) ? $stanze : '';
 
         // Unbekannte Namen bleiben stehen: warnings() soll sie melden koennen.
         // Nur Sonderzeichen fliegen raus. Leerzeichen werden zum Unterstrich,
@@ -1343,11 +1353,12 @@ final class Design
 
                 $poster = self::safeSrc($el['poster']);
 
-                // data-gruen: der Film ist ein Greenscreen ohne Alphakanal.
-                // gruen.js legt eine Leinwand an seine Stelle und stanzt das
-                // Gruen dort heraus; ohne WebGL bleibt der Film, wie er ist.
+                // data-stanze: der Film hat keinen Alphakanal, sein Gruen
+                // oder Schwarz soll durchsichtig sein. gruen.js legt eine
+                // Leinwand an seine Stelle und stanzt es dort heraus; ohne
+                // WebGL bleibt der Film, wie er ist.
                 $out .= '<video class="' . e($class) . '" src="' . e($src) . '"'
-                    . ($el['gruen'] ? ' data-gruen' : '')
+                    . ($el['stanze'] !== '' ? ' data-stanze="' . e($el['stanze']) . '"' : '')
                     . ($poster !== '' ? ' poster="' . e($poster) . '"' : '')
                     . $attr . '></video>';
             }
@@ -2193,9 +2204,11 @@ final class Design
             foreach (['flipx', 'flipy'] as $spiegel) {
                 $doc['layers'][$i]['box'][$spiegel] = isset($post['box_' . $spiegel . '_' . $id]) ? 1 : 0;
             }
-            // Yeşil ekran, gelesen wie die Spiegelungen. complete() setzt es
-            // an allem, was kein Film ist, ohnehin wieder auf aus.
-            $doc['layers'][$i]['gruen'] = isset($post['gruen_' . $id]);
+            // Was herausgestanzt wird. Eine Auswahl steht nur bei Filmen im
+            // Formular; complete() setzt alles andere ohnehin auf leer.
+            if (isset($post['stanze_' . $id])) {
+                $doc['layers'][$i]['stanze'] = (string) $post['stanze_' . $id];
+            }
 
             if (isset($post['move_' . $id])) {
                 $doc['layers'][$i]['motion']['move'] = (string) $post['move_' . $id];

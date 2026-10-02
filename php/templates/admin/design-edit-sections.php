@@ -794,16 +794,24 @@ use function Atelier\e;
             <input name="posterpfad_<?= e($ebene['id']) ?>" value="<?= e((string) $ebene['poster']) ?>"
                    class="<?= $feld ?> font-mono text-[0.78rem]"></label>
 
-          <?php /* Yeşil ekran: gruen.js stanzt das Gruen im Browser heraus.
-                   Fuer Filme ohne Alphakanal - ein webm mit Alpha braucht es nicht. */ ?>
-          <label class="mt-4 flex items-center gap-2 text-[0.66rem] text-muted">
-            <input type="checkbox" name="gruen_<?= e($ebene['id']) ?>" <?= !empty($ebene['gruen']) ? 'checked' : '' ?>>
-            <?= $tr ? 'Yeşil ekran — yeşil arka planı şeffaf yap' : 'Greenscreen — grünen Hintergrund durchsichtig machen' ?>
-          </label>
+          <?php /* Freistellen: gruen.js stanzt Gruen oder Schwarz im Browser
+                   heraus. Fuer Filme ohne Alphakanal - ein webm mit Alpha
+                   braucht es nicht. Ein H.264-Film laeuft auf iPhone und
+                   Android gleich, das Stanzen auch. */ ?>
+          <label class="<?= $label ?> mt-4 block"><?= $tr ? 'Arka planı şeffaf yap' : 'Hintergrund durchsichtig machen' ?>
+            <select name="stanze_<?= e($ebene['id']) ?>" class="<?= $feld ?>">
+              <?php foreach ([
+                  ''        => $tr ? 'Hayır — video olduğu gibi' : 'Nein — Film wie er ist',
+                  'schwarz' => $tr ? 'Siyah zemin silinsin' : 'Schwarzen Grund entfernen',
+                  'gruen'   => $tr ? 'Yeşil ekran silinsin' : 'Greenscreen entfernen',
+              ] as $wert => $name) : ?>
+                <option value="<?= e($wert) ?>" <?= (string) ($ebene['stanze'] ?? '') === $wert ? 'selected' : '' ?>><?= e($name) ?></option>
+              <?php endforeach; ?>
+            </select></label>
           <p class="mt-1 text-[0.62rem] leading-snug text-muted">
             <?= $tr
-                ? 'Şeffaflığı olmayan, yeşil fonlu videolar için. Yeşil her karede tarayıcıda silinir; zaten şeffaf olan webm için gerekmez.'
-                : 'Für Filme mit grünem Hintergrund ohne Transparenz. Das Grün wird im Browser Bild für Bild entfernt; ein transparentes webm braucht das nicht.' ?>
+                ? 'Şeffaflığı olmayan videolar için (siyah ya da yeşil fonlu .mov/.mp4). Fon her karede tarayıcıda silinir, iPhone ve Android’de aynı görünür. Zaten şeffaf olan webm için gerekmez.'
+                : 'Für Filme ohne Transparenz (schwarzer oder grüner Grund, .mov/.mp4). Der Grund wird im Browser Bild für Bild entfernt, auf iPhone und Android gleich. Ein transparentes webm braucht das nicht.' ?>
           </p>
         </div>
       </div>

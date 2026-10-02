@@ -1,11 +1,17 @@
 /*
- * Yeşil ekran: das Gruen eines Films im Browser herausstanzen.
+ * Freistellen: das Gruen oder Schwarz eines Films im Browser herausstanzen.
  *
- * Ein Greenscreen-Film (.mov/.mp4 ohne Alphakanal) traegt das Gruen als
- * echtes Bild. Ein <video> zeigt es so, wie es ist - durchsichtig wird nur,
- * was im Film schon durchsichtig ist (webm mit Alpha). Fuer alles andere
- * setzt der Grafiker im Panel den Haken, Design::html() schreibt data-gruen
- * an den Film, und hier passiert der Rest:
+ * Ein Film ohne Alphakanal (.mov/.mp4, H.264) traegt seinen Grund als
+ * echtes Bild - ein Greenscreen sein Gruen, ein auf Schwarz gedrehter Film
+ * sein Schwarz. Ein <video> zeigt es so, wie es ist - durchsichtig wird nur,
+ * was im Film schon durchsichtig ist (webm mit Alpha).
+ *
+ * Und das hilft nur halb: webm mit Alpha ist auf dem iPhone schwarz, HEVC
+ * mit Alpha auf Android. Ein H.264-Film laeuft ueberall, und das Stanzen
+ * hier auch - eine Datei fuer alle Geraete.
+ *
+ * Der Grafiker waehlt im Panel, was weg soll, Design::html() schreibt
+ * data-stanze="gruen|schwarz" an den Film, und hier passiert der Rest:
  *
  *   - Eine Leinwand tritt an die Stelle des Films und uebernimmt seine
  *     Klassen. Damit gelten fuer sie dieselben Regeln aus Design::css()
@@ -16,10 +22,9 @@
  *     Ganz entfernt (display:none) wuerde manch ein Browser ihn nicht mehr
  *     dekodieren - dann bliebe die Leinwand stehen.
  *   - Jedes neue Bild des Films geht als Textur durch einen kleinen Shader,
- *     der Gruen zu Durchsichtigkeit macht und den gruenen Saum an den
- *     Raendern entfaerbt.
+ *     der den Grund zu Durchsichtigkeit macht.
  *
- * Ohne WebGL bleibt alles, wie es war: der Film mit seinem Gruen. Lieber
+ * Ohne WebGL bleibt alles, wie es war: der Film mit seinem Grund. Lieber
  * ein sichtbarer Hintergrund als eine leere Stelle.
  */
 (function () {
@@ -39,20 +44,35 @@
   /*
    * Wie gruen ist ein Punkt: wie weit sein Gruen ueber Rot und Blau liegt.
    * Ein Studiogruen liegt da grob bei 0.5, Gold, Rosa und Weiss bei null
-   * oder darunter, ein olivfarbenes Blatt knapp darueber. Zwischen 0.12 und 0.30 wird weich ausgeblendet, damit die
-   * Kanten nicht treppig werden.
+   * oder darunter, ein olivfarbenes Blatt knapp darueber. Zwischen 0.12 und
+   * 0.30 wird weich ausgeblendet, damit die Kanten nicht treppig werden.
    *
    * Der Saum: an halbdurchsichtigen Raendern traegt das Bild noch Gruen vom
    * Hintergrund. Dort wird Gruen auf Rot/Blau gedeckelt - je
    * durchsichtiger, desto mehr. Voll deckende Punkte bleiben unberuehrt,
    * damit ein echtes gruenes Blatt gruen bleibt.
+   *
+   * Schwarz (m = 1): die Deckkraft ist die Helligkeit, bis 0.5 linear,
+   * darueber voll. Der Film wurde auf Schwarz gerechnet, seine Kanten sind
+   * also schon "Farbe mal Deckung" - genau das, was eine Leinwand mit
+   * premultipliedAlpha erwartet, die Farbe bleibt darum unangetastet.
+   * Ausprobiert am Rosenbogen vom 02.10.2026 auf hellem Kartengrund: eine
+   * harte Schwelle (Schwarz weg, alles andere voll) zog dunkle Konturen um
+   * jedes Blatt, linear bis 0.85 liess die Blaetter verblassen. 0.5 hielt
+   * beides klein.
    */
   var FARBE =
     "precision mediump float;" +
     "uniform sampler2D t;" +
+    "uniform float m;" +
     "varying vec2 v;" +
     "void main(){" +
     "  vec4 c = texture2D(t, v);" +
+    "  if (m > 0.5) {" +
+    "    float h = max(c.r, max(c.g, c.b));" +
+    "    gl_FragColor = vec4(c.rgb, clamp(h / 0.5, 0.0, 1.0));" +
+    "    return;" +
+    "  }" +
     "  float rb = max(c.r, c.b);" +
     "  float g = c.g - rb;" +
     "  float a = 1.0 - smoothstep(0.12, 0.30, g);" +
@@ -83,6 +103,7 @@
     gl.linkProgram(prog);
     if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) return;
     gl.useProgram(prog);
+    gl.uniform1f(gl.getUniformLocation(prog, "m"), film.getAttribute("data-stanze") === "schwarz" ? 1 : 0);
 
     var puffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, puffer);
@@ -124,7 +145,7 @@
         gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, film);
       } catch (e) {
         // Ein Film von fremdem Host ohne CORS: die Textur ist gesperrt. Dann
-        // lieber den Film mit seinem Gruen zeigen als eine leere Leinwand.
+        // lieber den Film mit seinem Grund zeigen als eine leere Leinwand.
         kaputt = true;
         leinwand.parentNode.removeChild(leinwand);
         film.className = leinwand.className;
@@ -169,7 +190,7 @@
   };
 
   var los = function () {
-    var filme = document.querySelectorAll("video[data-gruen]");
+    var filme = document.querySelectorAll("video[data-stanze]");
     for (var i = 0; i < filme.length; i++) {
       if (filme[i].getAttribute("src")) stanze(filme[i]);
     }
