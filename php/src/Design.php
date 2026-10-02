@@ -688,6 +688,7 @@ final class Design
             'box'         => [],
             'src'         => '',
             'poster'      => '',
+            'gruen'       => false,
             'bind'        => '',
             'text'        => ['de' => '', 'en' => ''],
             'style'       => [],
@@ -708,6 +709,10 @@ final class Design
         // einem poster-Attribut nichts verloren - dieselbe Regel wie bei src,
         // nur frueher, weil hier kein Zweig ihn spaeter noch abfangen wuerde.
         $el['poster'] = self::safeSrc((string) $el['poster']);
+
+        // Yeşil ekran: nur ein Film hat Gruen, das gruen.js herausstanzen
+        // kann. An jeder anderen Ebene waere die Marke eine Luege.
+        $el['gruen'] = $el['type'] === 'video' && (bool) $el['gruen'];
 
         // Unbekannte Namen bleiben stehen: warnings() soll sie melden koennen.
         // Nur Sonderzeichen fliegen raus. Leerzeichen werden zum Unterstrich,
@@ -1338,7 +1343,11 @@ final class Design
 
                 $poster = self::safeSrc($el['poster']);
 
+                // data-gruen: der Film ist ein Greenscreen ohne Alphakanal.
+                // gruen.js legt eine Leinwand an seine Stelle und stanzt das
+                // Gruen dort heraus; ohne WebGL bleibt der Film, wie er ist.
                 $out .= '<video class="' . e($class) . '" src="' . e($src) . '"'
+                    . ($el['gruen'] ? ' data-gruen' : '')
                     . ($poster !== '' ? ' poster="' . e($poster) . '"' : '')
                     . $attr . '></video>';
             }
@@ -2184,6 +2193,9 @@ final class Design
             foreach (['flipx', 'flipy'] as $spiegel) {
                 $doc['layers'][$i]['box'][$spiegel] = isset($post['box_' . $spiegel . '_' . $id]) ? 1 : 0;
             }
+            // Yeşil ekran, gelesen wie die Spiegelungen. complete() setzt es
+            // an allem, was kein Film ist, ohnehin wieder auf aus.
+            $doc['layers'][$i]['gruen'] = isset($post['gruen_' . $id]);
 
             if (isset($post['move_' . $id])) {
                 $doc['layers'][$i]['motion']['move'] = (string) $post['move_' . $id];

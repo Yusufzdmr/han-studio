@@ -1339,7 +1339,7 @@ final class InviteV2Controller
                 // Dieselbe Choreografie wie in der Design-Vorschau: Kuvert
                 // oeffnen, Karte aufsteigen lassen. Ohne dieses Skript bleibt
                 // das Kuvert zu.
-                'scripts' => ['/assets/invitation.js', '/assets/invite-v2-countdown.js'],
+                'scripts' => ['/assets/gruen.js', '/assets/invitation.js', '/assets/invite-v2-countdown.js'],
             ]),
             'design' => $doc,
             // OHNE Punkt. Design::css() bekommt den Selektor (".d-elysee"),

@@ -385,7 +385,7 @@ use function Atelier\e;
       <div class="grid gap-3 sm:grid-cols-2">
         <label class="<?= $label ?>"><?= $tr ? 'dosya (resim ya da video)' : 'Datei (Bild oder Film)' ?>
           <input type="file" class="<?= $feld ?>" name="icon_datei_<?= e((string) $kennung) ?>"
-                 accept="image/png,image/webp,image/svg+xml,image/jpeg,video/mp4,video/webm"></label>
+                 accept="image/png,image/webp,image/svg+xml,image/jpeg,video/mp4,video/webm,video/quicktime"></label>
         <label class="<?= $label ?>"><?= $tr ? 'ya da yol (boş = çizili hâli)' : 'oder Pfad (leer = gezeichnet)' ?>
           <input class="<?= $feld ?> font-mono text-[0.72rem]"
                  name="icon_src_<?= e((string) $kennung) ?>" value="<?= e($pfad) ?>"></label>
@@ -479,7 +479,7 @@ use function Atelier\e;
             <div class="grid gap-3 sm:grid-cols-2">
               <label class="<?= $label ?>"><?= $tr ? 'dosya (resim ya da video)' : 'Datei (Bild oder Film)' ?>
                 <input type="file" class="<?= $feld ?>" name="cd_datei_<?= e((string) $gestalt) ?>_<?= $i ?>"
-                       accept="image/png,image/webp,image/svg+xml,image/jpeg,video/mp4,video/webm"></label>
+                       accept="image/png,image/webp,image/svg+xml,image/jpeg,video/mp4,video/webm,video/quicktime"></label>
               <label class="<?= $label ?>"><?= $tr ? 'yol (boş = yok)' : 'Pfad (leer = keines)' ?>
                 <input class="<?= $feld ?> font-mono text-[0.72rem]"
                        name="<?= $n ?>src" value="<?= e($pfad) ?>"></label>
@@ -743,7 +743,7 @@ use function Atelier\e;
 
       <label class="<?= $label ?>"><?= $tr ? 'Başlangıç görseli (isteğe bağlı)' : 'Startbild (optional)' ?>
         <input type="file" name="neue_ebene_bild"
-               accept="image/png,image/jpeg,image/webp,image/svg+xml,video/mp4,video/webm" class="<?= $feld ?>"></label>
+               accept="image/png,image/jpeg,image/webp,image/svg+xml,video/mp4,video/webm,video/quicktime" class="<?= $feld ?>"></label>
     </div>
   </div>
 <?= $zu ?>
@@ -793,6 +793,18 @@ use function Atelier\e;
           <label class="<?= $label ?> mt-4 block"><?= $tr ? 'ya da kapak yolu' : 'oder Standbild-Pfad' ?>
             <input name="posterpfad_<?= e($ebene['id']) ?>" value="<?= e((string) $ebene['poster']) ?>"
                    class="<?= $feld ?> font-mono text-[0.78rem]"></label>
+
+          <?php /* Yeşil ekran: gruen.js stanzt das Gruen im Browser heraus.
+                   Fuer Filme ohne Alphakanal - ein webm mit Alpha braucht es nicht. */ ?>
+          <label class="mt-4 flex items-center gap-2 text-[0.66rem] text-muted">
+            <input type="checkbox" name="gruen_<?= e($ebene['id']) ?>" <?= !empty($ebene['gruen']) ? 'checked' : '' ?>>
+            <?= $tr ? 'Yeşil ekran — yeşil arka planı şeffaf yap' : 'Greenscreen — grünen Hintergrund durchsichtig machen' ?>
+          </label>
+          <p class="mt-1 text-[0.62rem] leading-snug text-muted">
+            <?= $tr
+                ? 'Şeffaflığı olmayan, yeşil fonlu videolar için. Yeşil her karede tarayıcıda silinir; zaten şeffaf olan webm için gerekmez.'
+                : 'Für Filme mit grünem Hintergrund ohne Transparenz. Das Grün wird im Browser Bild für Bild entfernt; ein transparentes webm braucht das nicht.' ?>
+          </p>
         </div>
       </div>
     </div>

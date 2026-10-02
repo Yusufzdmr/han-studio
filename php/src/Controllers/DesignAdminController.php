@@ -591,7 +591,7 @@ final class DesignAdminController
                 'noindex' => true,
                 // Nur die Vorschau braucht ein Skript. Der Rest ist ein
                 // Formular und bleibt ohne.
-                'scripts' => ['/assets/design-editor.js'],
+                'scripts' => ['/assets/gruen.js', '/assets/design-editor.js'],
             ],
             'design'   => $design,
             'scope'    => ltrim($scope, '.'),

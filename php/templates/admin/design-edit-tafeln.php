@@ -373,7 +373,7 @@ foreach ($katalog as $art => $eintrag) {
               <div class="b-gruppe b-zwei">
                 <label class="<?= $label ?>"><?= $tr ? 'dosya' : 'Datei' ?>
                   <input type="file" class="<?= $feld ?>" name="sec_dekodatei_<?= $i ?>_<?= $d ?>"
-                         accept="image/png,image/webp,image/svg+xml,image/jpeg,video/mp4,video/webm"></label>
+                         accept="image/png,image/webp,image/svg+xml,image/jpeg,video/mp4,video/webm,video/quicktime"></label>
                 <label class="<?= $label ?>"><?= $tr ? 'yol (boş = yok)' : 'Pfad (leer = keiner)' ?>
                   <input class="<?= $feld ?> font-mono text-[0.78rem]"
                          name="<?= $dn ?>src" value="<?= e($dPfad) ?>"></label>

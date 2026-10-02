@@ -218,7 +218,7 @@ final class DesignController
                  * Liste. tests/layout_skripte.php haelt beide Seiten
                  * zusammen.
                  */
-                'scripts'   => ['/assets/invitation.js', '/assets/invite-v2-countdown.js'],
+                'scripts'   => ['/assets/gruen.js', '/assets/invitation.js', '/assets/invite-v2-countdown.js'],
             ]),
             'design'   => $design,
             'scope'    => ltrim($scope, '.'),

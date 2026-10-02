@@ -339,7 +339,7 @@
       // Wer Bewegung abbestellt hat, sieht das Standbild und sonst nichts.
       if (!still) {
         setTimeout(function () {
-          var filme = document.querySelectorAll("video.d-el");
+          var filme = document.querySelectorAll("video.d-el, video.d-gruen-film");
           for (var i = 0; i < filme.length; i++) {
             filme[i].play().catch(function () {});
           }
@@ -414,7 +414,7 @@
     document.documentElement.setAttribute("data-karte-frei", "true");
     var ruhig = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (!ruhig) {
-      var vorschau = document.querySelectorAll("video.d-el");
+      var vorschau = document.querySelectorAll("video.d-el, video.d-gruen-film");
       for (var v = 0; v < vorschau.length; v++) {
         vorschau[v].play().catch(function () {});
       }
