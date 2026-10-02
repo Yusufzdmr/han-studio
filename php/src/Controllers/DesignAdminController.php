@@ -8,6 +8,7 @@ use Atelier\Design;
 use Atelier\DesignImages;
 use Atelier\DesignSections;
 use Atelier\DesignVideos;
+use Atelier\DesignWizard;
 use Atelier\I18n;
 use Atelier\InvitationsV2;
 use Atelier\Media;
@@ -33,7 +34,14 @@ final class DesignAdminController
         'venue'   => 'Schloss Hohenstein',
         'address' => 'Schlossstraße 1, 89312 Günzburg',
         'message' => 'Wir heiraten und wünschen uns, dass ihr dabei seid.',
+        // Wie im Assistenten (InviteV2Controller::BEISPIEL). Ohne ihn liess
+        // Design::html die Hashtag-Ebene ganz weg - im Editor unsichtbar, und
+        // ein im Kasten "Deneme verisi" getippter Hashtag haette keinen Knoten.
+        'hashtag' => '#sophiaundmaximilian',
     ];
+
+    /** Die Familien der Beispieleinladung - Vorschau und Kasten "Deneme verisi". */
+    private const BEISPIEL_FAMILIEN = ['bride' => 'Familie Berger', 'groom' => 'Familie Lindqvist'];
 
     public function index(string $locale): void
     {
@@ -373,16 +381,131 @@ final class DesignAdminController
         $doc = Design::fromPost($design, $_POST);
 
         $sel   = '.d-' . $doc['id'];
-        $daten = self::BEISPIEL + [
-            'families' => ['bride' => 'Familie Berger', 'groom' => 'Familie Lindqvist'],
-            'program'  => self::beispielAblauf($doc, $locale),
-        ];
+        $daten = is_array($_POST['probe'] ?? null)
+            ? self::probeDaten($_POST['probe'])
+            : self::BEISPIEL + [
+                'families' => self::BEISPIEL_FAMILIEN,
+                'program'  => self::beispielAblauf($doc, $locale),
+            ];
 
         // Kein Formular in der Vorschau: die Zusage schickt hier niemand ab.
         $abschnitte = DesignSections::html($doc, $daten, 'de', '', ['csrf' => '', 'sent' => false]);
 
         echo '<style>' . DesignSections::css($doc, $sel) . '</style>'
            . DesignSections::flaeche($doc, ltrim($sel, '.'), $abschnitte, 'mx-auto max-w-2xl', 'de');
+
+        /*
+         * Die Werte fuer die Karte gleich mit: das Skript schreibt sie in die
+         * gebundenen Knoten. Hier gerechnet und nicht im Browser, damit das
+         * Datum so dasteht wie auf der Einladung (Dates::long, Wochentag) -
+         * der Assistent zeigt an dieser Stelle nur die rohe Eingabe.
+         */
+        echo '<script type="application/json" data-probe-werte>'
+           . json_encode(Design::bindValues($daten, $locale), JSON_HEX_TAG | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE)
+           . '</script>';
+    }
+
+    /**
+     * Die ganze Seite fuer den Rahmen (Telefon / Tablet / Masaustu) - aus dem
+     * Formular, nicht aus der Datenbank.
+     *
+     * "kaydetmeden onizlemeyi gorebilsin sonra kaydederse"
+     *
+     * Bis hierher holte der Rahmen /v2/designs/{slug}, also den GESPEICHERTEN
+     * Stand: wer etwas aenderte, sah es im Rahmen erst nach dem Speichern.
+     * Jetzt schickt das Skript das Formular hierher, wie an vorschau(), und
+     * legt die Antwort als srcdoc in den Rahmen. Dieselben Grenzen wie dort:
+     * ohne Dateien, und vor allem - nichts wird gespeichert.
+     *
+     * @param array<string,string> $params
+     */
+    public function seite(array $params): void
+    {
+        $locale = $params['locale'];
+        Admin::requireLogin($locale);
+
+        header('Cache-Control: no-store');
+
+        if (!Security::checkCsrf($_POST['csrf'] ?? null)) {
+            http_response_code(419);
+            return;
+        }
+
+        $design = Design::find(Security::clean($params['slug'] ?? '', 64));
+        if ($design === null) {
+            http_response_code(404);
+            return;
+        }
+
+        DesignController::zeige(
+            Design::fromPost($design, $_POST),
+            is_array($_POST['probe'] ?? null) ? self::probeDaten($_POST['probe']) : null
+        );
+    }
+
+    /**
+     * Was im Kasten "Deneme verisi" steht, in der Form, in der eine
+     * Einladung es speichert.
+     *
+     * "gelin ve damadin adini yazip nasil oldugunu gorebilmeliyim" /
+     * "musterinin yazabildigi her seyi test edebilmeliyim"
+     *
+     * Dieselbe Uebersetzung wie InviteV2Controller::sammleAngaben(): ein
+     * leeres Feld setzt families, program und sections NICHT - so sieht der
+     * Betrieb genau das, was das Paar mit demselben leeren Feld bekaeme.
+     * Gespeichert wird nichts; die Werte leben nur im Browser.
+     *
+     * @param array<mixed> $probe
+     * @return array<string,mixed>
+     */
+    private static function probeDaten(array $probe): array
+    {
+        $wert = static fn (mixed $v, int $max): string => Security::clean(is_string($v) ? $v : '', $max);
+
+        $daten = [];
+        foreach (DesignWizard::FIELD_ORDER as $feld) {
+            $daten[$feld] = $wert($probe[$feld] ?? '', $feld === 'message' ? 600 : 160);
+        }
+
+        $braut = $wert($probe['family_bride'] ?? '', 120);
+        $mann  = $wert($probe['family_groom'] ?? '', 120);
+        if ($braut !== '' || $mann !== '') {
+            $daten['families'] = ['bride' => $braut, 'groom' => $mann];
+        }
+
+        $zeilen = [];
+        for ($z = 0; $z < 8; $z++) {
+            $titel   = $wert($probe['prog_title_' . $z] ?? '', DesignSections::PROGRAM_LEN);
+            $zeichen = $wert($probe['prog_icon_' . $z] ?? '', 32);
+            if ($titel === '' && $zeichen === '') {
+                continue;
+            }
+            $zeilen[] = [
+                'time'  => $wert($probe['prog_time_' . $z] ?? '', DesignSections::PROGRAM_LEN),
+                'title' => $titel,
+                'icon'  => $zeichen,
+                'text'  => $wert($probe['prog_text_' . $z] ?? '', DesignSections::PROGRAM_TEXT_LEN),
+            ];
+        }
+        if ($zeilen !== []) {
+            $daten['program'] = $zeilen;
+        }
+
+        foreach (is_array($probe['sec'] ?? null) ? $probe['sec'] : [] as $sid => $felder) {
+            if (!is_array($felder)) {
+                continue;
+            }
+            foreach ($felder as $schluessel => $v) {
+                // Die Obergrenze des Katalogs gilt beim Speichern; hier reicht
+                // eine grosszuegige - es wird nur gezeichnet.
+                $text = $wert($v, 1200);
+                if ($text !== '') {
+                    $daten['sections'][(string) $sid][(string) $schluessel] = $text;
+                }
+            }
+        }
+
+        return $daten;
     }
 
     /**
@@ -492,6 +615,19 @@ final class DesignAdminController
             // Die zweite Frage vor den veroeffentlichten Einladungen.
             'fragen'   => (string) ($_GET['auffrischen'] ?? '') === 'veroeffentlicht',
             'warnings' => Design::warnings($design),
+            /*
+             * Der Kasten "Deneme verisi": die Felder, die der Assistent dem
+             * Paar bei DIESER Vorlage anbietet (DesignWizard::choices), mit
+             * den Beispielwerten vorbelegt, die Karte und Vorschau ohnehin
+             * zeigen. Aus derselben Quelle wie der Assistent - sonst testete
+             * der Betrieb Felder, die der Kunde nie sieht.
+             */
+            'probe'    => [
+                'darf'     => DesignWizard::choices($design),
+                'werte'    => self::BEISPIEL,
+                'familien' => self::BEISPIEL_FAMILIEN,
+                'ablauf'   => self::beispielAblauf($design, $locale),
+            ],
             'csrf'     => Security::csrf(),
         ]);
     }

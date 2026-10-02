@@ -2,18 +2,16 @@
 /**
  * Eine Vorlage der zweiten Fassung, in voller Groesse.
  *
- * Drei Ebenen ineinander, wie beim Original: die Seite traegt Hintergrund und
- * Zeichnung, darauf liegt das Kuvert, darin die Karte. Welche Ebene wohin
+ * Zwei Ebenen ineinander: die Seite traegt Hintergrund und
+ * Zeichnung, darauf liegt die Karte. Welche Ebene wohin
  * gehoert, sagt ihr `spot` – der Controller hat sie schon getrennt.
  *
  * @var array<string,mixed> $design
  * @var string $scope
  * @var string $styles
  * @var string $seite
- * @var string $kuvert
  * @var string $karte
  * @var list<array{kind:string,element:string,detail:string}> $warnings
- * @var string $initialen
  * @var string $locale
  */
 
@@ -42,8 +40,6 @@ $tempo = (int) $design['animation']['speed'];
  * Sekunden, weil der Grafiker in Sekunden denkt.
  */
 $introMs = (int) round(((float) ($design['intro']['seconds'] ?? 0)) * 1000);
-// Die ruhige Dauerbewegung des Kuverts - dieselbe Klasse wie im Original.
-$idle = (string) $design['animation']['idle'];
 $googleFontsHref = Design::googleFontsHref(Design::fontsInUse($design));
 ?>
 <?php if ($googleFontsHref !== '') : ?>
@@ -54,10 +50,9 @@ $googleFontsHref = Design::googleFontsHref(Design::fontsInUse($design));
     'scope'     => $scope,
     'styles'    => $styles,
     'seite'     => $seite,
-    'kuvert'    => $kuvert,
     'karte'     => $karte,
     'locale'    => $locale,
-    // Diese fuenf stammen aus $design, werden aber hier - nicht in der
+    // Diese vier stammen aus $design, werden aber hier - nicht in der
     // Buehne selbst - berechnet: die Buehne teilt sich mit der Leiste
     // unten dieselben Werte (tempo, karteAn), also soll es nur eine
     // Berechnung geben.
@@ -69,10 +64,7 @@ $googleFontsHref = Design::googleFontsHref(Design::fontsInUse($design));
     // Einladung im eingefrorenen Sockel, hier in der Vorlage selbst.
     'introVideo'  => (string) $design['intro']['video'],
     'introPoster' => (string) $design['intro']['poster'],
-    'idle'      => $idle,
-    // Nicht aus $design ableitbar: initialen kommt aus den (Beispiel-)
-    // Werten des Paares, warnings betrifft die konkrete Vorlage.
-    'initialen' => $initialen,
+    // Nicht aus $design ableitbar: warnings betrifft die konkrete Vorlage.
     'warnings'  => $warnings,
     /*
      * Im Fluss, nicht fest.

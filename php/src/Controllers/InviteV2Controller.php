@@ -1352,7 +1352,7 @@ final class InviteV2Controller
             // Die Abschnittsregeln haengen an denselben Marken wie die Karte,
             // also gehoeren sie in denselben Stilblock.
             'styles' => Design::css($doc, $scope) . DesignSections::css($doc, $scope),
-            // Die fuenf Bewegungswerte rechnet sonst design-preview.php aus.
+            // Die Bewegungswerte rechnet sonst design-preview.php aus.
             // Die Buehne liest sie, leitet sie aber nicht selbst ab - eine
             // Rechnung, eine Quelle der Wahrheit (Aufgabe 5).
             'ratio'   => str_replace(':', ' / ', (string) $doc['canvas']['ratio']),
@@ -1363,10 +1363,6 @@ final class InviteV2Controller
             // Sockel, nicht aus der lebenden Vorlage - sonst aenderte sich
             // der Auftakt einer laengst verteilten Adresse.
             'introMs' => (int) round(((float) ($doc['intro']['seconds'] ?? 0)) * 1000),
-            'idle'    => (string) $doc['animation']['idle'],
-            // Die Initialen stehen auf dem Siegel. Sie kommen aus den Daten
-            // des Paares, nicht aus dem Dokument.
-            'initialen' => $values['initials'],
             // Leer, und zwar immer. Die Buehne zeigt Warnungen ungeprueft an
             // (design-stage.php:50) - auf einer echten Einladung hat ein Gast
             // nichts mit den Maengeln einer Vorlage zu tun. Waere der Wert gar
@@ -1379,7 +1375,6 @@ final class InviteV2Controller
             // Google-Schriften, die er auch sieht.
             'googleFontsHref' => Design::googleFontsHref(Design::fontsInUse($doc)),
             'seite'  => Design::html($doc, $values, $locale, 'page'),
-            'kuvert' => Design::html($doc, $values, $locale, 'envelope'),
             'karte'  => Design::html($doc, $values, $locale, 'card'),
             // Rohdaten, nicht gebundene Werte: die Abschnitte binden ihre
             // eigenen Platzhalter (Adresse, Countdown-Datum) selbst.

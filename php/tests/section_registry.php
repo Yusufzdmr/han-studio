@@ -269,7 +269,7 @@ assert_contains(SectionRegistry::typeHint('gallery', 'tr'), 'resimlerin', 'typeH
  * die dritte ist die Zeile in der Liste links.
  *
  * Geprueft wird die Vorlage als Text, wie bei der Buehne in
- * kuvert_vorspann.php - eine gerenderte Panelseite braucht eine Anmeldung.
+ * kuvert.php - eine gerenderte Panelseite braucht eine Anmeldung.
  */
 $tafelnQuelle = (string) file_get_contents(__DIR__ . '/../templates/admin/design-edit-tafeln.php');
 $listeQuelle  = (string) file_get_contents(__DIR__ . '/../templates/admin/design-edit-liste.php');

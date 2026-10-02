@@ -82,6 +82,18 @@ $videoEbenen = array_filter($design['layers'], static fn (array $l): bool => $l[
   .b-fein{font-size:0.66rem;letter-spacing:0.16em;text-transform:uppercase;color:var(--color-muted,#7a6f65);}
   a.b-fein:hover{color:var(--color-ink,#14110f);}
 
+  /* Deneme verisi: ueber der Karte, zugeklappt - wer nur gestaltet, soll
+     die Karte nicht unter einem Formular suchen. */
+  .b-probe{margin:0.6rem 0;border:1px solid var(--color-sand-deep,#e5ddd3);padding:0.55rem 0.75rem;}
+  .b-probe summary{cursor:pointer;color:var(--color-ink,#14110f);}
+  .b-probe-not{margin:0.5rem 0 0.75rem;text-transform:none;letter-spacing:0.02em;font-size:0.72rem;}
+  .b-probe-kopf{margin:0.9rem 0 0.4rem;color:var(--color-ink,#14110f);}
+  .b-probe-raster{display:grid;grid-template-columns:repeat(auto-fill,minmax(10rem,1fr));gap:0.5rem 0.75rem;}
+  .b-probe-feld{display:flex;flex-direction:column;gap:0.25rem;min-width:0;}
+  .b-probe-breit{grid-column:1/-1;}
+  .b-probe input,.b-probe textarea{width:100%;border:1px solid var(--color-sand-deep,#e5ddd3);
+    background:#fff;padding:0.35rem 0.5rem;font-size:0.85rem;color:var(--color-ink,#14110f);}
+
   .b-schale{display:grid;gap:1.5rem;align-items:start;}
   @media (min-width:1120px){.b-schale{grid-template-columns:248px minmax(0,1fr) 372px;}}
   .b-spalte{min-width:0;}
@@ -508,13 +520,12 @@ $videoEbenen = array_filter($design['layers'], static fn (array $l): bool => $l[
            kleiner. Sie folgt jedem Tastendruck ohne Speichern, weil das
            Skript nur CSS-Variablen, Textknoten und Inline-Kaesten setzt.
 
-           Die drei Geraete zeigen die GANZE Seite in einem Rahmen, und zwar
-           die oeffentliche Adresse selbst - Kuvert, Film, Karte, Abschnitte,
-           alles. Sie zeigt den GESPEICHERTEN Stand: ein Rahmen holt sich die
-           Seite vom Server, und der kennt nur, was in der Datenbank steht.
-           Das ist keine Einschraenkung, die sich beheben liesse, sondern der
-           Unterschied zwischen "was ich gerade tippe" und "was da draussen
-           steht" - deshalb sagt es die Zeile darunter auch so.
+           Die drei Geraete zeigen die GANZE Seite in einem Rahmen - Kuvert,
+           Film, Karte, Abschnitte, alles. Bis 01.10.2026 war das der
+           GESPEICHERTE Stand (der Rahmen holte /v2/designs/{slug}). Seitdem
+           zeichnet der Server sie aus dem Formular, ohne zu speichern
+           (DesignAdminController::seite): "kaydetmeden onizlemeyi
+           gorebilsin sonra kaydederse".
 
            Telefon zuerst: Einladungen werden auf Telefonen geoeffnet, fast
            nie am Schreibtisch.
@@ -525,6 +536,129 @@ $videoEbenen = array_filter($design['layers'], static fn (array $l): bool => $l[
           <button type="button" class="b-knopf" data-ansicht="820"><?= $tr ? 'Tablet' : 'Tablet' ?></button>
           <button type="button" class="b-knopf" data-ansicht="1280"><?= $tr ? 'Masaüstü' : 'Schreibtisch' ?></button>
         </div>
+
+        <?php /*
+           Deneme verisi: was das Paar eintippen kann, hier zum Ausprobieren.
+
+           "gelin ve damadin adini yazip nasil oldugunu gorebilmeliyim" -
+           bisher stand auf der Karte immer Sophia & Maximilian, und wie ein
+           langer Name oder ein leeres Feld aussieht, sah erst der Kunde.
+
+           Die Felder tragen KEINEN name: sie gehoeren nicht zur Vorlage. Mit
+           name reisten sie beim Speichern mit, und jeder Buchstabe hier
+           loeste das Speichern nebenbei und einen Schritt im Rueckgaengig
+           aus. Das Skript liest sie ueber data-probe und schickt sie nur an
+           .../vorschau. Gespeichert wird davon nichts.
+
+           Fotos und Musik fehlen: das sind Dateien, und eine Vorschau, die
+           bei jedem Tastendruck Megabytes schickt, waere keine.
+        */ ?>
+        <?php
+          $probeDarf = $probe['darf'];
+          $probeEtikett = [
+              'bride'   => $tr ? 'Gelin' : 'Braut',
+              'groom'   => $tr ? 'Damat' : 'Bräutigam',
+              'date'    => $tr ? 'Tarih' : 'Datum',
+              'time'    => $tr ? 'Saat' : 'Uhrzeit',
+              'venue'   => $tr ? 'Mekân' : 'Ort',
+              'address' => $tr ? 'Adres' : 'Adresse',
+              'message' => $tr ? 'Davet metni' : 'Einladungstext',
+              'hashtag' => 'Hashtag',
+          ];
+          $probeTyp = ['date' => 'date', 'time' => 'time'];
+          $probeAbschnitte = [];
+          foreach ($probeDarf['sections'] as $pSid => $pAbschnitt) {
+              if (in_array('families', $pAbschnitt['fields'], true) || in_array('program', $pAbschnitt['fields'], true)) {
+                  $probeAbschnitte[$pSid] = $pAbschnitt;
+                  continue;
+              }
+              foreach ($pAbschnitt['inputs'] as $pFeld) {
+                  if (in_array($pFeld['type'], ['text', 'textarea'], true)) {
+                      $probeAbschnitte[$pSid] = $pAbschnitt;
+                      break;
+                  }
+              }
+          }
+        ?>
+        <details class="b-probe" data-probe-kasten>
+          <summary class="b-fein">
+            <?= $tr ? 'Deneme verisi — müşterinin yazabildiği her şey' : 'Probedaten — alles, was das Paar eintippen kann' ?>
+          </summary>
+          <p class="b-fein b-probe-not">
+            <?= $tr
+              ? 'Sadece önizleme için: buraya yazılanlar kaydedilmez, tasarımı değiştirmez. Kart ve alttaki bölümler anında güncellenir. Fotoğraf ve müzik dosya olduğu için burada yok.'
+              : 'Nur für die Vorschau: nichts davon wird gespeichert oder ändert die Vorlage. Karte und Abschnitte folgen sofort. Fotos und Musik fehlen, weil es Dateien sind.' ?>
+          </p>
+
+          <div class="b-probe-raster">
+            <?php foreach ($probeDarf['fields'] as $pFeld) : ?>
+              <label class="b-probe-feld<?= $pFeld === 'message' ? ' b-probe-breit' : '' ?>">
+                <span class="b-fein"><?= e($probeEtikett[$pFeld] ?? $pFeld) ?></span>
+                <?php if ($pFeld === 'message') : ?>
+                  <textarea rows="3" data-probe="<?= e($pFeld) ?>"><?= e((string) ($probe['werte'][$pFeld] ?? '')) ?></textarea>
+                <?php else : ?>
+                  <input type="<?= e($probeTyp[$pFeld] ?? 'text') ?>" data-probe="<?= e($pFeld) ?>"
+                         value="<?= e((string) ($probe['werte'][$pFeld] ?? '')) ?>">
+                <?php endif; ?>
+              </label>
+            <?php endforeach; ?>
+          </div>
+
+          <?php foreach ($probeAbschnitte as $pSid => $pAbschnitt) : ?>
+            <?php
+              $pTitel = (string) ($pAbschnitt['title'][$tr ? 'tr' : 'de'] ?? '');
+              if ($pTitel === '') $pTitel = (string) ($pAbschnitt['title']['de'] ?? $pAbschnitt['type']);
+            ?>
+            <p class="b-fein b-probe-kopf"><?= e($pTitel) ?></p>
+            <div class="b-probe-raster">
+              <?php if (in_array('families', $pAbschnitt['fields'], true)) : ?>
+                <label class="b-probe-feld">
+                  <span class="b-fein"><?= $tr ? 'Gelin tarafı' : 'Familie der Braut' ?></span>
+                  <input type="text" data-probe="family_bride" value="<?= e($probe['familien']['bride']) ?>">
+                </label>
+                <label class="b-probe-feld">
+                  <span class="b-fein"><?= $tr ? 'Damat tarafı' : 'Familie des Bräutigams' ?></span>
+                  <input type="text" data-probe="family_groom" value="<?= e($probe['familien']['groom']) ?>">
+                </label>
+              <?php endif; ?>
+
+              <?php if (in_array('program', $pAbschnitt['fields'], true)) : ?>
+                <?php for ($pZ = 0; $pZ < 6; $pZ++) : $pZeile = $probe['ablauf'][$pZ] ?? []; ?>
+                  <label class="b-probe-feld">
+                    <span class="b-fein"><?= $tr ? 'Saat' : 'Uhrzeit' ?> <?= $pZ + 1 ?></span>
+                    <input type="text" data-probe="prog_time_<?= $pZ ?>" value="<?= e((string) ($pZeile['time'] ?? '')) ?>">
+                  </label>
+                  <label class="b-probe-feld">
+                    <span class="b-fein"><?= $tr ? 'Başlık' : 'Titel' ?> <?= $pZ + 1 ?></span>
+                    <input type="text" data-probe="prog_title_<?= $pZ ?>" value="<?= e((string) ($pZeile['title'] ?? '')) ?>">
+                    <?php /* Das Zeichen der Beispielzeile reist mit, damit sie
+                             aussieht wie vorher - ein Titel ohne Zeichen waere
+                             eine andere Zeile als die, die man gerade sah. */ ?>
+                    <input type="hidden" data-probe="prog_icon_<?= $pZ ?>" value="<?= e((string) ($pZeile['icon'] ?? '')) ?>">
+                  </label>
+                <?php endfor; ?>
+              <?php endif; ?>
+
+              <?php foreach ($pAbschnitt['inputs'] as $pSchluessel => $pFeld) : ?>
+                <?php if (!in_array($pFeld['type'], ['text', 'textarea'], true)) continue; ?>
+                <?php
+                  $pName = 'sec[' . $pSid . '][' . $pSchluessel . ']';
+                  $pEtikett = (string) ($pFeld['label'][$tr ? 'tr' : 'de'] ?? $pSchluessel);
+                  // Leer = was die Vorlage vorschlaegt; das steht als Platzhalter da.
+                  $pVorschlag = (string) ($pAbschnitt['defaults'][$pSchluessel] ?? '');
+                ?>
+                <label class="b-probe-feld<?= $pFeld['type'] === 'textarea' ? ' b-probe-breit' : '' ?>">
+                  <span class="b-fein"><?= e($pEtikett) ?></span>
+                  <?php if ($pFeld['type'] === 'textarea') : ?>
+                    <textarea rows="3" data-probe="<?= e($pName) ?>" placeholder="<?= e($pVorschlag) ?>"></textarea>
+                  <?php else : ?>
+                    <input type="text" data-probe="<?= e($pName) ?>" placeholder="<?= e($pVorschlag) ?>">
+                  <?php endif; ?>
+                </label>
+              <?php endforeach; ?>
+            </div>
+          <?php endforeach; ?>
+        </details>
 
         <div class="<?= e($scope) ?> relative overflow-hidden border border-sand-deep"
              data-design-preview
@@ -577,9 +711,10 @@ $videoEbenen = array_filter($design['layers'], static fn (array $l): bool => $l[
         */ ?>
         <div class="b-rahmen" data-ansicht-rahmen hidden
              data-adresse="<?= e(I18n::path('/v2/designs/' . $design['slug'], 'de')) ?>"
+             data-seite-adresse="<?= e($p('/admin/designs/' . $design['slug'] . '/seite')) ?>"
              data-wort-seite="<?= $tr
-                ? 'Bu çerçeve KAYDEDİLMİŞ hâli gösterir — sayfanın kendisini sunucudan alır. Değişikliği görmek için önce kaydet.'
-                : 'Der Rahmen zeigt den GESPEICHERTEN Stand - er holt die Seite vom Server. Erst speichern, dann sieht man die Änderung.' ?>"></div>
+                ? 'Çerçeve şu anki hâli gösterir, kaydetmeden — değişiklik ve deneme verisi bir an sonra burada. Beğenirsen kaydet.'
+                : 'Der Rahmen zeigt den jetzigen Stand, ohne zu speichern — Änderungen und Probedaten erscheinen einen Augenblick später. Gefällt es, speichern.' ?>"></div>
 
         <?php /*
            Und darunter die Abschnitte - lebend.
@@ -628,8 +763,8 @@ $videoEbenen = array_filter($design['layers'], static fn (array $l): bool => $l[
 
         <p class="b-fein" style="margin-top:0.5rem;" data-ansicht-hinweis>
           <?= $tr
-            ? 'Kart: renk, yazı, metin ve katman yerleşimi anında değişir. BÖLÜMLER kartta değil, kartın altında sayfada — soldan birini seçince çerçeveye geçilir ve o bölüme kaydırılır. Çerçeve KAYDEDİLMİŞ hâli gösterir, yani yeni yazdığın bir bölüm önce kaydedilmeli.'
-            : 'Karte: Farbe, Schrift, Text und der Kasten einer Ebene ändern sich sofort. ABSCHNITTE stehen nicht auf der Karte, sondern darunter auf der Seite — wer links einen auswählt, bekommt den Rahmen und darin die Stelle. Der Rahmen zeigt den GESPEICHERTEN Stand.' ?>
+            ? 'Kart: renk, yazı, metin ve katman yerleşimi anında değişir. BÖLÜMLER kartta değil, kartın altında sayfada — soldan birini seçince çerçeveye geçilir ve o bölüme kaydırılır. Çerçeve de kaydetmeden şu anki hâli gösterir.'
+            : 'Karte: Farbe, Schrift, Text und der Kasten einer Ebene ändern sich sofort. ABSCHNITTE stehen nicht auf der Karte, sondern darunter auf der Seite — wer links einen auswählt, bekommt den Rahmen und darin die Stelle. Auch der Rahmen zeigt den jetzigen Stand, ohne zu speichern.' ?>
         </p>
       </div>
     </div>

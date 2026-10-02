@@ -168,6 +168,8 @@ $router->any('/{locale}/admin/designs', $admin_(static fn (array $p) => (new Des
  * man an der Adresse sehen koennen.
  */
 $router->post('/{locale}/admin/designs/{slug}/vorschau', $admin_(static fn (array $p) => (new DesignAdminController())->vorschau($p)));
+// Dasselbe fuer die ganze Seite im Rahmen (Telefon/Tablet/Masaustu).
+$router->post('/{locale}/admin/designs/{slug}/seite', $admin_(static fn (array $p) => (new DesignAdminController())->seite($p)));
 $router->any('/{locale}/admin/designs/{slug}', $admin_(static fn (array $p) => (new DesignAdminController())->edit($p)));
 $router->any('/{locale}/admin/systemcheck', $admin_(static fn (array $p) => (new AdminController($p['locale']))->preflight()));
 $router->any('/{locale}/admin/integrationen', $admin_(static fn (array $p) => (new AdminController($p['locale']))->integrations()));

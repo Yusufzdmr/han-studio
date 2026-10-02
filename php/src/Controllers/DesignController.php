@@ -106,9 +106,27 @@ final class DesignController
             return;
         }
 
+        self::zeige($design, null);
+    }
+
+    /**
+     * Die ganze Seite einer Vorlage zeichnen.
+     *
+     * Getrennt vom Suchen, weil es zwei Wege hierher gibt: das Schaufenster
+     * mit der gespeicherten Vorlage und den Beispieldaten, und der Rahmen im
+     * Editor (DesignAdminController::seite) mit dem, was gerade im Formular
+     * steht - "kaydetmeden onizlemeyi gorebilsin". Zwei Zeichner fuer
+     * dieselbe Seite liefen auseinander.
+     *
+     * @param array<string,mixed>      $design
+     * @param array<string,mixed>|null $daten  Was das Paar getippt hat (Kasten
+     *                                         "Deneme verisi"); null = Beispiel.
+     */
+    public static function zeige(array $design, ?array $daten): void
+    {
         $locale = I18n::locale();
         $scope = '.d-' . $design['id'];
-        $values = Design::bindValues(self::BEISPIEL, $locale);
+        $values = Design::bindValues($daten ?? self::BEISPIEL, $locale);
 
         /*
          * Beispieldaten fuer die Abschnitte.
@@ -152,6 +170,12 @@ final class DesignController
                   . 'der Hinweis auf die Parkplätze. Was ihr schreibt, steht hier.'
                 : 'Your own words go here – the story, the dress code, a note about '
                   . 'parking. Whatever you write stands here.';
+        }
+
+        // Getippt statt Beispiel: dann steht genau das da, auch ein leeres
+        // Feld - so, wie es beim Paar aussaehe.
+        if ($daten !== null) {
+            $beispieldaten = $daten;
         }
         // Einmal abgefragt, zweimal gebraucht: fuer den Entwicklerbalken
         // unten und dafuer, ob Warnungen ueberhaupt herausgehen.
@@ -217,9 +241,7 @@ final class DesignController
              */
             'abschnitte' => DesignSections::html($design, $beispieldaten, $locale, '', ['csrf' => '', 'sent' => false]),
             // Drei Ebenenlisten statt einer: die Vorschau schachtelt sie.
-            'initialen' => $values['initials'],
             'seite'    => Design::html($design, $values, $locale, 'page'),
-            'kuvert'   => Design::html($design, $values, $locale, 'envelope'),
             'karte'    => Design::html($design, $values, $locale, 'card'),
             // Warnungen sind ein Arbeitsvermerk fuer den, der die Vorlage
             // bearbeitet - nicht etwas, das einen Kunden angeht, der eine

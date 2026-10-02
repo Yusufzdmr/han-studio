@@ -6,28 +6,24 @@
  * Beispieldaten - und ohne Leiste darunter: wer diese Seite oeffnet, ist
  * eingeladen und nicht auf Vorlagensuche.
  *
- * Die Buehne (partials/design-stage) liest fünfzehn Werte, nicht nur die
- * sieben Kernwerte design/scope/styles/seite/kuvert/karte/locale - ratio,
- * tempo, karteAn, introMs, idle, initialen, warnings und fest fehlten hier
- * einmal, und das ergab eine leere Seitenverhaeltnis-Angabe, eine
- * stillstehende Animation, ein Siegel ohne Initialen und - weil null !== []
- * wahr ist - eine leere Warnungsbox auf jeder echten Einladung. Der
- * Controller (InviteV2Controller::show) rechnet alle fünfzehn vor, diese
- * Vorlage gibt sie nur weiter.
+ * Die Buehne (partials/design-stage) liest mehr als die Kernwerte
+ * design/scope/styles/seite/karte/locale - ratio, tempo, karteAn, introMs,
+ * warnings und fest fehlten hier einmal, und das ergab eine leere
+ * Seitenverhaeltnis-Angabe, eine stillstehende Animation und - weil
+ * null !== [] wahr ist - eine leere Warnungsbox auf jeder echten Einladung.
+ * Der Controller (InviteV2Controller::show) rechnet sie vor, diese Vorlage
+ * gibt sie nur weiter.
  *
  * @var array<string,mixed> $design
  * @var string $scope
  * @var string $styles
  * @var string $seite
- * @var string $kuvert
  * @var string $karte
  * @var string $locale
  * @var string $ratio
  * @var int $tempo
  * @var string $karteAn
  * @var int $introMs
- * @var string $idle
- * @var string $initialen
  * @var list<array{kind:string,element:string,detail:string}> $warnings
  * @var string $abschnitte
  * @var string $googleFontsHref  leer, wenn das Dokument keine Google-Schrift benutzt
@@ -46,7 +42,6 @@ use Atelier\View;
     'scope'     => $scope,
     'styles'    => $styles,
     'seite'     => $seite,
-    'kuvert'    => $kuvert,
     'karte'     => $karte,
     'locale'    => $locale,
     'ratio'     => $ratio,
@@ -57,8 +52,6 @@ use Atelier\View;
     // Einladung im eingefrorenen Sockel, hier in der Vorlage selbst.
     'introVideo'  => (string) $design['intro']['video'],
     'introPoster' => (string) $design['intro']['poster'],
-    'idle'      => $idle,
-    'initialen' => $initialen,
     // Immer leer: eine echte Einladung zeigt keine Vorlagenmaengel an.
     'warnings'  => $warnings,
     // Auf der Einladung steht die Buehne im Fluss - darunter kommen die

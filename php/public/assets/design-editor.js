@@ -1320,6 +1320,7 @@
     // Anhaengen ist also folgenlos und eine Ausnahme waere nur eine Regel
     // mehr, die stimmen muss.
     var ziehenImRahmen = function () { rahmenWurzeln().forEach(haengeZiehen); };
+    form.addEventListener("rahmen-geladen", ziehenImRahmen);
 
     /*
      * Angehaengt wird beim Klick auf ein Geraet - denselben Weg nimmt weiter
@@ -1914,6 +1915,7 @@
 
     var haengen = function () { alleWurzeln().forEach(anhaengen); };
     haengen();
+    form.addEventListener("rahmen-geladen", haengen);
 
     /*
      * Der Rahmen entsteht beim ersten Klick auf ein Geraet und laedt bei
@@ -2642,8 +2644,8 @@
    * Karte oder Geraet.
    *
    * Die Karte ist die lebende: sie folgt jedem Tastendruck. Die drei Geraete
-   * zeigen die ganze oeffentliche Seite in einem Rahmen - und damit den
-   * GESPEICHERTEN Stand, denn der Rahmen holt sich die Seite vom Server.
+   * zeigen die ganze Seite in einem Rahmen - seit dem Lader weiter unten
+   * (rahmenLaden) aus dem Formular gezeichnet, ohne zu speichern.
    *
    * Der Rahmen entsteht beim ersten Klick und nicht im Markup: sonst laedt
    * jeder Aufruf des Editors die Einladung samt Kuvertfilm mit, auch wenn
@@ -2703,6 +2705,8 @@
       oeffneRahmen(doc, function () {});
     };
 
+    form.addEventListener("rahmen-geladen", kuvertAuf);
+
     geraete.forEach(function (knopf) {
       knopf.addEventListener("click", function () {
         geraete.forEach(function (k) { k.removeAttribute("data-aktiv"); });
@@ -2749,10 +2753,12 @@
 
         if (!rahmen.querySelector("iframe")) {
           var kind = document.createElement("iframe");
-          kind.setAttribute("loading", "lazy");
-          kind.src = rahmen.getAttribute("data-adresse");
           rahmen.appendChild(kind);
         }
+
+        // Gefuellt wird er vom Lader unten (rahmenLaden): aus dem Formular,
+        // nicht von der gespeicherten Adresse.
+        form.dispatchEvent(new CustomEvent("rahmen-laden"));
 
         passeAn(parseInt(welche, 10));
 
@@ -2783,10 +2789,9 @@
      * Schreibtisch prueft, will nicht bei jedem Klick aufs Telefon
      * zurueckgeworfen werden.
      *
-     * Was sich dadurch NICHT aendert: der Rahmen zeigt den gespeicherten
-     * Stand. Ein Abschnitt, den es dort noch nicht gibt, wird nicht gefunden
-     * - dann bleibt es beim Umschalten, und die Zeile unter dem Rahmen sagt
-     * ohnehin, woran man ist.
+     * Ein Abschnitt, den der Rahmen noch nicht gezeichnet hat, wird nicht
+     * gefunden - dann bleibt es beim Umschalten; mit dem naechsten
+     * Neuzeichnen (rahmenLaden) ist er da.
      */
     var mitAbschnitt = function (name, tuWas) {
       var kind = rahmen.querySelector("iframe");
@@ -2811,7 +2816,13 @@
       };
 
       if (versuch()) return;
-      kind.addEventListener("load", versuch, { once: true });
+      // Nicht auf "load" des Rahmens: ein frisch gebauter Rahmen meldet
+      // zuerst about:blank, und der Inhalt kommt erst mit dem Lader.
+      var einmal = function () {
+        form.removeEventListener("rahmen-geladen", einmal);
+        versuch();
+      };
+      form.addEventListener("rahmen-geladen", einmal);
     };
 
     var hervor = null;
@@ -3055,6 +3066,65 @@
     // zu kennen.
     var liveAdresse = liveKasten ? liveKasten.getAttribute("data-adresse") : "";
 
+    /*
+     * Deneme verisi (design-edit.php): was das Paar eintippen kann.
+     *
+     * Die Felder haben keinen name und gehoeren nicht zur Vorlage. Ihre
+     * Ereignisse enden am Kasten - sonst hielte das Speichern nebenbei jeden
+     * Buchstaben fuer eine Aenderung an der Vorlage und das Rueckgaengig
+     * bekaeme einen Schritt dazu. Statt dessen ein eigenes Ereignis, auf das
+     * nur die Vorschau hoert.
+     */
+    var probeKasten = form.querySelector("[data-probe-kasten]");
+
+    var probeDaten = function (daten) {
+      if (!probeKasten) return daten;
+      var felder = {};
+      probeKasten.querySelectorAll("[data-probe]").forEach(function (feld) {
+        felder[feld.getAttribute("data-probe")] = feld.value;
+      });
+      Object.keys(felder).forEach(function (schluessel) {
+        var wert = felder[schluessel];
+        // Eine geleerte Zeile des Ablaufs soll verschwinden; das Zeichen der
+        // Beispielzeile hielte sie sonst am Leben (die Art allein traegt
+        // eine Zeile, InviteV2Controller::sammleAngaben).
+        var zeile = schluessel.match(/^prog_icon_(\d+)$/);
+        if (zeile && !String(felder["prog_title_" + zeile[1]] || "").trim()
+                  && !String(felder["prog_time_" + zeile[1]] || "").trim()) {
+          wert = "";
+        }
+        // sec[kennung][feld] -> probe[sec][kennung][feld]
+        var name = schluessel.indexOf("[") > -1
+          ? "probe[" + schluessel.replace("[", "][")
+          : "probe[" + schluessel + "]";
+        daten.append(name, wert);
+      });
+      return daten;
+    };
+
+    // Die Werte der Karte, vom Server gerechnet (Datum, Wochentag, das Und
+    // auf eigener Zeile) - in jeden gebundenen Knoten, auch im Rahmen.
+    var probeWerte = null;
+    var probeMalen = function () {
+      if (!probeWerte) return;
+      wurzeln().forEach(function (wurzel) {
+        Object.keys(probeWerte).forEach(function (bind) {
+          wurzel.querySelectorAll('[data-bind="' + bind + '"]').forEach(function (knoten) {
+            knoten.textContent = probeWerte[bind];
+          });
+        });
+      });
+    };
+
+    if (probeKasten) {
+      ["input", "change"].forEach(function (art) {
+        probeKasten.addEventListener(art, function (ereignis) {
+          ereignis.stopPropagation();
+          form.dispatchEvent(new CustomEvent("probe"));
+        });
+      });
+    }
+
     if (liveKasten && liveAdresse) {
       var laeuft = null;
       var nochmal = false;
@@ -3086,7 +3156,7 @@
 
         window.fetch(liveAdresse, {
           method: "POST",
-          body: formularOhneDateien(),
+          body: probeDaten(formularOhneDateien()),
           credentials: "same-origin"
         }).then(function (antwort) {
           return antwort.ok ? antwort.text() : null;
@@ -3098,6 +3168,18 @@
            */
           if (stueck !== null) {
             liveKasten.innerHTML = stueck;
+
+            // Die Kartenwerte reisen im selben Stueck mit; sie gehoeren
+            // nicht in den Kasten, und ohne sie entscheidet sich auch erst,
+            // ob er leer ist.
+            var werteKnoten = liveKasten.querySelector("[data-probe-werte]");
+            if (werteKnoten) {
+              try { probeWerte = JSON.parse(werteKnoten.textContent); } catch (fehler) { probeWerte = null; }
+              werteKnoten.parentNode.removeChild(werteKnoten);
+              probeMalen();
+              stueck = liveKasten.innerHTML;
+            }
+
             liveKasten.hidden = stueck.trim() === "";
             entwaffne();
           }
@@ -3117,12 +3199,155 @@
 
       form.addEventListener("input", spaeterHolen);
       form.addEventListener("change", spaeterHolen);
+      form.addEventListener("probe", spaeterHolen);
       // Nach einem Knopf: verschoben, verdoppelt, weggenommen.
       form.addEventListener("click", function (ereignis) {
         if (ereignis.target.closest("button[type=button]")) spaeterHolen();
       });
 
       hole();
+    }
+
+    /*
+     * Der Rahmen (Telefon / Tablet / Masaustu) - ohne zu speichern.
+     *
+     * "kaydetmeden onizlemeyi gorebilsin sonra kaydederse"
+     *
+     * Er holte bisher /v2/designs/{slug}, also den GESPEICHERTEN Stand. Jetzt
+     * geht das Formular samt Deneme verisi an .../seite, und die Antwort
+     * kommt als srcdoc hinein - gleicher Ursprung, alles, was den Rahmen
+     * bisher anfasste (Farben, Ziehen, Reihenfolge), greift weiter.
+     *
+     * Doppelt gepuffert: der neue Rahmen laedt unsichtbar NEBEN dem alten und
+     * tauscht erst, wenn er steht. Sonst blitzte bei jeder Aenderung eine
+     * leere Flaeche auf und die Seite sprang nach oben.
+     *
+     * Das Kuvert geht nur beim ersten Laden auf: invitation.js merkt sich
+     * "schon offen" je Adresse im sessionStorage, und die Adresse eines
+     * srcdoc ist immer dieselbe. Beim Neubau des Rahmens (erster Klick auf ein
+     * Geraet) wird das vergessen, damit man das Kuvert einmal sieht.
+     */
+    var rahmenKasten = form.querySelector("[data-ansicht-rahmen]");
+    var seiteAdresse = rahmenKasten ? rahmenKasten.getAttribute("data-seite-adresse") : "";
+
+    if (rahmenKasten && seiteAdresse) {
+      var rahmenLaeuft = false;
+      var rahmenNochmal = false;
+      var rahmenVeraltet = true;
+      var rahmenStand = 0;
+
+      var rahmenLaden = function () {
+        if (rahmenKasten.hidden) { rahmenVeraltet = true; return; }
+        if (rahmenLaeuft) { rahmenNochmal = true; return; }
+        rahmenLaeuft = true;
+        rahmenVeraltet = false;
+        var nummer = ++rahmenStand;
+
+        var fertig = function () {
+          rahmenLaeuft = false;
+          if (rahmenNochmal) { rahmenNochmal = false; rahmenLaden(); }
+        };
+
+        window.fetch(seiteAdresse, {
+          method: "POST",
+          body: probeDaten(formularOhneDateien()),
+          credentials: "same-origin"
+        }).then(function (antwort) {
+          return antwort.ok ? antwort.text() : null;
+        }).then(function (seite) {
+          var alt = rahmenKasten.querySelector("iframe");
+          // Nein vom Server: stehenlassen, was zuletzt richtig war.
+          if (seite === null || !alt || nummer !== rahmenStand) { fertig(); return; }
+
+          var hoehe = 0;
+          try {
+            var altDoc = alt.contentDocument;
+            if (altDoc && altDoc.scrollingElement) hoehe = altDoc.scrollingElement.scrollTop;
+          } catch (fehler) { hoehe = 0; }
+
+          var neu = document.createElement("iframe");
+          // Masse und Zoom wie der alte (passeAn hat sie gesetzt).
+          neu.style.width = alt.style.width;
+          neu.style.height = alt.style.height;
+          neu.style.transform = alt.style.transform;
+          // Ausserhalb des Bildes und ohne Platz im Fluss: absolute haette
+          // in der rollenden Mitte (.b-buehne) Bildlaufhoehe dazugelegt.
+          neu.style.position = "fixed";
+          neu.style.left = "-100000px";
+          neu.style.top = "0";
+          neu.style.visibility = "hidden";
+          neu.style.pointerEvents = "none";
+
+          /*
+           * Getauscht wird, sobald das Dokument steht - nicht beim "load".
+           * load wartet auf jedes Bild und jeden Film der Seite, gemessen
+           * 7,5 Sekunden bei Roseraie, waehrend der Server nach 0,7 fertig
+           * war. Die Bilder laden im getauschten Rahmen einfach weiter.
+           */
+          var getauscht = false;
+          var tausche = function () {
+            if (getauscht) return;
+            var doc;
+            try { doc = neu.contentDocument; } catch (fehler) { doc = null; }
+            if (!doc || doc.URL !== "about:srcdoc" || doc.readyState === "loading") return;
+            // "interactive" reicht nicht: die Skripte der Seite sind defer
+            // und laufen erst danach - ohne sie gaebe es kein Kuvert zum
+            // Aufmachen. Fertig ist DOMContentLoaded, und das sagt die
+            // Zeitmessung des Rahmens.
+            if (doc.readyState !== "complete") {
+              var lauf;
+              try { lauf = neu.contentWindow.performance.getEntriesByType("navigation")[0]; } catch (fehler) { lauf = null; }
+              if (!lauf || !(lauf.domContentLoadedEventEnd > 0)) return;
+            }
+            getauscht = true;
+            window.clearInterval(warte);
+            if (doc && doc.scrollingElement) doc.scrollingElement.scrollTop = hoehe;
+
+            if (alt.parentNode) alt.parentNode.removeChild(alt);
+            neu.style.position = "";
+            neu.style.left = "";
+            neu.style.top = "";
+            neu.style.visibility = "";
+            neu.style.pointerEvents = "";
+            // Bilder koennen die Seite nach dem Tausch noch verlaengern.
+            window.setTimeout(function () {
+              try { if (doc && doc.scrollingElement) doc.scrollingElement.scrollTop = hoehe; } catch (fehler) {}
+            }, 300);
+
+            probeMalen();
+            form.dispatchEvent(new CustomEvent("rahmen-geladen"));
+            fertig();
+          };
+          var warte = window.setInterval(tausche, 50);
+          neu.addEventListener("load", tausche);
+
+          neu.srcdoc = seite;
+          rahmenKasten.appendChild(neu);
+        }).catch(fertig);
+      };
+
+      var rahmenWartend = null;
+      var rahmenSpaeter = function () {
+        if (rahmenKasten.hidden) { rahmenVeraltet = true; return; }
+        if (rahmenWartend) window.clearTimeout(rahmenWartend);
+        rahmenWartend = window.setTimeout(rahmenLaden, 700);
+      };
+
+      form.addEventListener("rahmen-laden", function () {
+        var kind = rahmenKasten.querySelector("iframe");
+        // Neu gebaut (noch leer): das Kuvert soll einmal zu sehen sein.
+        if (kind && !kind.srcdoc) {
+          try { window.sessionStorage.removeItem("al-kuvert-offen:srcdoc"); } catch (fehler) {}
+          rahmenVeraltet = true;
+        }
+        if (rahmenVeraltet) rahmenLaden();
+      });
+      form.addEventListener("input", rahmenSpaeter);
+      form.addEventListener("change", rahmenSpaeter);
+      form.addEventListener("probe", rahmenSpaeter);
+      form.addEventListener("click", function (ereignis) {
+        if (ereignis.target.closest("button[type=button]:not([data-ansicht])")) rahmenSpaeter();
+      });
     }
 
     window.addEventListener("resize", function () {
@@ -3514,9 +3739,9 @@
    * Seite. Wer also links einen Abschnitt verschiebt, sieht in der Mitte
    * nichts, und das sah aus wie ein kaputter Editor.
    *
-   * Der Rahmen daneben zeigt die ganze Seite - aber den GESPEICHERTEN Stand,
-   * denn er holt sie vom Server. Verschieben ohne Speichern kaeme dort also
-   * auch nicht an.
+   * Der Rahmen daneben zeigt die ganze Seite. Er wird nach jeder Aenderung
+   * neu gezeichnet (rahmenLaden), aber erst einen Augenblick spaeter - bis
+   * dahin zieht diese Stelle die Reihenfolge sofort nach.
    *
    * Seit die Richtlinie die eigene Seite einrahmen laesst, liegt der Rahmen
    * im selben Ursprung: sein Inhalt ist erreichbar. Also wird die Reihenfolge
@@ -3525,8 +3750,7 @@
    * Nachgezogen und nicht neu gezeichnet: was der Server geschickt hat,
    * bleibt stehen: dieselben Knoten, nur in anderer Reihenfolge. Ein
    * Abschnitt, den es beim Laden des Rahmens noch nicht gab, ist dort nicht
-   * zu finden - er kommt beim naechsten Speichern dazu, und der Hinweis unter
-   * dem Rahmen sagt ohnehin, dass er den gespeicherten Stand zeigt.
+   * zu finden - er kommt mit dem naechsten Neuzeichnen des Rahmens dazu.
    */
   var rahmenDokument = function () {
     var kind = rahmen && rahmen.querySelector("iframe");
@@ -3575,6 +3799,7 @@
 
 
   secListe.addEventListener("change", rahmenNachziehen);
+  form.addEventListener("rahmen-geladen", rahmenNachziehen);
   form.querySelectorAll("[data-ansicht]").forEach(function (knopf) {
     knopf.addEventListener("click", function () {
       // Der Rahmen entsteht beim ersten Klick; erst wenn er geladen hat, gibt
