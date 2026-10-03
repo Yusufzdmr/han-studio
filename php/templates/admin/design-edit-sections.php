@@ -426,6 +426,10 @@ use function Atelier\e;
         <label class="<?= $label ?>"><?= $tr ? 'ya da yol (boş = çizili hâli)' : 'oder Pfad (leer = gezeichnet)' ?>
           <input class="<?= $feld ?> font-mono text-[0.72rem]"
                  name="icon_src_<?= e((string) $kennung) ?>" value="<?= e($pfad) ?>"></label>
+        <?= \Atelier\View::partial('partials/stanze-wahl', [
+            'name' => 'icon_stanze_' . $kennung, 'wert' => (string) ($z['stanze'] ?? ''),
+            'tr' => $tr, 'label' => $label, 'feld' => $feld,
+        ]) ?>
       </div>
 
       <div class="grid gap-2 sm:grid-cols-5">
@@ -520,6 +524,10 @@ use function Atelier\e;
               <label class="<?= $label ?>"><?= $tr ? 'yol (boş = yok)' : 'Pfad (leer = keines)' ?>
                 <input class="<?= $feld ?> font-mono text-[0.72rem]"
                        name="<?= $n ?>src" value="<?= e($pfad) ?>"></label>
+              <?= \Atelier\View::partial('partials/stanze-wahl', [
+                  'name' => 'cd_' . $gestalt . '_' . $i . '_stanze', 'wert' => (string) ($z['stanze'] ?? ''),
+                  'tr' => $tr, 'label' => $label, 'feld' => $feld,
+              ]) ?>
             </div>
 
             <div class="grid gap-2 sm:grid-cols-2">

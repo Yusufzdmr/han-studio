@@ -377,6 +377,10 @@ foreach ($katalog as $art => $eintrag) {
                 <label class="<?= $label ?>"><?= $tr ? 'yol (boş = yok)' : 'Pfad (leer = keiner)' ?>
                   <input class="<?= $feld ?> font-mono text-[0.78rem]"
                          name="<?= $dn ?>src" value="<?= e($dPfad) ?>"></label>
+                <?= \Atelier\View::partial('partials/stanze-wahl', [
+                    'name' => $dn . 'stanze', 'wert' => (string) ($dk['stanze'] ?? ''),
+                    'tr' => $tr, 'label' => $label, 'feld' => $feld,
+                ]) ?>
               </div>
 
               <div class="b-gruppe b-zwei">

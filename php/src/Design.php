@@ -21,6 +21,17 @@ final class Design
     public const TYPES      = ['image', 'text', 'photo', 'shape', 'button', 'video'];
     /** Was gruen.js aus einem Film herausstanzen kann. */
     public const STANZEN    = ['gruen', 'schwarz'];
+
+    /**
+     * Ein Stanzwert, geprueft: nur bekannt und nur dort, wo ein Film steht.
+     * An einem Bild waere die Marke eine Luege - gruen.js sucht video[data-stanze].
+     */
+    public static function stanze(mixed $wert, string $film): string
+    {
+        $wert = is_string($wert) ? $wert : '';
+
+        return $film !== '' && in_array($wert, self::STANZEN, true) ? $wert : '';
+    }
     public const ALIGNS     = ['left', 'center', 'right'];
 
     /** Welche dynamischen Felder eine Vorlage einsetzen darf. */
@@ -209,6 +220,7 @@ final class Design
             $satz = [
                 'src'   => $bild,
                 'video' => $film,
+                'stanze' => self::stanze($eigen['stanze'] ?? '', $film),
                 'size'  => max(10, min(4000, (int) ($eigen['size'] ?? 100))),
                 'x'     => max(-400, min(400, (int) ($eigen['x'] ?? 0))),
                 'y'     => max(-400, min(400, (int) ($eigen['y'] ?? 0))),
@@ -217,7 +229,7 @@ final class Design
             ];
 
             // Nichts gesagt, nichts gespeichert.
-            $stumm = $satz['src'] === '' && $satz['video'] === ''
+            $stumm = $satz['src'] === '' && $satz['video'] === '' && $satz['stanze'] === ''
                 && $satz['size'] === 100 && $satz['x'] === 0 && $satz['y'] === 0
                 && $satz['gap'] === 0 && $satz['z'] === 0;
 
@@ -340,6 +352,7 @@ final class Design
             $liste[] = [
                 'src'    => $bild,
                 'video'  => $film,
+                'stanze' => self::stanze($zeile['stanze'] ?? '', $film),
                 'anchor' => $wo,
                 // Links oder rechts vom Feld. Zwei Werte und kein Winkel:
                 // die Zeile flieszt, und ein Zeichen in ihr steht davor
@@ -2045,6 +2058,9 @@ final class Design
                     $eigen['src']   = $film ? '' : $pfad;
                     $eigen['video'] = $film ? $pfad : '';
                 }
+                if (isset($post['icon_stanze_' . $kennung])) {
+                    $eigen['stanze'] = (string) $post['icon_stanze_' . $kennung];
+                }
 
                 foreach (['size', 'x', 'y', 'gap', 'z'] as $feld) {
                     if (isset($post['icon_' . $feld . '_' . $kennung])) {
@@ -2088,6 +2104,7 @@ final class Design
                     $liste[] = [
                         'src'    => $film ? '' : $pfad,
                         'video'  => $film ? $pfad : '',
+                        'stanze' => (string) ($post[$p . 'stanze'] ?? ''),
                         'anchor' => (string) ($post[$p . 'anchor'] ?? 'days'),
                         'side'   => (string) ($post[$p . 'side'] ?? 'nach'),
                         'size'   => (int) ($post[$p . 'size'] ?? 100),
@@ -2440,6 +2457,7 @@ final class Design
                     $deko[] = [
                         'src'    => $film ? '' : $pfad,
                         'video'  => $film ? $pfad : '',
+                        'stanze' => (string) ($post[$p . 'stanze'] ?? ''),
                         'anchor' => (string) ($post[$p . 'anchor'] ?? 'titel'),
                         'side'   => (string) ($post[$p . 'side'] ?? 'nach'),
                         'size'   => (int) ($post[$p . 'size'] ?? 100),

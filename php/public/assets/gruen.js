@@ -126,6 +126,13 @@
     leinwand.className = film.className;
     var stil = film.getAttribute("style");
     if (stil) leinwand.setAttribute("style", stil);
+    // Auch die data-Marken: Countdown- und Abschnittsschmuck werden ueber sie
+    // gefunden (data-cdzeichen, data-secdeko - der Editor zieht daran, die
+    // Vorschau malt daran). data-stanze bleibt am Film, sonst fande los()
+    // die Leinwand beim naechsten Durchgang als Film.
+    Array.prototype.forEach.call(film.attributes, function (a) {
+      if (a.name.indexOf("data-") === 0 && a.name !== "data-stanze") leinwand.setAttribute(a.name, a.value);
+    });
     leinwand.setAttribute("aria-hidden", "true");
     film.parentNode.insertBefore(leinwand, film);
 

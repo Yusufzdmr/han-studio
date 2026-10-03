@@ -1003,7 +1003,11 @@ final class DesignSections
          */
         $film = (string) ($eigen['video'] ?? '');
         if ($film !== '') {
+            // data-stanze: schwarzer oder gruener Grund, gruen.js stanzt ihn
+            // heraus - wie bei den Ebenen (Design::html).
+            $stanze = Design::stanze($eigen['stanze'] ?? '', $film);
             return '<video class="' . $klasse . '" src="' . e($film) . '"'
+                . ($stanze !== '' ? ' data-stanze="' . e($stanze) . '"' : '')
                 . ' autoplay muted loop playsinline preload="metadata" aria-hidden="true"></video>';
         }
 
@@ -2679,7 +2683,9 @@ final class DesignSections
         if ($film !== '') {
             // autoplay, stumm, in der Schleife - wie das Zeichen daneben.
             // Wer den Countdown sieht, hat die Einladung geoeffnet.
+            $stanze = Design::stanze($e['stanze'] ?? '', $film);
             return '<video class="' . $klasse . '"' . $marke . ' style="' . e($stil) . '" src="' . e($film) . '"'
+                . ($stanze !== '' ? ' data-stanze="' . e($stanze) . '"' : '')
                 . ' autoplay muted loop playsinline preload="metadata" aria-hidden="true"></video>';
         }
 
