@@ -2498,7 +2498,11 @@ final class DesignSections
                  * Zierde, kein Film zum Ansehen. Und ohne muted laesst kein
                  * Browser sie von allein laufen.
                  */
+                // data-stanze wie bei jedem anderen Film: gruen.js stanzt den
+                // Grund heraus (Einstellung mapStanze, "nein" = nichts).
+                $stanze = Design::stanze($settings['mapStanze'] ?? '', $film);
                 $out .= '<video src="' . e($film) . '"'
+                    . ($stanze !== '' ? ' data-stanze="' . e($stanze) . '"' : '')
                     . ' width="640" height="480" autoplay muted loop playsinline'
                     . ' preload="metadata" aria-hidden="true"></video>';
             } else {

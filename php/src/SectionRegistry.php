@@ -368,6 +368,24 @@ final class SectionRegistry
                                   'tr' => 'Kendi harita videon ("eigen" için)'],
                 ],
                 /*
+                 * Der Grund des Kartenfilms: schwarz oder gruen herausstanzen
+                 * (gruen.js), wie an jeder anderen Stelle mit einem Film
+                 * ("gerekir ekle oraya da", 03.10.2026). Drei Woerter statt
+                 * eines leeren Werts: eine Auswahlliste zeigt die Option.
+                 */
+                'mapStanze' => [
+                    'type'         => 'select',
+                    'options'      => ['nein', 'schwarz', 'gruen'],
+                    'default'      => 'nein',
+                    'label'        => ['de' => 'Kartenfilm: Grund durchsichtig',
+                                       'tr' => 'Harita videosu: arka planı şeffaf yap'],
+                    'optionLabels' => [
+                        'nein'    => ['de' => 'nein', 'tr' => 'hayır'],
+                        'schwarz' => ['de' => 'schwarzen Grund entfernen', 'tr' => 'siyah zemin silinsin'],
+                        'gruen'   => ['de' => 'Greenscreen entfernen', 'tr' => 'yeşil ekran silinsin'],
+                    ],
+                ],
+                /*
                  * Wie gross die Karte sitzt.
                  *
                  * "Haritanin boyunu kucultmeli mesela." Bis hierher stand

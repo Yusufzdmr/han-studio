@@ -71,3 +71,19 @@ $uhr = \Atelier\DesignSections::complete([
 ]);
 $uhrHtml = \Atelier\DesignSections::html($uhr, ['date' => '2099-06-20', 'time' => '15:00'], 'de', '2026-01-01');
 assert_contains($uhrHtml, 'src="/uploads/designs/kerze.mov" data-stanze="schwarz"', 'Countdown: der Film traegt data-stanze');
+
+/* --- Die eigene Karte als Film (Ort-Abschnitt, "eigen") --- */
+
+$ort = static fn (array $einstellungen): string => \Atelier\DesignSections::html(
+    \Atelier\DesignSections::complete(['id' => 'probe', 'slug' => 'probe', 'sections' => [[
+        'id' => 'ort', 'type' => 'location',
+        'settings' => ['karte' => 'eigen', 'mapVideo' => '/uploads/designs/karte.mov'] + $einstellungen,
+    ]]]),
+    ['venue' => 'Saal', 'address' => 'Hauptstr. 1, Krumbach', 'slug' => 'p'], 'de', '2026-01-01'
+);
+assert_contains($ort(['mapStanze' => 'schwarz']), 'src="/uploads/designs/karte.mov" data-stanze="schwarz"', 'Karte: der Film traegt data-stanze');
+assert_not_contains($ort([]), 'data-stanze', 'Karte: ohne Wahl keine Marke');
+assert_not_contains($ort(['mapStanze' => 'lila']), 'data-stanze', 'Karte: Unbekanntes faellt weg');
+
+$feldTeil = (string) file_get_contents(__DIR__ . '/../templates/partials/einstellung-feld.php');
+assert_contains($feldTeil, "optionLabels", 'Panel: Auswahllisten zeigen Woerter statt Schluessel, wo es welche gibt');

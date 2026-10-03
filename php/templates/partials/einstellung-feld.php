@@ -129,7 +129,7 @@ use function Atelier\e;
                   <?php foreach ($s['options'] as $option) : ?>
                     <option value="<?= e((string) $option) ?>"
                       <?= (string) ($werte[$schluessel] ?? $s['default']) === (string) $option ? 'selected' : '' ?>>
-                      <?= e((string) $option) ?></option>
+                      <?= e((string) ($s['optionLabels'][$option][$sprache] ?? $option)) ?></option>
                   <?php endforeach; ?>
                 </select></label>
             <?php endif; ?>
