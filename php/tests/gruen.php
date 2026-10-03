@@ -85,3 +85,10 @@ assert_contains($skript, '"schwarz"', 'gruen.js: kennt den schwarzen Grund');
 // invitation.js muss ihn trotzdem noch finden, sonst startet er nie.
 $einladung = (string) file_get_contents(__DIR__ . '/../public/assets/invitation.js');
 assert_contains($einladung, 'video.d-el, video.d-gruen-film', 'invitation.js: startet auch den gestanzten Film');
+
+// Der Assistent und die Bearbeiten-Seite zeigen die Karte auch, aber ohne
+// invitation.js. Dort stand der Film still und schwarz (03.10.2026).
+$assistent = (string) file_get_contents(__DIR__ . '/../public/assets/invite-v2.js');
+assert_contains($assistent, "'video.d-el, video.d-gruen-film'", 'invite-v2.js: startet die Filme der Vorschau');
+$v2 = (string) file_get_contents(__DIR__ . '/../src/Controllers/InviteV2Controller.php');
+assert_same(3, substr_count($v2, "'/assets/gruen.js'"), 'InviteV2Controller: gruen.js auf Einladung, Assistent und Bearbeiten');

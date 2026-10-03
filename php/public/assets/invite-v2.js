@@ -387,3 +387,28 @@
     if (e.target !== suchfeld && !liste.contains(e.target)) zumachen();
   });
 })();
+
+/*
+ * Die Filme der Karte auch in der Vorschau abspielen.
+ *
+ * Gemeldet am 03.10.2026: im Assistenten stand ein Film mit schwarzem Grund
+ * still und schwarz, die fertige Einladung zeigte ihn richtig. Dort startet
+ * invitation.js die Filme (sie tragen kein autoplay, damit sie nicht hinter
+ * dem geschlossenen Kuvert laufen) - hier gab es niemanden, der das tat.
+ * Ein Paar, das seine Karte gestaltet, soll sie so sehen, wie die Gaeste.
+ *
+ * Gestanzt wird von gruen.js, das vorher geladen ist. Der gestanzte Film
+ * heisst dann d-gruen-film, deshalb beide Namen - wie in invitation.js.
+ * Wer Bewegung abbestellt hat, bekommt das Standbild, auch wie dort.
+ */
+(function () {
+  'use strict';
+
+  var ruhig = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (ruhig) return;
+
+  var filme = document.querySelectorAll('video.d-el, video.d-gruen-film');
+  for (var i = 0; i < filme.length; i++) {
+    filme[i].play().catch(function () {});
+  }
+})();

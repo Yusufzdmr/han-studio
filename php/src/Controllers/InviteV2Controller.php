@@ -154,7 +154,7 @@ final class InviteV2Controller
             'meta'    => Seo::forPage('einladung2', [
                 'title'    => I18n::t('invitation2.wizardTitle'),
                 'noindex'  => true,
-                'scripts'  => ['/assets/invite-v2.js'],
+                'scripts'  => ['/assets/gruen.js', '/assets/invite-v2.js'],
             ]),
             'design'  => $design,
             'steps'   => DesignWizard::steps($design),
@@ -1688,7 +1688,7 @@ final class InviteV2Controller
                 // Dasselbe Skript wie der Assistent, unveraendert: es blendet
                 // [data-step] ein und aus und spiegelt [data-live] in die
                 // Karte. Es entscheidet nichts.
-                'scripts'     => ['/assets/invite-v2.js'],
+                'scripts'     => ['/assets/gruen.js', '/assets/invite-v2.js'],
             ]),
             // Der eingefrorene Sockel, vollstaendig: die Vorlage liest daraus
             // die Ausgangsfarbe einer Ebene.

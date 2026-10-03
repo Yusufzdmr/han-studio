@@ -191,6 +191,14 @@ use function Atelier\e;
         <input type="checkbox" name="font_customer_<?= e($marke) ?>" <?= $eintrag['customer'] ? 'checked' : '' ?>>
         <?= $tr ? 'müşteri değiştirebilir' : 'Kunde darf ändern' ?>
       </label>
+      <?php /* Loeschen beim Speichern, nicht sofort: ein Haken laesst sich
+               bis dahin zuruecknehmen. Wer die Marke noch benutzt, steht
+               direkt darueber ("kullanıldığı yerler") - diese Stellen erben
+               danach (Design::fromPost). */ ?>
+      <label class="flex items-center gap-2 text-[0.66rem] text-muted">
+        <input type="checkbox" name="font_loesch_<?= e($marke) ?>">
+        <?= $tr ? 'bu yazı markasını sil (kaydedince)' : 'diese Schriftmarke löschen (beim Speichern)' ?>
+      </label>
     </div>
   <?php endforeach; ?>
 

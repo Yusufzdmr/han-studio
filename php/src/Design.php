@@ -2483,6 +2483,31 @@ final class Design
         $doc['sections'] = $abschnitte;
         $doc = DesignSections::complete($doc);
 
+        /*
+         * Eine Schriftmarke loeschen ("mehmed ... sabitlendi oraya
+         * silinmiyor", 03.10.2026). Erst hier am Ende: dasselbe Formular hat
+         * oben die Schriftwahl jeder Ebene und jedes Abschnitts gelesen, und
+         * die kann noch auf die Marke zeigen. Diese Stellen erben danach -
+         * eine Variable ohne Wert waere schlimmer. Die Textrollen raeumt
+         * complete() selbst auf, siehe dort ("faellt auf erben zurueck").
+         */
+        foreach (array_keys($doc['fonts']) as $marke) {
+            if (!isset($post['font_loesch_' . $marke])) {
+                continue;
+            }
+            unset($doc['fonts'][$marke]);
+            foreach ($doc['layers'] as $i => $ebene) {
+                if ((string) ($ebene['style']['font'] ?? '') === (string) $marke) {
+                    $doc['layers'][$i]['style']['font'] = '';
+                }
+            }
+            foreach ($doc['sections'] as $i => $abschnitt) {
+                if ((string) ($abschnitt['style']['font'] ?? '') === (string) $marke) {
+                    $doc['sections'][$i]['style']['font'] = '';
+                }
+            }
+        }
+
         // complete() zieht die Grenzen: unbekannte Enums fallen auf die
         // Voreinstellung, Zahlen werden geklemmt, Rechte zu Wahrheitswerten.
         return self::complete($doc);
