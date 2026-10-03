@@ -1656,6 +1656,13 @@ final class InviteV2Controller
         $error = '';
         $werte = $this->formularWerte($data);
 
+        // "Davetiyeyi tam gor" auch hier - vor saveEdit(), damit eine
+        // Vorschau niemals in den Speicherzweig faellt.
+        if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && (string) ($_POST['was'] ?? '') === 'ganzseite') {
+            $this->ganzeVorschauBearbeiten($einladung, $darf);
+            return;
+        }
+
         if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
             $ergebnis = $this->saveEdit($einladung, $darf);
             if (isset($ergebnis['error'])) {
@@ -1921,6 +1928,98 @@ final class InviteV2Controller
      * fehlen sie, meldet PHP undefinierte Variablen und die Seite kommt auf
      * Englisch heraus, egal in welcher Sprache sie aufgerufen wurde.
      */
+    /**
+     * Die Vollbildvorschau der Bearbeiten-Seite.
+     *
+     * Dieselbe Rechnung wie saveEdit(), nur ohne zu schreiben: die alten
+     * Angaben, darueber das gerade Getippte, die Wahl auf den eingefrorenen
+     * Sockel. Statt mitDateien() - das loescht, was als "weg" angekreuzt ist
+     * - laeuft bisherigeDateien(), das nur auswaehlt. sammleWahl() loescht
+     * ein altes Foto nur, wenn ein neues hochgeladen wurde, und Dateien
+     * kommen hier nicht an.
+     *
+     * @param array<string,mixed> $einladung
+     * @param array<string,mixed> $darf
+     */
+    private function ganzeVorschauBearbeiten(array $einladung, array $darf): void
+    {
+        if (!Security::checkCsrf(is_string($_POST['csrf'] ?? null) ? $_POST['csrf'] : null)) {
+            http_response_code(400);
+            return;
+        }
+
+        header('Cache-Control: private, no-store');
+        $_FILES = [];
+
+        $slug = (string) $einladung['slug'];
+        $alt  = $einladung['data'];
+
+        $angaben = self::bisherigeDateien($this->sammleAngaben($darf), $darf, $alt, $_POST);
+
+        $neu = $alt;
+        unset($neu['families'], $neu['program'], $neu['sections']);
+        foreach ($darf['fields'] as $feld) {
+            unset($neu[$feld]);
+        }
+        $neu = array_merge($neu, $angaben);
+
+        $wahl = InvitationsV2::canEditDesign($alt)
+            ? $this->sammleWahl($darf, $slug, (array) $alt['wahl'], $einladung['design_snapshot'])
+            : [];
+        $doc = DesignWizard::personalize($einladung['design_snapshot'], $wahl);
+
+        $this->zeichneEinladung($doc, $neu, $slug, I18n::locale(), false, true);
+    }
+
+    /**
+     * Was mitDateien() beim Speichern hinuebertruege - ohne eine Datei
+     * anzufassen.
+     *
+     * Musik und Fotos der Abschnitte bleiben, ausser sie sind als "weg"
+     * angekreuzt; dann fehlen sie in der Vorschau, liegen aber weiter auf
+     * der Platte. Neue Dateien gibt es hier nicht (die Vorschau schickt
+     * keine). Statisch und mit $post als Argument, damit ein Test es ohne
+     * Anfrage pruefen kann (tests/vollbild_bearbeiten.php).
+     *
+     * @param array<string,mixed> $data
+     * @param array<string,mixed> $darf
+     * @param array<string,mixed> $alt
+     * @param array<string,mixed> $post
+     * @return array<string,mixed>
+     */
+    public static function bisherigeDateien(array $data, array $darf, array $alt, array $post): array
+    {
+        foreach ($darf['sections'] as $sid => $abschnitt) {
+            foreach ($abschnitt['inputs'] ?? [] as $schluessel => $feld) {
+                if ((string) $feld['type'] === 'audio') {
+                    $bisher = DesignSections::sectionTrack($alt, (string) $sid);
+                    if ($bisher !== '' && empty($post['sec_ton_weg_' . $sid])) {
+                        $data['sections'][$sid][$schluessel] = $bisher;
+                    }
+                    continue;
+                }
+
+                if ((string) $feld['type'] !== 'photos') {
+                    continue;
+                }
+
+                $weg = array_map(
+                    static fn (mixed $p): string => is_string($p) ? $p : '',
+                    (array) ($post['sec_photo_weg_' . $sid] ?? [])
+                );
+                $behalten = array_values(array_filter(
+                    DesignSections::sectionPhotos($alt, (string) $sid),
+                    static fn (string $pfad): bool => !in_array($pfad, $weg, true)
+                ));
+                if ($behalten !== []) {
+                    $data['sections'][$sid][$schluessel] = $behalten;
+                }
+            }
+        }
+
+        return $data;
+    }
+
     private function nichtGefunden(): void
     {
         http_response_code(404);

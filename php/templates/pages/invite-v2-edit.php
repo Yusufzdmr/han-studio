@@ -584,6 +584,8 @@ if ($darfDesign) {
     <div class="<?= e($scope) ?> wz-card mx-auto w-full max-w-xs" data-live-card
          style="position:relative;container-type:inline-size;"><?= $karte ?></div>
 
+    <?= \Atelier\View::partial('partials/vollbild-vorschau') ?>
+
     <?php /*
        disabled fieldset, kein blosses CSS: der rsvp-Abschnitt druckt ein
        echtes Formular mit Absenden-Knopf. In der Vorschau darf es nicht

@@ -28,8 +28,10 @@ assert_not_contains($vorschau, 'mitDateien', 'Vollbild: und keine Dateien ab');
 assert_contains($c, '$teilen = $vorschau ? [] :', 'Vollbild: kein Teilbild fuer die Vorschau');
 
 $seite = (string) file_get_contents(__DIR__ . '/../templates/pages/invite-v2-wizard.php');
-assert_contains($seite, 'data-ganz-zeigen', 'Vollbild: der Knopf steht unter der Karte');
-assert_contains($seite, 'data-vollbild hidden', 'Vollbild: die Ebene ist zu, bis jemand klickt');
+assert_contains($seite, "View::partial('partials/vollbild-vorschau')", 'Vollbild: der Knopf steht unter der Karte');
+$teil = (string) file_get_contents(__DIR__ . '/../templates/partials/vollbild-vorschau.php');
+assert_contains($teil, 'data-ganz-zeigen', 'Vollbild: der Knopf');
+assert_contains($teil, 'data-vollbild hidden', 'Vollbild: die Ebene ist zu, bis jemand klickt');
 
 $js = (string) file_get_contents(__DIR__ . '/../public/assets/invite-v2.js');
 assert_contains($js, "daten.set('was', 'ganzseite');", 'invite-v2.js: fragt die ganze Seite an');
