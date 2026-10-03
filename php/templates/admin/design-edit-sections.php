@@ -104,15 +104,13 @@ use function Atelier\e;
      soyler. Bos donen bir marka hala kullanilabilir - sadece kimse ona
      DOGRUDAN isaret etmiyor demektir.
   */
+  /*
+     Die Textrollen stehen hier nicht mehr: sie sind die Haken direkt unter
+     der Marke (data-marke-rollen) und aendern sich ohne Speichern - eine
+     Zeile, die erst nach dem Speichern stimmt, widerspraeche ihnen.
+  */
   $markaKullanimi = static function (string $marke) use ($design, $tr): array {
       $liste = [];
-
-      foreach (Design::TYPO as $rolle => $stand) {
-          if ((string) ($design['typo'][$rolle]['font'] ?? '') === $marke) {
-              $liste[] = (string) ($stand['label'][$tr ? 'tr' : 'de'] ?? $rolle)
-                  . ' (' . ($tr ? 'yazı rolü' : 'Textrolle') . ')';
-          }
-      }
 
       foreach ($design['layers'] as $ebene) {
           if (!in_array((string) $ebene['type'], ['text', 'button'], true)) {
@@ -177,12 +175,43 @@ use function Atelier\e;
           <input name="font_line_<?= e($marke) ?>" type="number" value="<?= (int) $eintrag['lineHeight'] ?>" class="<?= $feld ?>"></label>
       </div>
       <?php $kullanim = $markaKullanimi((string) $marke); ?>
+      <?php /*
+        Wo die Marke gilt, gleich hier ("deneme", 03.10.2026: drei Marken,
+        keine irgendwo gewaehlt, und die Familie zu wechseln bewegte nichts).
+        Die Haken haben keinen Namen - sie stellen nur die Liste der Rolle in
+        3b um (typo_<rolle>_font), die bleibt die einzige Wahrheit und malt
+        die Vorschau wie bisher. design-editor.js, data-marke-rollen.
+      */ ?>
+      <div class="space-y-2" data-marke-rollen="<?= e($marke) ?>" data-marke-direkt="<?= count($kullanim) ?>">
+        <div class="text-[0.66rem] uppercase tracking-[0.12em] text-ink"><?= $tr ? 'bu yazı tipi nerede kullanılsın' : 'wo diese Schrift gilt' ?></div>
+        <div class="flex flex-wrap gap-x-4 gap-y-2">
+          <?php foreach (Design::TYPO as $rolle => $stand) : ?>
+            <label class="flex items-center gap-2 text-[0.66rem] text-muted">
+              <input type="checkbox" data-marke-rolle="<?= e((string) $rolle) ?>"
+                     <?= (string) ($design['typo'][$rolle]['font'] ?? '') === (string) $marke ? 'checked' : '' ?>>
+              <?= e((string) ($stand['label'][$tr ? 'tr' : 'de'] ?? $rolle)) ?>
+            </label>
+          <?php endforeach; ?>
+        </div>
+      </div>
+      <?php
+        $hicYok = $kullanim === [];
+        foreach (Design::TYPO as $rolle => $stand) {
+            if ((string) ($design['typo'][$rolle]['font'] ?? '') === (string) $marke) {
+                $hicYok = false;
+            }
+        }
+      ?>
+      <p class="border border-sand-deep bg-sand px-3 py-2 text-[0.72rem] leading-relaxed text-ink"
+         data-marke-hinweis="<?= e($marke) ?>" <?= $hicYok ? '' : 'hidden' ?>>
+        <?= $tr
+            ? 'Bu yazı markası henüz hiçbir yazıda kullanılmıyor — ailesini değiştirmek önizlemede hiçbir şeyi değiştirmez. Yukarıdan en az bir yer işaretle.'
+            : 'Diese Schriftmarke gilt noch nirgends — ihre Familie zu wechseln ändert in der Vorschau nichts. Oben mindestens einen Ort ankreuzen.' ?>
+      </p>
       <p class="text-[0.72rem] leading-relaxed text-muted">
-        <span class="uppercase tracking-[0.12em] text-ink"><?= $tr ? 'kullanıldığı yerler' : 'wird benutzt von' ?>:</span>
+        <span class="uppercase tracking-[0.12em] text-ink"><?= $tr ? 'ayrıca katman ve bölümler' : 'außerdem Ebenen und Abschnitte' ?>:</span>
         <?php if ($kullanim === []) : ?>
-          <?= $tr
-            ? 'hiçbir yerde doğrudan seçili değil — sadece "— miras —" diyen bir yer üzerinden dolaylı etkili olabilir.'
-            : 'nirgends direkt ausgewählt — wirkt höchstens dort, wo "— erben —" steht.' ?>
+          <?= $tr ? 'yok' : 'keine' ?>
         <?php else : ?>
           <?= e(implode(' · ', $kullanim)) ?>
         <?php endif; ?>

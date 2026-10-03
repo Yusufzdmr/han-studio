@@ -509,6 +509,73 @@
   });
 
   /*
+   * Wo eine Schriftmarke gilt: die Rollenhaken unter jeder Marke (3).
+   *
+   * "deneme", 03.10.2026: drei Marken, keine irgendwo gewaehlt - die Familie
+   * zu wechseln bewegte nichts, und das sah aus wie eine tote Vorschau. Die
+   * Haken stellen nur die Liste der Rolle in 3b um und schicken deren
+   * change-Ereignis los. Damit malt der Listener darueber die Vorschau, der
+   * Rahmen zeichnet sich neu, und gespeichert wird, was in 3b steht - die
+   * Haken selbst haben keinen Namen.
+   *
+   * Umgekehrt genauso: wer in 3b waehlt, sieht die Haken hier nachziehen.
+   * Eine Rolle hat genau eine Marke, also nimmt ein Haken hier den Haken
+   * derselben Rolle bei der anderen Marke mit.
+   */
+  var rollenListe = function (rolle) {
+    return form.querySelector('select[data-typo="' + rolle + '"][data-typo-feld="font"]');
+  };
+
+  var markenKaesten = Array.prototype.slice.call(form.querySelectorAll("[data-marke-rollen]"));
+
+  var markenZeigen = function () {
+    markenKaesten.forEach(function (kasten) {
+      var marke = kasten.getAttribute("data-marke-rollen");
+      var benutzt = (parseInt(kasten.getAttribute("data-marke-direkt"), 10) || 0) > 0;
+
+      kasten.querySelectorAll("[data-marke-rolle]").forEach(function (haken) {
+        var liste = rollenListe(haken.getAttribute("data-marke-rolle"));
+        haken.checked = !!liste && liste.value === marke;
+        if (haken.checked) benutzt = true;
+      });
+
+      var hinweis = form.querySelector('[data-marke-hinweis="' + marke + '"]');
+      if (hinweis) hinweis.hidden = benutzt;
+    });
+  };
+
+  markenKaesten.forEach(function (kasten) {
+    var marke = kasten.getAttribute("data-marke-rollen");
+
+    kasten.querySelectorAll("[data-marke-rolle]").forEach(function (haken) {
+      haken.addEventListener("change", function () {
+        var liste = rollenListe(haken.getAttribute("data-marke-rolle"));
+        if (!liste) return;
+        // Eine Marke, die 3b noch nicht kennt (gerade erst angelegt und
+        // noch nicht gespeichert), hat dort keine Option - dann lieber
+        // nichts tun als die Rolle auf "erben" zu werfen.
+        if (haken.checked && !liste.querySelector('option[value="' + marke + '"]')) {
+          haken.checked = false;
+          return;
+        }
+        if (haken.checked) {
+          liste.value = marke;
+        } else if (liste.value === marke) {
+          liste.value = "";
+        }
+        liste.dispatchEvent(new Event("change", { bubbles: true }));
+      });
+    });
+  });
+
+  form.addEventListener("change", function (ereignis) {
+    var t = ereignis.target;
+    if (t && t.matches && (t.matches('select[data-typo-feld="font"]') || t.hasAttribute("data-marke-rolle"))) {
+      markenZeigen();
+    }
+  });
+
+  /*
    * Die Groesse einer einzelnen Zeile. Dieselbe Rechnung wie in
    * Design::css(): Zehntelprozent der Kartenbreite, mal dem Faktor der
    * Marke. Der Faktor kommt aus der Variablen und nicht aus dem Feld daneben
