@@ -92,3 +92,32 @@ $assistent = (string) file_get_contents(__DIR__ . '/../public/assets/invite-v2.j
 assert_contains($assistent, "'video.d-el, video.d-gruen-film'", 'invite-v2.js: startet die Filme der Vorschau');
 $v2 = (string) file_get_contents(__DIR__ . '/../src/Controllers/InviteV2Controller.php');
 assert_same(3, substr_count($v2, "'/assets/gruen.js'"), 'InviteV2Controller: gruen.js auf Einladung, Assistent und Bearbeiten');
+
+/*
+ * Jede Seite, die Ebenen einer Vorlage zeigt, laedt gruen.js.
+ *
+ * "tum sayfalar dedik" (03.10.2026): die beiden Galerien (Kunde und Panel)
+ * zeigten die Ebenen, luden das Skript aber nicht - ein Film mit schwarzem
+ * Grund stand dort als schwarzes Rechteck. Gezaehlt wird jeder View::page-
+ * Aufruf eines Controllers, dessen Vorlage Design::html druckt.
+ */
+$vorlagenMitEbenen = [];
+foreach (glob(__DIR__ . '/../templates/{pages,admin}/*.php', GLOB_BRACE) ?: [] as $vorlage) {
+    $text = (string) file_get_contents($vorlage);
+    if (str_contains($text, 'Design::html(') || str_contains($text, "partial('partials/design-stage'")) {
+        $vorlagenMitEbenen[] = basename(dirname($vorlage)) . '/' . basename($vorlage, '.php');
+    }
+}
+foreach (glob(__DIR__ . '/../src/Controllers/*.php') ?: [] as $datei) {
+    $c = (string) file_get_contents($datei);
+    foreach ($vorlagenMitEbenen as $name) {
+        $stelle = strpos($c, "View::page('" . $name . "'");
+        if ($stelle === false) {
+            continue;
+        }
+        // Bis zum naechsten View::page oder Dateiende: dort steht das meta.
+        $naechste = strpos($c, 'View::page(', $stelle + 5);
+        $block = substr($c, $stelle, ($naechste === false ? strlen($c) : $naechste) - $stelle);
+        assert_contains($block, "'/assets/gruen.js'", basename($datei) . ': ' . $name . ' laedt gruen.js');
+    }
+}

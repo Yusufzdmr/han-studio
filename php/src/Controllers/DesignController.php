@@ -75,6 +75,10 @@ final class DesignController
                 // helle Schrift auf cremefarbenem Grund (siehe layout.php).
                 'solidHeader' => true,
                 'canonical' => Config::url() . I18n::path('/v2/designs', $locale),
+                // Die Kacheln zeigen die Ebenen der Vorlagen, auch Filme mit
+                // schwarzem oder gruenem Grund (data-stanze) - ohne gruen.js
+                // stuende dort ein schwarzes Rechteck.
+                'scripts'   => ['/assets/gruen.js'],
             ]),
             'designs' => $designs,
             'styles'  => $styles,

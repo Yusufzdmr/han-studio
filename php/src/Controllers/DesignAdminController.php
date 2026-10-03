@@ -84,7 +84,8 @@ final class DesignAdminController
             'layout'     => 'admin/layout',
             'locale'     => $locale,
             'current'    => '/designs',
-            'meta'       => ['title' => 'Designs (v2)', 'noindex' => true],
+            // gruen.js: die Kacheln zeigen auch gestanzte Filme (data-stanze).
+            'meta'       => ['title' => 'Designs (v2)', 'noindex' => true, 'scripts' => ['/assets/gruen.js']],
             'designs'    => $designs,
             'warnings'   => $warnings,
             'styles'     => $styles,
