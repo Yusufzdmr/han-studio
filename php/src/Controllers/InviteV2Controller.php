@@ -117,6 +117,11 @@ final class InviteV2Controller
                 $this->previewFragment($design);
                 return;
             }
+            // Dasselbe fuer die ganze Seite: der Knopf "Davetiyeyi tam gor".
+            if ((string) ($_POST['was'] ?? '') === 'ganzseite') {
+                $this->ganzeVorschau($design);
+                return;
+            }
             if ((string) ($_POST['was'] ?? '') === 'draft') {
                 $ergebnis = $this->saveDraft($token);
                 if (isset($ergebnis['error'])) {
@@ -283,6 +288,44 @@ final class InviteV2Controller
         header('Cache-Control: private, no-store');
 
         echo $this->abschnittsVorschau($design, InvitationsV2::draftValues($_POST), I18n::locale());
+    }
+
+    /**
+     * Die ganze Einladung aus dem gerade Getippten, als Vollbild im Assistenten.
+     *
+     * "gelinle damadin o olustururken ki musterinin onizlemesi tam gorsel
+     * olsa daha guzel olur, kagit gibi gozukmesin" (03.10.2026). Die Spalte
+     * rechts zeigt nur die Karte - ohne die Seite dahinter und ohne die
+     * Abschnitte darunter. Diese Antwort ist die echte Einladung, so wie
+     * der Gast sie oeffnet: Kuvert, Karte, Abschnitte, Filme.
+     *
+     * Dieselben Sammler wie beim Veroeffentlichen, aber ohne zu schreiben:
+     * invite-v2.js schickt das Formular OHNE Dateien, und ohne Datei legt
+     * sammleWahl() nichts ab und loescht nichts (geloescht wird nur ein
+     * Vorgaenger aus $alt, und der ist hier leer). mitDateien() laeuft gar
+     * nicht. Kein Eintrag, kein Entwurf, kein Bild auf der Platte.
+     *
+     * @param array<string,mixed> $design
+     */
+    private function ganzeVorschau(array $design): void
+    {
+        if (!Security::checkCsrf(is_string($_POST['csrf'] ?? null) ? $_POST['csrf'] : null)) {
+            http_response_code(400);
+            return;
+        }
+
+        header('Cache-Control: private, no-store');
+
+        // Das Skript schickt keine Dateien - und wer die Anfrage von Hand
+        // mit einer baut, soll damit trotzdem nichts auf die Platte legen.
+        $_FILES = [];
+
+        $darf = DesignWizard::choices($design);
+        $data = $this->sammleAngaben($darf);
+        $wahl = $this->sammleWahl($darf, 'vorschau', [], $design);
+        $doc  = DesignWizard::personalize(DesignSections::complete(Design::complete($design)), $wahl);
+
+        $this->zeichneEinladung($doc, $data, 'vorschau', I18n::locale(), false, true);
     }
 
     /**
@@ -1292,40 +1335,61 @@ final class InviteV2Controller
             $gesendet = $this->saveReply((string) $einladung['slug'], $einladung['data'], $doc);
         }
 
+        $this->zeichneEinladung($doc, $einladung['data'], (string) $einladung['slug'], $locale, $gesendet, false);
+    }
+
+    /**
+     * Die Seite einer Einladung zeichnen - fuer den Gast oder als Vorschau.
+     *
+     * Aus show() herausgeloest, als der Assistent eine Vollbildvorschau
+     * bekam ("gelinle damadin olustururken ki onizlemesi tam gorsel olsa",
+     * 03.10.2026): das Paar soll genau das sehen, was der Gast sieht, also
+     * dieselbe Vorlage mit denselben Werten - kein zweiter Zeichner, der
+     * irgendwann anders aussieht.
+     *
+     * Als Vorschau ($vorschau) faellt weg, was zur verschickten Adresse
+     * gehoert: kein Teilbild (OgImage schreibt eine Datei), keine kanonische
+     * Adresse, und das Antwortformular hat kein Zeichen - eine Vorschau nimmt
+     * keine Zusagen an, dieselbe Regel wie im Schaufenster
+     * (DesignController::zeige).
+     *
+     * @param array<string,mixed> $doc  das fertige Dokument (personalize)
+     * @param array<string,mixed> $data die Angaben der Einladung
+     */
+    private function zeichneEinladung(array $doc, array $data, string $slug, string $locale, bool $gesendet, bool $vorschau): void
+    {
+        $einladung = ['slug' => $slug, 'data' => $data];
+
         $values = Design::bindValues($einladung['data'], $locale);
         $scope = '.d-' . $doc['id'];
 
         $namen = trim(((string) ($einladung['data']['bride'] ?? '')) . ' & ' . ((string) ($einladung['data']['groom'] ?? '')), ' &');
 
+        $teilen = $vorschau ? [] : [
+            'description' => $this->vorschauText($einladung['data'], $locale),
+            'image'       => OgImage::forDocument(
+                (string) $einladung['slug'],
+                $this->vorschauQuelle($doc, $einladung['data']),
+                (string) ($doc['palette']['paper']['value'] ?? $doc['palette']['bg']['value'] ?? '#faf7f2'),
+                (string) ($doc['palette']['accentSoft']['value'] ?? $doc['palette']['accent']['value'] ?? '#b08d57')
+            ),
+            'canonical'   => Config::url() . I18n::path('/v2/einladung/' . rawurlencode((string) $einladung['slug']), $locale),
+            'ogType'      => 'article',
+        ];
+
         View::page('pages/invite-v2-show', [
             'locale' => $locale,
             'path'   => I18n::path('/v2/einladung/' . $einladung['slug'], $locale),
-            'meta'   => Seo::forPage('einladung2', [
+            'meta'   => Seo::forPage('einladung2', $teilen + [
                 'title' => $namen !== '' ? $namen : I18n::t('invitation2.wizardTitle'),
                 /*
-                 * Was in WhatsApp ueber dem Link steht.
-                 *
-                 * Hier stand bis heute nichts, und Seo::forPage fuellte die
-                 * Luecken mit den Angaben der Seite "Einladung 2": leere
-                 * Beschreibung, kein Bild, und als Adresse der Wegweiser
-                 * /de/einladung2 statt der Einladung selbst. Geteilt sah eine
-                 * Einladung damit aus wie ein nackter Link - ausgerechnet die
-                 * Seite, die fast nur ueber WhatsApp weitergereicht wird.
-                 *
-                 * Die erste Fassung hat das alles laengst
-                 * (InviteController::show); es war nur nie mitgekommen.
+                 * Was in WhatsApp ueber dem Link steht: description, image,
+                 * canonical und ogType kommen aus $teilen oben. Hier stand bis
+                 * zum 21.08. nichts, und Seo::forPage fuellte die Luecken mit
+                 * den Angaben der Seite "Einladung 2" - geteilt sah eine
+                 * Einladung aus wie ein nackter Link. Die Vorschau im
+                 * Assistenten wird nie geteilt und laesst sie leer.
                  */
-                'description' => $this->vorschauText($einladung['data'], $locale),
-                'image'       => OgImage::forDocument(
-                    (string) $einladung['slug'],
-                    $this->vorschauQuelle($doc, $einladung['data']),
-                    (string) ($doc['palette']['paper']['value'] ?? $doc['palette']['bg']['value'] ?? '#faf7f2'),
-                    (string) ($doc['palette']['accentSoft']['value'] ?? $doc['palette']['accent']['value'] ?? '#b08d57')
-                ),
-                // Die Einladung selbst, nicht der Wegweiser: sonst zeigt jede
-                // geteilte Einladung auf dieselbe Sammelseite.
-                'canonical'   => Config::url() . I18n::path('/v2/einladung/' . rawurlencode((string) $einladung['slug']), $locale),
-                'ogType'      => 'article',
                 // Eine Einladung gehoert nicht in den Index. Der Link ist
                 // fuer die Gaeste, nicht fuer die Suche.
                 'noindex' => true,
@@ -1385,7 +1449,7 @@ final class InviteV2Controller
             // Argument laesst das Bezugsdatum bei date('Y-m-d') - eine echte
             // Einladung schaut auf die echte Uhr.
             'abschnitte' => DesignSections::html($doc, $einladung['data'], $locale, '', [
-                'csrf' => Security::csrf(),
+                'csrf' => $vorschau ? '' : Security::csrf(),
                 'sent' => $gesendet,
             ]),
         ]);

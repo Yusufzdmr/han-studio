@@ -412,3 +412,103 @@
     filme[i].play().catch(function () {});
   }
 })();
+
+/*
+ * "Davetiyeyi tam gor": die ganze Einladung als Vollbild.
+ *
+ * "gelinle damadin o olustururken ki musterinin onizlemesi tam gorsel olsa
+ * daha guzel olur, kagit gibi gozukmesin" (03.10.2026). Rechts steht nur die
+ * Karte. Dieser Knopf holt die echte Seite - Kuvert, Karte, Abschnitte,
+ * Filme - aus dem gerade Getippten (InviteV2Controller::ganzeVorschau) und
+ * legt sie in einen Rahmen ueber alles. Gespeichert wird dabei nichts.
+ *
+ * Ohne Dateien, wie die Abschnittsvorschau oben: der Server soll nichts
+ * ablegen. Ein gewaehltes, noch nicht hochgeladenes Foto setzt der Browser
+ * danach selbst in die Seite - dieselbe Datei, die schon in der Karte rechts
+ * zu sehen ist.
+ *
+ * Das Kuvert soll bei jedem Oeffnen zu sein. invitation.js merkt sich ein
+ * offenes Kuvert je Adresse, und die Adresse eines srcdoc-Rahmens ist immer
+ * dieselbe - also vorher vergessen, wie im Rahmen des Editors.
+ */
+(function () {
+  'use strict';
+
+  var form = document.querySelector('[data-wizard]');
+  var knopf = document.querySelector('[data-ganz-zeigen]');
+  var ebene = document.querySelector('[data-vollbild]');
+  if (!form || !knopf || !ebene) return;
+
+  var zu = ebene.querySelector('[data-vollbild-zu]');
+
+  // Die Ebene steht im Markup in der rechten Spalte, und die ist sticky -
+  // damit ein eigener Stapelkontext. z-index 200 galt nur darin, und der
+  // feste Kopf der Seite (z-50, aussen) lag ueber dem Vollbild. Direkt
+  // unter body gilt die Zahl fuer die ganze Seite. Angesehen, nicht vermutet.
+  document.body.appendChild(ebene);
+
+  var rahmen = null;
+  var vorher = '';
+  var holt = false;
+
+  function fotos(doc) {
+    form.querySelectorAll('input[type=file][name^="layer_src_"]').forEach(function (feld) {
+      var datei = feld.files && feld.files[0];
+      if (!datei) return;
+      var id = feld.name.slice('layer_src_'.length);
+      var adresse = URL.createObjectURL(datei);
+      doc.querySelectorAll('img.d-el-' + id).forEach(function (bild) {
+        bild.src = adresse;
+        bild.hidden = false;
+      });
+    });
+  }
+
+  function schliessen() {
+    ebene.hidden = true;
+    if (rahmen && rahmen.parentNode) rahmen.parentNode.removeChild(rahmen);
+    rahmen = null;
+    document.documentElement.style.overflow = vorher;
+    knopf.focus();
+  }
+
+  knopf.addEventListener('click', function () {
+    if (holt) return;
+    holt = true;
+    knopf.setAttribute('aria-busy', 'true');
+
+    var daten = new FormData(form);
+    daten.set('was', 'ganzseite');
+    form.querySelectorAll('input[type=file]').forEach(function (el) { daten.delete(el.name); });
+
+    fetch(window.location.pathname, { method: 'POST', body: daten, credentials: 'same-origin' })
+      .then(function (r) { return r.ok ? r.text() : null; })
+      .then(function (html) {
+        if (html === null) return;
+        try { window.sessionStorage.removeItem('al-kuvert-offen:srcdoc'); } catch (e) {}
+
+        rahmen = document.createElement('iframe');
+        rahmen.title = knopf.textContent;
+        rahmen.addEventListener('load', function () {
+          try { fotos(rahmen.contentDocument); } catch (e) {}
+        }, { once: true });
+        rahmen.srcdoc = html;
+        ebene.appendChild(rahmen);
+
+        vorher = document.documentElement.style.overflow;
+        document.documentElement.style.overflow = 'hidden';
+        ebene.hidden = false;
+        if (zu) zu.focus();
+      })
+      .catch(function () { /* Eine Zugabe: faellt sie aus, bleibt der Assistent, wie er ist. */ })
+      .finally(function () {
+        holt = false;
+        knopf.removeAttribute('aria-busy');
+      });
+  });
+
+  if (zu) zu.addEventListener('click', schliessen);
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && !ebene.hidden) schliessen();
+  });
+})();
