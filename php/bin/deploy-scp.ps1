@@ -24,11 +24,6 @@ param(
 
 $ErrorActionPreference = 'Stop'
 
-# Windows PowerShell 5.1 setzt beim Pipen in ein natives Programm ein BOM vor
-# den Text. Auf dem Server wurde daraus "﻿set: command not found", und
-# set -e lief nie (10.10.2026). UTF-8 ohne BOM.
-$OutputEncoding = New-Object System.Text.UTF8Encoding $false
-
 $repo    = Resolve-Path (Join-Path $PSScriptRoot '..\..')
 $tar     = Join-Path $env:TEMP 'atelier-php.tar.gz'
 $tarUnix = $tar -replace '\\', '/'
@@ -48,6 +43,9 @@ try {
 
   Write-Host "Gonderiliyor -> ${Server}:/root/ ..."
   scp $tar "${Server}:/root/"
+  # 'Stop' greift nur bei Cmdlets; ein natives Programm meldet sich ueber
+  # den Exitcode.
+  if ($LASTEXITCODE -ne 0) { throw "scp fehlgeschlagen ($LASTEXITCODE)" }
 
   Write-Host 'Sunucuda aciliyor ...'
   $uzak = @"
@@ -64,7 +62,13 @@ systemctl reload $PhpFpm
 echo "Bitti. Yedek: `$yedek"
 "@ -replace "`r`n", "`n"
 
-  $uzak | ssh $Server 'bash -s'
+  # Als Base64 im Argument und nicht ueber stdin: Windows PowerShell 5.1
+  # setzt beim Pipen in ein natives Programm ein BOM vor den Text, auf dem
+  # Server wurde daraus "set: command not found" und set -e lief nie
+  # (10.10.2026). $OutputEncoding half nicht. Base64 kennt kein BOM.
+  $b64 = [Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes($uzak))
+  ssh $Server "echo $b64 | base64 -d | bash"
+  if ($LASTEXITCODE -ne 0) { throw "Sunucu adimi fehlgeschlagen ($LASTEXITCODE)" }
   Write-Host 'Tamam.'
 }
 finally { Pop-Location }
