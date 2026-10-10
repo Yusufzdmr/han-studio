@@ -192,7 +192,7 @@ foreach (['icon_src_', 'icon_size_', 'icon_x_', 'icon_y_', 'icon_gap_', 'icon_z_
 assert_contains($tafel, 'foreach (SectionRegistry::icons() as $kennung', 'Panel: die Liste kommt aus dem Katalog');
 
 $steuer = (string) file_get_contents(__DIR__ . '/../src/Controllers/DesignAdminController.php');
-assert_contains($steuer, "Media::storeVideo(\$f, 'designs') ?? Media::storeGraphic(\$f, 'designs')",
+assert_contains($steuer, "Media::storeVideo(\$f, 'designs') ?? Media::storeGraphic(\$f, 'designs', \$stanze)",
     'Panel: erst der Film, dann das Bild - die Datei entscheidet selbst');
 
 /* --- "Yukledim ama gelmedi bir sey" --- */

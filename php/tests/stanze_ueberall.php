@@ -19,7 +19,13 @@ $icons = Design::icons(['icons' => ['pasta' => ['video' => '/uploads/designs/t.m
 assert_same('schwarz', $icons['pasta']['stanze'], 'Zeichen: stanze bleibt');
 
 $bildIcon = Design::icons(['icons' => ['pasta' => ['src' => '/uploads/designs/t.png', 'stanze' => 'schwarz']]]);
-assert_same('', $bildIcon['pasta']['stanze'], 'Zeichen: ein Bild hat nichts zu stanzen');
+// Ein Bild behaelt die Wahl: sein Grund wurde schon beim Hochladen
+// herausgestanzt (Media::freistellen), und die Liste im Panel soll nach dem
+// Speichern zeigen, was gewaehlt war.
+assert_same('schwarz', $bildIcon['pasta']['stanze'], 'Zeichen: auch ein Bild behaelt die Wahl');
+
+$leer = Design::icons(['icons' => ['pasta' => ['stanze' => 'schwarz']]]);
+assert_same('', $leer['pasta']['stanze'] ?? '', 'Zeichen: ohne Datei nichts zu stanzen');
 
 $quatsch = Design::icons(['icons' => ['pasta' => ['video' => '/uploads/designs/t.mov', 'stanze' => 'lila']]]);
 assert_same('', $quatsch['pasta']['stanze'], 'Zeichen: Unbekanntes faellt weg');
@@ -35,7 +41,7 @@ $zeilen = Design::freieElemente([
     ['src' => '/uploads/designs/b.png', 'anchor' => 'days', 'stanze' => 'schwarz'],
 ], ['days']);
 assert_same('schwarz', $zeilen[0]['stanze'], 'Schmuck: stanze am Film');
-assert_same('', $zeilen[1]['stanze'], 'Schmuck: nicht am Bild');
+assert_same('schwarz', $zeilen[1]['stanze'], 'Schmuck: auch am Bild');
 
 $cd = Design::fromPost($basis, [
     'cdicons_da' => '1', 'cd_n_default' => '1',
@@ -71,6 +77,33 @@ $uhr = \Atelier\DesignSections::complete([
 ]);
 $uhrHtml = \Atelier\DesignSections::html($uhr, ['date' => '2099-06-20', 'time' => '15:00'], 'de', '2026-01-01');
 assert_contains($uhrHtml, 'src="/uploads/designs/kerze.mov" data-stanze="schwarz"', 'Countdown: der Film traegt data-stanze');
+
+/* --- Ein Bild traegt keine data-stanze: sein Grund ist schon aus der Datei --- */
+
+$bildUhr = \Atelier\DesignSections::complete([
+    'id' => 'probe', 'slug' => 'probe',
+    'countdownIcons' => ['uhr' => [['src' => '/uploads/designs/kerze.webp', 'anchor' => 'days', 'stanze' => 'schwarz']]],
+    'sections' => [['id' => 'zeit', 'type' => 'countdown', 'variant' => 'uhr']],
+]);
+$bildUhrHtml = \Atelier\DesignSections::html($bildUhr, ['date' => '2099-06-20', 'time' => '15:00'], 'de', '2026-01-01');
+assert_contains($bildUhrHtml, '/uploads/designs/kerze.webp', 'Countdown: das Bild steht da');
+assert_not_contains($bildUhrHtml, 'data-stanze', 'Countdown: am Bild keine data-stanze');
+
+/* --- Hochgeladene Bilder werden nach der Wahl freigestellt --- */
+
+$steuerung = (string) file_get_contents(__DIR__ . '/../src/Controllers/DesignAdminController.php');
+foreach ([
+    "\$post['icon_stanze_' . \$kennung]" => 'Zeichen',
+    "\$post['cd_' . \$gestalt . '_' . \$i . '_stanze']" => 'Countdown',
+    "\$post['sec_deko_' . \$i . '_' . \$d . '_stanze']" => 'Abschnittsschmuck',
+] as $nadel => $wo) {
+    assert_contains($steuerung, $nadel, $wo . ': der Upload liest die Wahl');
+}
+assert_same(0, substr_count($steuerung, "Media::storeVideo(\$f, 'designs') ?? Media::storeGraphic(\$f, 'designs'))"),
+    'Kein Bild-oder-Film-Upload mehr ohne Stanzwert');
+
+$wahl = (string) file_get_contents(__DIR__ . '/../templates/partials/stanze-wahl.php');
+assert_not_contains($wahl, 'video ise', 'Panel: die Wahl gilt nicht mehr nur fuer Filme');
 
 /* --- Die eigene Karte als Film (Ort-Abschnitt, "eigen") --- */
 

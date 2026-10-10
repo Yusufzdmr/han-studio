@@ -1,12 +1,12 @@
 <?php
 /**
- * "Arka planı şeffaf yap" fuer einen Film: nichts, schwarzer oder gruener
- * Grund. Eine Liste fuer jede Stelle, an der ein Film stehen kann - die
- * Videoebenen (5b) haben ihre eigene, laengere Fassung mit Hinweis.
+ * "Arka planı şeffaf yap": nichts, schwarzer oder gruener Grund. Eine Liste
+ * fuer jede Stelle, deren Dateifeld Bild ODER Film nimmt - die Ebenen (5,
+ * 5b) haben ihre eigene, laengere Fassung mit Hinweis.
  *
- * Steht immer da, auch neben einem Bild: das Feld daneben nimmt beides, und
- * ob es ein Film wird, entscheidet erst die Datei. An einem Bild ignoriert
- * Design::stanze() den Wert.
+ * Beim Film stanzt gruen.js im Browser, jedes Mal. Beim Bild stanzt
+ * Media::freistellen() einmal beim Hochladen - deshalb wirkt eine geaenderte
+ * Wahl an einem Bild erst, wenn es neu hochgeladen wird.
  *
  * @var string $name
  * @var string $wert
@@ -17,7 +17,7 @@
 
 use function Atelier\e;
 ?>
-<label class="<?= $label ?>"><?= $tr ? 'video ise arka planı şeffaf yap' : 'bei einem Film: Grund durchsichtig' ?>
+<label class="<?= $label ?>"><?= $tr ? 'arka planı şeffaf yap' : 'Grund durchsichtig machen' ?>
   <select name="<?= e($name) ?>" class="<?= $feld ?>">
     <?php foreach ([
         ''        => $tr ? 'hayır' : 'nein',
@@ -26,4 +26,7 @@ use function Atelier\e;
     ] as $w => $wort) : ?>
       <option value="<?= e($w) ?>" <?= $wert === $w ? 'selected' : '' ?>><?= e($wort) ?></option>
     <?php endforeach; ?>
-  </select></label>
+  </select>
+  <span class="mt-1 block text-[0.7rem] normal-case tracking-normal opacity-70">
+    <?= $tr ? 'resimde: seçtikten sonra resmi yeniden yükleyin' : 'bei einem Bild: danach neu hochladen' ?>
+  </span></label>

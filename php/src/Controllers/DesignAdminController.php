@@ -846,8 +846,12 @@ final class DesignAdminController
                 continue;
             }
 
+            // Die Stanzwahl daneben gilt fuer beides: ein Film traegt sie als
+            // data-stanze in den Browser, ein Bild wird gleich hier
+            // freigestellt.
+            $stanze = (string) ($post['icon_stanze_' . $kennung] ?? '');
             $pfad = Media::nimm($datei, 'zeichen', static fn (array $f): ?string
-                => Media::storeVideo($f, 'designs') ?? Media::storeGraphic($f, 'designs'));
+                => Media::storeVideo($f, 'designs') ?? Media::storeGraphic($f, 'designs', $stanze));
             if ($pfad !== null) {
                 $post['icon_src_' . $kennung] = $pfad;
             }
@@ -871,8 +875,9 @@ final class DesignAdminController
                     continue;
                 }
 
+                $stanze = (string) ($post['cd_' . $gestalt . '_' . $i . '_stanze'] ?? '');
                 $pfad = Media::nimm($datei, 'zeichen', static fn (array $f): ?string
-                    => Media::storeVideo($f, 'designs') ?? Media::storeGraphic($f, 'designs'));
+                    => Media::storeVideo($f, 'designs') ?? Media::storeGraphic($f, 'designs', $stanze));
                 if ($pfad !== null) {
                     $post['cd_' . $gestalt . '_' . $i . '_src'] = $pfad;
                 }
@@ -980,8 +985,9 @@ final class DesignAdminController
                     continue;
                 }
 
+                $stanze = (string) ($post['sec_deko_' . $i . '_' . $d . '_stanze'] ?? '');
                 $pfad = Media::nimm($datei, 'zeichen', static fn (array $f): ?string
-                    => Media::storeVideo($f, 'designs') ?? Media::storeGraphic($f, 'designs'));
+                    => Media::storeVideo($f, 'designs') ?? Media::storeGraphic($f, 'designs', $stanze));
 
                 if ($pfad !== null) {
                     $post['sec_deko_' . $i . '_' . $d . '_src'] = $pfad;

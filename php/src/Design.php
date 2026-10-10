@@ -23,16 +23,19 @@ final class Design
     public const STANZEN    = ['gruen', 'schwarz'];
 
     /**
-     * Ein Stanzwert fuer einen FILM, geprueft: nur bekannt und nur dort, wo
-     * ein Film steht. Hier geht es um gruen.js im Browser - Fotoebenen gehen
-     * einen anderen Weg (Media::freistellen() beim Hochladen, siehe
-     * completeElement()).
+     * Ein Stanzwert, geprueft: nur bekannt und nur dort, wo eine Datei steht.
+     *
+     * Beim Film stanzt gruen.js im Browser (data-stanze), beim Bild hat
+     * Media::freistellen() den Grund schon beim Hochladen herausgenommen.
+     * Gespeichert wird die Wahl bei beiden - die Liste im Panel soll nach dem
+     * Speichern zeigen, was gewaehlt war. Wer zeichnet, fragt mit dem FILM
+     * allein: an ein Bild gehoert keine data-stanze.
      */
-    public static function stanze(mixed $wert, string $film): string
+    public static function stanze(mixed $wert, string $datei): string
     {
         $wert = is_string($wert) ? $wert : '';
 
-        return $film !== '' && in_array($wert, self::STANZEN, true) ? $wert : '';
+        return $datei !== '' && in_array($wert, self::STANZEN, true) ? $wert : '';
     }
     public const ALIGNS     = ['left', 'center', 'right'];
 
@@ -222,7 +225,7 @@ final class Design
             $satz = [
                 'src'   => $bild,
                 'video' => $film,
-                'stanze' => self::stanze($eigen['stanze'] ?? '', $film),
+                'stanze' => self::stanze($eigen['stanze'] ?? '', $film !== '' ? $film : $bild),
                 'size'  => max(10, min(4000, (int) ($eigen['size'] ?? 100))),
                 'x'     => max(-400, min(400, (int) ($eigen['x'] ?? 0))),
                 'y'     => max(-400, min(400, (int) ($eigen['y'] ?? 0))),
@@ -354,7 +357,7 @@ final class Design
             $liste[] = [
                 'src'    => $bild,
                 'video'  => $film,
-                'stanze' => self::stanze($zeile['stanze'] ?? '', $film),
+                'stanze' => self::stanze($zeile['stanze'] ?? '', $film !== '' ? $film : $bild),
                 'anchor' => $wo,
                 // Links oder rechts vom Feld. Zwei Werte und kein Winkel:
                 // die Zeile flieszt, und ein Zeichen in ihr steht davor
