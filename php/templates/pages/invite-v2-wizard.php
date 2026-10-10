@@ -118,6 +118,9 @@ $inputTypes = ['date' => 'date', 'time' => 'time'];
   <div class="mx-auto max-w-2xl text-center">
     <div class="eyebrow">✓</div>
     <h2 class="headline mt-3 text-3xl"><?= e($t('doneTitle')) ?></h2>
+    <?php if (($done['email'] ?? '') !== '') : ?>
+      <p class="mt-4 text-sm text-muted"><?= e(sprintf($t('doneMailSent'), $done['email'])) ?></p>
+    <?php endif; ?>
 
     <?php foreach ($zeilen as $nr => $zeile) : ?>
       <?php if ($zeile['link'] === null) { continue; } ?>
@@ -489,6 +492,16 @@ $inputTypes = ['date' => 'date', 'time' => 'time'];
             <label class="<?= $label ?>" for="f-slug"><?= e($t('fieldSlug')) ?></label>
             <input id="f-slug" name="slug" class="<?= $field ?>" value="<?= e($old('slug')) ?>">
             <p class="mt-2 text-[0.8rem] text-muted"><?= e($t('slugNote')) ?></p>
+          </div>
+
+          <?php /* Pflicht: an diese Adresse gehen die privaten Links, und
+                   "Links verloren" findet die Einladung ueber sie wieder
+                   (Ayhan, 10.10.2026). */ ?>
+          <div>
+            <label class="<?= $label ?>" for="f-email"><?= e($t('fieldEmail')) ?></label>
+            <input id="f-email" type="email" name="email" required autocomplete="email" maxlength="160"
+                   class="<?= $field ?>" value="<?= e($old('email')) ?>">
+            <p class="mt-2 text-[0.8rem] text-muted"><?= e($t('emailNote')) ?></p>
           </div>
 
           <button type="submit" class="border border-ink px-8 py-4 text-[0.66rem] uppercase tracking-[0.16em] text-ink transition-colors hover:bg-ink hover:text-cream">

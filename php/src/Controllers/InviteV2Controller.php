@@ -10,6 +10,7 @@ use Atelier\Design;
 use Atelier\DesignSections;
 use Atelier\DesignVideos;
 use Atelier\DesignWizard;
+use Atelier\EinladungsMail;
 use Atelier\I18n;
 use Atelier\InvitationsV2;
 use Atelier\Media;
@@ -926,6 +927,16 @@ final class InviteV2Controller
             return ['error' => 'names'];
         }
 
+        // Die Adresse des Paares ist Pflicht: an sie gehen die privaten Links,
+        // und ueber sie findet "Links verloren" die Einladung wieder (Ayhan,
+        // 10.10.2026). Klein geschrieben, damit die Suche nicht an einem
+        // grossen Buchstaben scheitert.
+        $email = mb_strtolower(Security::singleLine(Security::clean($_POST['email'] ?? '', 160)));
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            return ['error' => 'email'];
+        }
+        $data['email'] = $email;
+
         $slug = InvitationsV2::slug(Security::clean($_POST['slug'] ?? '', 96));
         if ($slug === '') {
             $slug = InvitationsV2::slug(($data['bride'] ?? '') . '-' . ($data['groom'] ?? ''));
@@ -1007,9 +1018,21 @@ final class InviteV2Controller
         // Funktion.
         $links = InvitationsV2::links($slug, $data);
 
+        // Dieselben Links per Mail, mit Dank und dem Bild, das auch WhatsApp
+        // zeigt. Schlaegt der Versand fehl, stehen die Links trotzdem auf der
+        // Erfolgsseite und im Panel.
+        $doc = DesignWizard::personalize($snapshot, $wahl);
+        EinladungsMail::senden($email, [[
+            'slug'  => $slug,
+            'data'  => $data,
+            'links' => $links,
+            'bild'  => $this->teilbild($doc, $data, $slug),
+        ]], (string) $data['locale']);
+
         return [
             'slug'  => $slug,
             'links' => $links,
+            'email' => $email,
         ];
     }
 
@@ -1348,6 +1371,23 @@ final class InviteV2Controller
     }
 
     /**
+     * Das Teilbild einer Einladung (1200x630, fuer WhatsApp und die Mail an
+     * das Paar). Leer, wenn die Vorlage kein Foto hat.
+     *
+     * @param array<string,mixed> $doc
+     * @param array<string,mixed> $data
+     */
+    private function teilbild(array $doc, array $data, string $slug): string
+    {
+        return OgImage::forDocument(
+            $slug,
+            $this->vorschauQuelle($doc, $data),
+            (string) ($doc['palette']['paper']['value'] ?? $doc['palette']['bg']['value'] ?? '#faf7f2'),
+            (string) ($doc['palette']['accentSoft']['value'] ?? $doc['palette']['accent']['value'] ?? '#b08d57')
+        );
+    }
+
+    /**
      * Die Seite einer Einladung zeichnen - fuer den Gast oder als Vorschau.
      *
      * Aus show() herausgeloest, als der Assistent eine Vollbildvorschau
@@ -1376,12 +1416,7 @@ final class InviteV2Controller
 
         $teilen = $vorschau ? [] : [
             'description' => $this->vorschauText($einladung['data'], $locale),
-            'image'       => OgImage::forDocument(
-                (string) $einladung['slug'],
-                $this->vorschauQuelle($doc, $einladung['data']),
-                (string) ($doc['palette']['paper']['value'] ?? $doc['palette']['bg']['value'] ?? '#faf7f2'),
-                (string) ($doc['palette']['accentSoft']['value'] ?? $doc['palette']['accent']['value'] ?? '#b08d57')
-            ),
+            'image'       => $this->teilbild($doc, $einladung['data'], (string) $einladung['slug']),
             'canonical'   => Config::url() . I18n::path('/v2/einladung/' . rawurlencode((string) $einladung['slug']), $locale),
             'ogType'      => 'article',
         ];
