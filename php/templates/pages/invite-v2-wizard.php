@@ -136,6 +136,10 @@ $inputTypes = ['date' => 'date', 'time' => 'time'];
         <?php endif; ?>
       </div>
     <?php endforeach; ?>
+
+    <p class="mt-10 text-[0.8rem] text-muted">
+      <a class="link-underline" href="<?= e(I18n::path('/v2/meine-links')) ?>"><?= e($t('linksForgot')) ?></a>
+    </p>
   </div>
 
 <?php else : ?>

@@ -2075,6 +2075,68 @@ final class InviteV2Controller
     }
 
     /**
+     * "Links verloren": Adresse eingeben, die Links kommen per Mail.
+     *
+     * Die Seite sagt nie, ob es zu einer Adresse eine Einladung gibt - jede
+     * gueltige Adresse bekommt dieselbe Antwort, und die Links gehen nur an
+     * die Adresse selbst. Sonst liesse sich hier ausprobieren, wer bei uns
+     * heiratet. Zwei Bremsen: je Absender (jemand probiert viele Adressen)
+     * und je Adresse (jemand flutet ein fremdes Postfach).
+     */
+    public function meineLinks(): void
+    {
+        $locale = I18n::locale();
+        $status = '';
+        $email  = '';
+
+        if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
+            $email = mb_strtolower(Security::singleLine(Security::clean($_POST['email'] ?? '', 160)));
+
+            if (!Security::checkCsrf($_POST['csrf'] ?? null)) {
+                $status = 'csrf';
+            } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                $status = 'email';
+            } else {
+                // Gebremst heisst: dieselbe Antwort, nur ohne Mail. Wer
+                // bremst, soll nicht erfahren, dass er gebremst wird.
+                $gebremst = Security::throttle('v2-links', 10, 3600)
+                    || Security::throttle('v2-links-adresse-' . md5($email), 3, 3600);
+
+                if (!$gebremst) {
+                    $gefunden = [];
+                    foreach (InvitationsV2::byEmail($email) as $ein) {
+                        $gefunden[] = [
+                            'slug'  => $ein['slug'],
+                            'data'  => $ein['data'],
+                            'links' => InvitationsV2::links($ein['slug'], $ein['data']),
+                            'bild'  => '',
+                        ];
+                    }
+                    if ($gefunden !== []) {
+                        EinladungsMail::senden($email, $gefunden, $locale, true);
+                    }
+                }
+                $status = 'gesendet';
+            }
+        }
+
+        header('Cache-Control: private, no-store');
+
+        View::page('pages/invite-v2-links', [
+            'locale' => $locale,
+            'path'   => I18n::path('/v2/meine-links'),
+            'meta'   => Seo::forPage('einladung2', [
+                'title'       => I18n::t('invitation2.linksTitle'),
+                'solidHeader' => true,
+                'noindex'     => true,
+            ]),
+            'csrf'   => Security::csrf(),
+            'status' => $status,
+            'email'  => $status === 'gesendet' ? '' : $email,
+        ]);
+    }
+
+    /**
      * Die Tuer, die manageKey oeffnet.
      *
      * Seit dieser Phase oeffnet derselbe Schluessel mehr als eine Seite: die

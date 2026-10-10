@@ -249,6 +249,37 @@ final class InvitationsV2
         ];
     }
 
+    /**
+     * Alle Einladungen einer Adresse - fuer "Links verloren".
+     *
+     * Die Adresse steht seit dem 11.10.2026 klein geschrieben in data.email;
+     * aeltere Einladungen haben keine und werden hier nicht gefunden (fuer
+     * sie bleibt das Panel). Ein Durchlauf ueber die ganze Tabelle, aber eine
+     * kleine: das kostet weniger als eine eigene Spalte samt Wanderung.
+     *
+     * @return list<array{slug:string,data:array<string,mixed>}>
+     */
+    public static function byEmail(string $email): array
+    {
+        $email = mb_strtolower(trim($email));
+        if ($email === '') {
+            return [];
+        }
+
+        $zeilen = Db::all(
+            "SELECT slug, data FROM invitations_v2
+              WHERE JSON_UNQUOTE(JSON_EXTRACT(data, '$.email')) = ?
+           ORDER BY created_at DESC
+              LIMIT 20",
+            [$email]
+        );
+
+        return array_map(static fn (array $z): array => [
+            'slug' => (string) $z['slug'],
+            'data' => (array) json_decode((string) $z['data'], true),
+        ], $zeilen);
+    }
+
     /* --------------------------------- RSVP --------------------------------- */
 
     /**

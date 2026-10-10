@@ -101,6 +101,8 @@ $router->get('/{locale}/v2/designs/{slug}', $page_(static fn (array $p) => (new 
 $router->any('/{locale}/v2/einladung', $page_(static fn (array $p) => (new InviteV2Controller())->wizard()));
 // Ortssuche fuer den Assistenten. Antwortet mit JSON und nicht mit einer
 // Seite; ohne Skript bleibt das Adressfeld ein gewoehnliches Textfeld.
+// "Links verloren": any, weil dieselbe Seite das Formular zeigt und annimmt.
+$router->any('/{locale}/v2/meine-links', $page_(static fn (array $p) => (new InviteV2Controller())->meineLinks()));
 $router->get('/{locale}/v2/orte', $page_(static fn (array $p) => (new InviteV2Controller())->places()));
 
 // Die Kartenvorschau im Assistenten. Nur zu unterschriebenen Koordinaten.

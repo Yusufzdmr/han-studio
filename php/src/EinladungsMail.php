@@ -68,7 +68,10 @@ final class EinladungsMail
             $html[] = $nr > 0 || $wiederholt ? self::linie() : '';
 
             if ($wiederholt) {
-                $html[] = self::zwischentitel(self::paar($daten) !== '' ? self::paar($daten) : '/' . $ein['slug']);
+                $name   = self::paar($daten) !== '' ? self::paar($daten) : '/' . $ein['slug'];
+                $html[] = self::zwischentitel($name);
+                $text[] = '';
+                $text[] = '— ' . $name . ' —';
             }
 
             if (!$wiederholt && $ein['bild'] !== '') {
