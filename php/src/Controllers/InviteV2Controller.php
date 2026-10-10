@@ -756,6 +756,15 @@ final class InviteV2Controller
             $typen[(string) ($el['id'] ?? '')] = (string) ($el['type'] ?? '');
         }
 
+        // Was der Grafiker an der Bildebene als Grund zum Stanzen gewaehlt hat.
+        // Das Paar waehlt es nicht - es steht schon in der Vorlage, und das
+        // gerade hochgeladene Foto wird serverseitig danach freigestellt.
+        $stanzen = [];
+        foreach (($sockel['layers'] ?? []) as $el) {
+            $wert = (string) ($el['stanze'] ?? '');
+            $stanzen[(string) ($el['id'] ?? '')] = in_array($wert, Design::STANZEN, true) ? $wert : '';
+        }
+
         $wahl = ['palette' => [], 'fonts' => [], 'layers' => [], 'sections' => []];
 
         foreach (array_keys($darf['palette']) as $marke) {
@@ -826,8 +835,12 @@ final class InviteV2Controller
                 }
             } elseif ($rechte['photo']) {
                 // Media::store() sieht in die Datei, nicht auf ihren Namen.
+                // Der Stanzwert kommt aus der Vorlage: eine Fotoecke mit
+                // gruenem oder schwarzem Grund wird beim Hochladen
+                // freigestellt, ohne dass das Paar davon etwas waehlen muss.
+                $stanze = $stanzen[$id] ?? '';
                 $pfad = Media::nimm((array) ($_FILES['layer_src_' . $id] ?? []), 'bild',
-                    static fn (array $f): ?string => Media::store($f, 'einladungen/v2/' . $slug));
+                    static fn (array $f): ?string => Media::store($f, 'einladungen/v2/' . $slug, $stanze));
                 if ($pfad !== null) {
                     $eintrag['src'] = $pfad;
 

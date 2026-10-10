@@ -402,13 +402,27 @@ $meldungen = [
 
     <div class="border-t border-sand-deep pt-5">
       <div class="text-[0.66rem] uppercase tracking-[0.16em] text-muted"><?= $tr ? 'Yeni görsel' : 'Neues Bild' ?></div>
-      <div class="mt-3 grid gap-4 sm:grid-cols-2">
+      <div class="mt-3 grid gap-4 sm:grid-cols-3">
         <label class="text-[0.66rem] uppercase tracking-[0.16em] text-muted"><?= $tr ? 'Adı' : 'Name' ?>
           <input name="img_neu_label" maxlength="80"
                  class="mt-1 w-full border border-sand-deep bg-cream px-3 py-2 text-sm normal-case tracking-normal text-ink"></label>
         <label class="text-[0.66rem] uppercase tracking-[0.16em] text-muted">PNG / JPG / WebP / SVG
           <input type="file" name="img_neu_datei" accept="image/png,image/jpeg,image/webp,image/svg+xml"
                  class="mt-1 w-full text-[0.8rem] text-muted"></label>
+        <?php /* Ein Foto mit gruenem oder schwarzem Grund wird schon beim
+                 Hochladen freigestellt (Media::freistellen) - die Datei liegt
+                 danach ueberall durchsichtig. Fuer SVG ohne Wirkung. */ ?>
+        <label class="text-[0.66rem] uppercase tracking-[0.16em] text-muted"><?= $tr ? 'Fon sil (yükleme)' : 'Grund entfernen (Upload)' ?>
+          <select name="img_neu_stanze"
+                  class="mt-1 w-full border border-sand-deep bg-cream px-3 py-2 text-sm normal-case tracking-normal text-ink">
+            <?php foreach ([
+                ''        => $tr ? 'hayır' : 'nein',
+                'schwarz' => $tr ? 'siyah zemin' : 'schwarzer Grund',
+                'gruen'   => $tr ? 'yeşil ekran' : 'Greenscreen',
+            ] as $sw => $swort) : ?>
+              <option value="<?= e($sw) ?>"><?= e($swort) ?></option>
+            <?php endforeach; ?>
+          </select></label>
       </div>
     </div>
 

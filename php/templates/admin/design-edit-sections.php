@@ -701,6 +701,27 @@ use function Atelier\e;
           <label class="<?= $label ?> mt-4 block"><?= $tr ? 'ya da yol' : 'oder Pfad' ?>
             <input name="src_<?= e($ebene['id']) ?>" value="<?= e((string) $ebene['src']) ?>"
                    class="<?= $feld ?> font-mono text-[0.78rem]"></label>
+
+          <?php /* Freistellen fuer ein Foto: gruener oder schwarzer Grund
+                   verschwindet schon beim Hochladen (Media::freistellen), die
+                   Datei liegt danach ueberall durchsichtig - auch ohne gruen.js.
+                   Wirkt auf den gerade hochgeladenen Upload; ein nur
+                   eingetippter Pfad wird nicht angefasst. */ ?>
+          <label class="<?= $label ?> mt-4 block"><?= $tr ? 'Yükleme sırasında arka planı sil' : 'Beim Hochladen Grund entfernen' ?>
+            <select name="stanze_<?= e($ebene['id']) ?>" class="<?= $feld ?>">
+              <?php foreach ([
+                  ''        => $tr ? 'hayır' : 'nein',
+                  'schwarz' => $tr ? 'siyah zemin silinsin' : 'schwarzen Grund entfernen',
+                  'gruen'   => $tr ? 'yeşil ekran silinsin' : 'Greenscreen entfernen',
+              ] as $sw => $swort) : ?>
+                <option value="<?= e($sw) ?>" <?= (string) ($ebene['stanze'] ?? '') === $sw ? 'selected' : '' ?>><?= e($swort) ?></option>
+              <?php endforeach; ?>
+            </select></label>
+          <p class="mt-1 text-[0.78rem] leading-relaxed text-muted">
+            <?= $tr
+              ? 'Yeşil ya da siyah fonlu bir fotoğraf seçildiyse fonu yükleme anında silinir ve şeffaf kaydedilir. Seçimi değiştirdikten sonra görseli yeniden yükleyin.'
+              : 'Für ein Foto mit grünem oder schwarzem Grund: der Grund verschwindet schon beim Hochladen, das Bild wird durchsichtig gespeichert. Nach dem Umstellen das Bild neu hochladen.' ?>
+          </p>
         </div>
       </div>
     </div>
@@ -789,6 +810,13 @@ use function Atelier\e;
       <label class="<?= $label ?>"><?= $tr ? 'Başlangıç görseli (isteğe bağlı)' : 'Startbild (optional)' ?>
         <input type="file" name="neue_ebene_bild"
                accept="image/png,image/jpeg,image/webp,image/svg+xml,video/mp4,video/webm,video/quicktime" class="<?= $feld ?>"></label>
+
+      <label class="<?= $label ?>"><?= $tr ? 'Görselse: fonu yükleme sırasında sil' : 'Falls Bild: Grund beim Hochladen entfernen' ?>
+        <select name="neue_ebene_stanze" class="<?= $feld ?>">
+          <option value=""><?= $tr ? 'hayır' : 'nein' ?></option>
+          <option value="schwarz"><?= $tr ? 'siyah zemin silinsin' : 'schwarzen Grund entfernen' ?></option>
+          <option value="gruen"><?= $tr ? 'yeşil ekran silinsin' : 'Greenscreen entfernen' ?></option>
+        </select></label>
     </div>
   </div>
 <?= $zu ?>

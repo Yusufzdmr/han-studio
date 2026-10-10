@@ -732,11 +732,15 @@ final class DesignAdminController
 
         $start = $schrift ? null : ($_FILES['neue_ebene_bild'] ?? null);
         if (is_array($start) && ((int) ($start['error'] ?? UPLOAD_ERR_NO_FILE)) === UPLOAD_ERR_OK) {
+            $stanze = (string) ($post['neue_ebene_stanze'] ?? '');
             $pfad = $ebene['type'] === 'video'
                 ? Media::storeVideo($start, 'designs')
-                : Media::storeGraphic($start, 'designs');
+                : Media::storeGraphic($start, 'designs', $stanze);
             if ($pfad !== null) {
                 $ebene['src'] = $pfad;
+                if ($stanze !== '') {
+                    $ebene['stanze'] = $stanze;
+                }
             }
         }
 
@@ -786,7 +790,12 @@ final class DesignAdminController
                 // Zeichnung null zurueck. storeGraphic putzt das SVG und behaelt
                 // bei allem anderen den Alphakanal, den eine Ebene ueber der Karte
                 // braucht.
-                $pfad = Media::nimm($file, 'bild', static fn (array $f): ?string => Media::storeGraphic($f, 'designs'));
+                //
+                // Der Stanzwert kommt aus demselben Formular (das Select steht
+                // neben dem Dateifeld): ist er gruen oder schwarz, schneidet
+                // storeGraphic den Grund schon beim Hochladen heraus.
+                $stanze = (string) ($post['stanze_' . $id] ?? ($ebene['stanze'] ?? ''));
+                $pfad = Media::nimm($file, 'bild', static fn (array $f): ?string => Media::storeGraphic($f, 'designs', $stanze));
                 if ($pfad !== null) {
                     $post['src_' . $id] = $pfad;
                 }
@@ -1264,7 +1273,8 @@ final class DesignAdminController
 
         $datei = $_FILES['img_neu_datei'] ?? null;
         if (is_array($datei) && ((int) ($datei['error'] ?? UPLOAD_ERR_NO_FILE)) === UPLOAD_ERR_OK) {
-            $pfad = Media::storeGraphic($datei, 'designs');
+            $stanze = (string) ($_POST['img_neu_stanze'] ?? '');
+            $pfad = Media::storeGraphic($datei, 'designs', $stanze);
             if ($pfad !== null) {
                 $rows[] = [
                     'id'       => '',

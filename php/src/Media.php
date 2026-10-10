@@ -127,7 +127,7 @@ final class Media
      * @param array{name?:string,type?:string,tmp_name?:string,error?:int,size?:int} $file
      * @return string|null Öffentliche URL oder null bei Fehler
      */
-    public static function store(array $file, string $folder): ?string
+    public static function store(array $file, string $folder, string $stanze = ''): ?string
     {
         if (($file['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
             return null;
@@ -177,12 +177,24 @@ final class Media
         }
 
         $stem = self::safeStem((string) ($file['name'] ?? ''), $folder);
-        $name = $stem . '.jpg';
-        $relative = trim($folder, '/') . '/' . $name;
-        $target = self::dir($folder) . '/' . $name;
 
-        // Einheitlich JPEG: kleiner als PNG und überall darstellbar.
-        $ok = imagejpeg($image, $target, self::QUALITY);
+        if (in_array($stanze, self::STANZEN, true)) {
+            // Ein herausgestanzter Grund braucht einen Alphakanal - JPEG kann
+            // keinen tragen. Also WebP (mit Alpha), sonst PNG.
+            self::freistellen($image, $stanze);
+            $webp = function_exists('imagewebp');
+            $name = $stem . ($webp ? '.webp' : '.png');
+            $relative = trim($folder, '/') . '/' . $name;
+            $target = self::dir($folder) . '/' . $name;
+            $ok = $webp ? imagewebp($image, $target, self::QUALITY) : imagepng($image, $target, 6);
+        } else {
+            $name = $stem . '.jpg';
+            $relative = trim($folder, '/') . '/' . $name;
+            $target = self::dir($folder) . '/' . $name;
+
+            // Einheitlich JPEG: kleiner als PNG und überall darstellbar.
+            $ok = imagejpeg($image, $target, self::QUALITY);
+        }
         imagedestroy($image);
 
         if (!$ok) {
@@ -434,7 +446,7 @@ final class Media
      *
      * @param array{name?:string,type?:string,tmp_name?:string,error?:int,size?:int} $file
      */
-    public static function storeGraphic(array $file, string $folder): ?string
+    public static function storeGraphic(array $file, string $folder, string $stanze = ''): ?string
     {
         if (($file['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
             return null;
@@ -501,6 +513,13 @@ final class Media
         imagealphablending($image, false);
         imagesavealpha($image, true);
 
+        // Der Grund eines Fotos (gruen oder schwarz) verschwindet schon hier
+        // und nicht erst im Browser: so sieht die Datei ueberall gleich aus -
+        // in der Karte, in der Galerie, im Standbild - auch ohne gruen.js.
+        if (in_array($stanze, self::STANZEN, true)) {
+            self::freistellen($image, $stanze);
+        }
+
         $webp = function_exists('imagewebp');
         $name = bin2hex(random_bytes(8)) . ($webp ? '.webp' : '.png');
         $target = self::dir($folder) . '/' . $name;
@@ -509,6 +528,106 @@ final class Media
         imagedestroy($image);
 
         return $ok ? self::url(trim($folder, '/') . '/' . $name) : null;
+    }
+
+    /** Was ein Foto herausstanzen kann: gruener oder schwarzer Grund. */
+    public const STANZEN = ['gruen', 'schwarz'];
+
+    /**
+     * Den Grund eines Fotos durchsichtig machen.
+     *
+     * Dieselbe Rechnung wie gruen.js fuer Filme, nur einmal beim Hochladen und
+     * nicht in jedem Browser: ein Studiogruen wird zu Durchsichtigkeit, ein auf
+     * Schwarz gedrehtes Bild traegt seine Deckung als Helligkeit. Weil das
+     * Ergebnis schon auf der Platte durchsichtig liegt, zeigt es sich ueberall
+     * gleich - ohne WebGL, auch in der Kachel einer Galerie.
+     *
+     * Ohne GD kommt diese Funktion nie zum Zug: store()/storeGraphic() legen
+     * die Datei dann unveraendert ab, mit ihrem Grund. Lieber ein sichtbarer
+     * Hintergrund als ein Loch.
+     *
+     * @param \GdImage|resource $image
+     */
+    public static function freistellen($image, string $stanze): void
+    {
+        if (!in_array($stanze, self::STANZEN, true)) {
+            return;
+        }
+
+        // GIF kommt als Palette herein: imagecolorat() gaebe dort einen
+        // Palettenindex und kein RGB. Erst auf Truecolor umstellen.
+        if (function_exists('imagepalettetotruecolor') && !imageistruecolor($image)) {
+            imagepalettetotruecolor($image);
+        }
+
+        $breit   = imagesx($image);
+        $hoch    = imagesy($image);
+        $schwarz = $stanze === 'schwarz';
+
+        imagealphablending($image, false);
+        imagesavealpha($image, true);
+
+        for ($y = 0; $y < $hoch; $y++) {
+            for ($x = 0; $x < $breit; $x++) {
+                $farbe = imagecolorat($image, $x, $y);
+                $a = ($farbe >> 24) & 0x7F;   // 0 deckend, 127 durchsichtig
+                $r = ($farbe >> 16) & 0xFF;
+                $g = ($farbe >> 8) & 0xFF;
+                $b = $farbe & 0xFF;
+
+                if ($schwarz) {
+                    $h = max($r, $g, $b);
+                    // Ab halber Helligkeit ist der Punkt deckend - die
+                    // allermeisten: ein Sprung statt eines Schreibvorgangs.
+                    if ($h >= 128) {
+                        continue;
+                    }
+                    $neu = min(1.0, ($h / 255.0) / 0.5);
+                } else {
+                    $d = $g - max($r, $b);
+                    // Kein nennenswertes Gruen: unberuehrt lassen. Deckt den
+                    // Grossteil eines Fotos ab und spart das Schreiben.
+                    if ($d <= 30) {
+                        continue;
+                    }
+                    $neu = 1.0 - self::smoothstep(0.12, 0.30, $d / 255.0);
+                    // Saum: an den halbdurchsichtigen Raendern traegt das Bild
+                    // noch Gruen vom Grund. Gruen auf Rot/Blau deckeln, je
+                    // durchsichtiger desto mehr - ein echtes gruenes Blatt
+                    // bleibt so gruen.
+                    $rb   = max($r, $b);
+                    $minG = min($g, $rb);
+                    $t    = $neu * $neu;
+                    $g    = (int) round($minG * (1.0 - $t) + $g * $t);
+                }
+
+                // Was schon durchsichtig war, kann nicht deckender werden.
+                $neu *= 1.0 - $a / 127.0;
+
+                $gdA = (int) round((1.0 - $neu) * 127.0);
+                if ($gdA < 0) {
+                    $gdA = 0;
+                } elseif ($gdA > 127) {
+                    $gdA = 127;
+                }
+
+                imagesetpixel($image, $x, $y, imagecolorallocatealpha($image, $r, $g, $b, $gdA));
+            }
+        }
+    }
+
+    /** Weiche Blende zwischen zwei Schwellen - wie GLSL smoothstep. */
+    private static function smoothstep(float $e0, float $e1, float $x): float
+    {
+        $t = ($x - $e0) / ($e1 - $e0);
+        if ($t < 0.0) {
+            $t = 0.0;
+        }
+        if ($t > 1.0) {
+            $t = 1.0;
+        }
+
+        return $t * $t * (3.0 - 2.0 * $t);
     }
 
     /**

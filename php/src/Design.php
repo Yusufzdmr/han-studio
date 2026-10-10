@@ -23,8 +23,10 @@ final class Design
     public const STANZEN    = ['gruen', 'schwarz'];
 
     /**
-     * Ein Stanzwert, geprueft: nur bekannt und nur dort, wo ein Film steht.
-     * An einem Bild waere die Marke eine Luege - gruen.js sucht video[data-stanze].
+     * Ein Stanzwert fuer einen FILM, geprueft: nur bekannt und nur dort, wo
+     * ein Film steht. Hier geht es um gruen.js im Browser - Fotoebenen gehen
+     * einen anderen Weg (Media::freistellen() beim Hochladen, siehe
+     * completeElement()).
      */
     public static function stanze(mixed $wert, string $film): string
     {
@@ -725,17 +727,21 @@ final class Design
         // nur frueher, weil hier kein Zweig ihn spaeter noch abfangen wuerde.
         $el['poster'] = self::safeSrc((string) $el['poster']);
 
-        // Was gruen.js aus dem Film herausstanzt: das Gruen eines
-        // Greenscreens oder das Schwarz eines Films, der auf Schwarz gedreht
-        // ist (Ayhans Rosenbogen vom 02.10.2026: H.264 ohne Alpha, innen
-        // 0,0,0). Nur ein Film hat etwas zum Stanzen. Das alte Feld gruen
-        // (ein Haken, einen Tag lang) wird als "gruen" gelesen.
+        // Was herausgestanzt wird: das Gruen eines Greenscreens oder das
+        // Schwarz eines Bildes, das auf Schwarz gedreht ist (Ayhans
+        // Rosenbogen vom 02.10.2026: H.264 ohne Alpha, innen 0,0,0). Beim
+        // Film entfernt gruen.js den Grund im Browser; ein Foto stanzt
+        // Media::freistellen() schon beim Hochladen aus. Weil das Ergebnis dann als Datei durchsichtig liegt, zeigt es
+        // sich ueberall gleich - in der Karte, in der Galerie, im Standbild.
+        // Das alte Feld gruen (ein Haken, einen Tag lang) wird als "gruen"
+        // gelesen.
         $stanze = (string) $el['stanze'];
         if ($stanze === '' && !empty($el['gruen'])) {
             $stanze = 'gruen';
         }
         unset($el['gruen']);
-        $el['stanze'] = $el['type'] === 'video' && in_array($stanze, self::STANZEN, true) ? $stanze : '';
+        $stanzbar = in_array($el['type'], ['video', 'image', 'photo'], true);
+        $el['stanze'] = $stanzbar && in_array($stanze, self::STANZEN, true) ? $stanze : '';
 
         // Unbekannte Namen bleiben stehen: warnings() soll sie melden koennen.
         // Nur Sonderzeichen fliegen raus. Leerzeichen werden zum Unterstrich,
