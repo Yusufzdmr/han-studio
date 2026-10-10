@@ -1000,20 +1000,16 @@ final class InviteV2Controller
 
         InvitationsV2::create($slug, (string) $design['id'], $snapshot, $data);
 
-        $path = I18n::path('/v2/einladung/' . $slug);
-        // Derselbe Aufbau wie oben, nur mit dem Schluessel als letztem
-        // Wegstueck - genau das Muster, das replies() unter /{slug}/{key}
-        // erwartet. Ohne diesen Link findet das Paar den Leseschirm nur per
-        // SQL-Abfrage, und eine Antwort, die niemand liest, ist laut
-        // Lastenheft §2 keine Funktion.
-        $managePath = I18n::path('/v2/einladung/' . $slug . '/' . $data['manageKey']);
+        // Alle drei Links aus einer Hand - auch der zum Bearbeiten, den das
+        // Paar bis zum 11.10.2026 nirgends zu sehen bekam. Ohne den Link zu
+        // den Antworten faende das Paar den Leseschirm nur per SQL-Abfrage,
+        // und eine Antwort, die niemand liest, ist laut Lastenheft §2 keine
+        // Funktion.
+        $links = InvitationsV2::links($slug, $data);
 
         return [
-            'slug'       => $slug,
-            'path'       => $path,
-            'url'        => Config::url() . $path,
-            'managePath' => $managePath,
-            'manageUrl'  => Config::url() . $managePath,
+            'slug'  => $slug,
+            'links' => $links,
         ];
     }
 

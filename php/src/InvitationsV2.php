@@ -524,6 +524,44 @@ final class InvitationsV2
     }
 
     /**
+     * Die drei Links einer Einladung: fuer die Gaeste, fuer die Antworten und
+     * zum Bearbeiten.
+     *
+     * Eine Stelle fuer alle, die sie zeigen - Erfolgsseite, Panel, die Mail an
+     * das Paar und "Links verloren". Vorher baute publish() sie von Hand, und
+     * der Link zum Bearbeiten stand nirgends (Ayhan, 10.10.2026: "linki
+     * kopyalamasam kayboluyor").
+     *
+     * Die Sprache ist die der Einladung, nicht die der gerade offenen Seite:
+     * ein Link aus dem Panel oder aus einer Mail soll in der Sprache des
+     * Paares aufgehen. Ohne Schluessel gibt es nur den Gastlink.
+     *
+     * @param array<string,mixed> $data die Daten der Einladung
+     * @return array{gast: array{path:string,url:string}, antworten: ?array{path:string,url:string}, bearbeiten: ?array{path:string,url:string}}
+     */
+    public static function links(string $slug, array $data): array
+    {
+        $sprache = is_string($data['locale'] ?? null) && I18n::isLocale($data['locale'])
+            ? $data['locale']
+            : I18n::DEFAULT;
+        $schluessel = is_string($data['manageKey'] ?? null) ? $data['manageKey'] : '';
+
+        $link = static function (string $weg) use ($sprache): array {
+            $path = I18n::path($weg, $sprache);
+
+            return ['path' => $path, 'url' => Config::url() . $path];
+        };
+
+        $gast = '/v2/einladung/' . $slug;
+
+        return [
+            'gast'       => $link($gast),
+            'antworten'  => $schluessel !== '' ? $link($gast . '/' . $schluessel) : null,
+            'bearbeiten' => $schluessel !== '' ? $link($gast . '/' . $schluessel . '/bearbeiten') : null,
+        ];
+    }
+
+    /**
      * Hat jemand anders dazwischen gespeichert?
      *
      * Das Paar bearbeitet in zwei Tabs; der zweite Speichervorgang ueberschreibt

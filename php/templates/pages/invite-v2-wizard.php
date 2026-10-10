@@ -102,20 +102,37 @@ $inputTypes = ['date' => 'date', 'time' => 'time'];
 <?= Ui::sectionOpen() ?>
 
 <?php if ($done !== null) : ?>
+  <?php
+    /*
+     * Alle drei Links, jeder mit Kopierknopf. "linki kopyalamasam
+     * kayboluyor" (Ayhan, 10.10.2026): der Link zum Bearbeiten stand bis
+     * dahin gar nicht da, und wer die Seite schloss, hatte die privaten
+     * Links verloren.
+     */
+    $zeilen = [
+        ['link' => $done['links']['gast'],       'label' => $t('doneGuestLabel'),   'hinweis' => ''],
+        ['link' => $done['links']['antworten'],  'label' => $t('doneRepliesLabel'), 'hinweis' => $t('doneRepliesWarning')],
+        ['link' => $done['links']['bearbeiten'], 'label' => $t('doneEditLabel'),    'hinweis' => $t('doneEditWarning')],
+    ];
+  ?>
   <div class="mx-auto max-w-2xl text-center">
     <div class="eyebrow">✓</div>
     <h2 class="headline mt-3 text-3xl"><?= e($t('doneTitle')) ?></h2>
-    <p class="mt-6 break-all text-sm text-ink">
-      <a class="link-underline" href="<?= e($done['path']) ?>"><?= e($done['url']) ?></a>
-    </p>
 
-    <div class="mt-10 border-t border-sand-deep pt-6">
-      <p class="text-[0.62rem] uppercase tracking-[0.18em] text-muted"><?= e($t('doneRepliesLabel')) ?></p>
-      <p class="mt-3 break-all text-sm text-ink">
-        <a class="link-underline" href="<?= e($done['managePath']) ?>"><?= e($done['manageUrl']) ?></a>
-      </p>
-      <p class="mt-3 text-[0.8rem] text-muted"><?= e($t('doneRepliesWarning')) ?></p>
-    </div>
+    <?php foreach ($zeilen as $nr => $zeile) : ?>
+      <?php if ($zeile['link'] === null) { continue; } ?>
+      <div class="<?= $nr === 0 ? 'mt-8' : 'mt-8 border-t border-sand-deep pt-6' ?>">
+        <p class="text-[0.62rem] uppercase tracking-[0.18em] text-muted"><?= e($zeile['label']) ?></p>
+        <p class="mt-3 break-all text-sm text-ink">
+          <a class="link-underline" href="<?= e($zeile['link']['path']) ?>"><?= e($zeile['link']['url']) ?></a>
+        </p>
+        <button type="button" data-copy="<?= e($zeile['link']['url']) ?>"
+                class="mt-3 border border-sand-deep px-4 py-1.5 text-[0.7rem] uppercase tracking-[0.16em] text-ink"><?= e($t('doneCopy')) ?></button>
+        <?php if ($zeile['hinweis'] !== '') : ?>
+          <p class="mt-3 text-[0.8rem] text-muted"><?= e($zeile['hinweis']) ?></p>
+        <?php endif; ?>
+      </div>
+    <?php endforeach; ?>
   </div>
 
 <?php else : ?>

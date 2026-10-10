@@ -158,6 +158,24 @@
     });
   });
 
+  /* --------------- Kopierknopf (wie im Panel, admin.js) --------------- */
+  // Die Erfolgsseite der Einladung: wer den Link nicht kopiert, verliert
+  // ihn. Ohne Clipboard-API (http, alter Browser) bleibt der Link selbst
+  // zum Markieren stehen.
+  document.querySelectorAll("[data-copy]").forEach(function (button) {
+    button.addEventListener("click", function () {
+      var value = button.getAttribute("data-copy") || "";
+      if (!navigator.clipboard) return;
+      navigator.clipboard.writeText(value).then(function () {
+        var before = button.textContent;
+        button.textContent = "✓";
+        setTimeout(function () {
+          button.textContent = before;
+        }, 1500);
+      });
+    });
+  });
+
   /* ------------------ Karte: erst nach dem Klick ------------------- */
   document.querySelectorAll("[data-map]").forEach(function (box) {
     var button = box.querySelector("[data-map-load]");
