@@ -24,6 +24,11 @@ param(
 
 $ErrorActionPreference = 'Stop'
 
+# Windows PowerShell 5.1 setzt beim Pipen in ein natives Programm ein BOM vor
+# den Text. Auf dem Server wurde daraus "﻿set: command not found", und
+# set -e lief nie (10.10.2026). UTF-8 ohne BOM.
+$OutputEncoding = New-Object System.Text.UTF8Encoding $false
+
 $repo    = Resolve-Path (Join-Path $PSScriptRoot '..\..')
 $tar     = Join-Path $env:TEMP 'atelier-php.tar.gz'
 $tarUnix = $tar -replace '\\', '/'
