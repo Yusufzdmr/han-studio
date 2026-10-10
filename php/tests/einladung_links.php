@@ -47,3 +47,13 @@ assert_contains($app, '[data-copy]', 'app.js: Kopierknoepfe funktionieren auch a
 
 $steuer = (string) file_get_contents(__DIR__ . '/../src/Controllers/InviteV2Controller.php');
 assert_contains($steuer, 'InvitationsV2::links(', 'publish: die Links kommen aus links()');
+
+/* --- Das Panel zeigt die privaten Links: ein verlorener Link ist ein Anruf, keine SQL-Abfrage --- */
+
+$liste = (string) file_get_contents(__DIR__ . '/../src/InvitationsV2.php');
+assert_contains($liste, "JSON_EXTRACT(i.data, \'$.manageKey\')", 'all(): holt den Schluessel mit');
+
+$panel = (string) file_get_contents(__DIR__ . '/../templates/admin/invitations.php');
+assert_contains($panel, 'InvitationsV2::links($slug', 'Panel: Links aus links()');
+assert_contains($panel, "\$links['bearbeiten']", 'Panel: Link zum Bearbeiten');
+assert_contains($panel, 'data-copy=', 'Panel: Kopierknopf');

@@ -97,13 +97,22 @@ final class InvitationsV2
      * waere sonst einunddreissig Abfragen. LEFT JOIN, weil die Zeile im
      * Zustand fehlen darf - sie fehlt bei allem, was vor heute entstanden ist.
      *
+     * Der Schluessel, die Sprache und die Namen kommen per JSON_EXTRACT mit,
+     * nicht das ganze data-Feld: das Panel zeigt die privaten Links (Ayhan,
+     * 10.10.2026: ein verlorener Link war sonst nur per SQL wiederzufinden),
+     * braucht dafuer aber nicht die Fotos und Texte jeder Einladung.
+     *
      * @return list<array<string,mixed>>
      */
     public static function all(): array
     {
         return Db::all(
             'SELECT i.slug, i.design_id, i.created_at,
-                    COALESCE(s.status, \'published\') AS status, s.published_at
+                    COALESCE(s.status, \'published\') AS status, s.published_at,
+                    JSON_UNQUOTE(JSON_EXTRACT(i.data, \'$.manageKey\')) AS manage_key,
+                    JSON_UNQUOTE(JSON_EXTRACT(i.data, \'$.locale\')) AS locale,
+                    JSON_UNQUOTE(JSON_EXTRACT(i.data, \'$.bride\')) AS bride,
+                    JSON_UNQUOTE(JSON_EXTRACT(i.data, \'$.groom\')) AS groom
                FROM invitations_v2 i
           LEFT JOIN invite_status s ON s.slug = i.slug
            ORDER BY i.created_at DESC'

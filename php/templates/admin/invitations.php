@@ -11,6 +11,7 @@
 use function Atelier\e;
 use Atelier\Dates;
 use Atelier\I18n;
+use Atelier\InvitationsV2;
 
 $de = $locale === 'de';
 $hidden = '<input type="hidden" name="csrf" value="' . e($csrf) . '">';
@@ -43,6 +44,14 @@ $hidden = '<input type="hidden" name="csrf" value="' . e($csrf) . '">';
           <?php
             $slug = (string) ($ein['slug'] ?? '');
             $an   = (string) ($ein['status'] ?? 'published') !== 'draft';
+            $paar = trim(((string) ($ein['bride'] ?? '')) . ' & ' . ((string) ($ein['groom'] ?? '')), ' &');
+            // Die privaten Links des Paares. Ruft es an, weil es sie verloren
+            // hat, steht die Antwort hier - vorher nur per SQL (Ayhan,
+            // 10.10.2026).
+            $links = InvitationsV2::links($slug, [
+                'manageKey' => (string) ($ein['manage_key'] ?? ''),
+                'locale'    => (string) ($ein['locale'] ?? ''),
+            ]);
           ?>
           <div class="flex flex-wrap items-center justify-between gap-4 py-3">
             <div class="min-w-0">
@@ -55,6 +64,32 @@ $hidden = '<input type="hidden" name="csrf" value="' . e($csrf) . '">';
                   · <?= $de ? 'seit' : 'şu tarihten beri' ?> <?= e(Dates::short((string) $ein['published_at'])) ?>
                 <?php endif; ?>
               </div>
+              <?php if ($paar !== '') : ?>
+                <div class="mt-1 text-[0.8rem] text-ink"><?= e($paar) ?></div>
+              <?php endif; ?>
+              <?php if ($links['antworten'] !== null) : ?>
+                <details class="mt-2">
+                  <summary class="cursor-pointer text-[0.66rem] uppercase tracking-[0.16em] text-muted hover:text-ink">
+                    <?= $de ? 'Private Links des Paares' : 'Çiftin özel bağlantıları' ?>
+                  </summary>
+                  <div class="mt-2 space-y-2">
+                    <?php foreach ([
+                        [$links['antworten'],  $de ? 'Antworten' : 'Cevaplar'],
+                        [$links['bearbeiten'], $de ? 'Bearbeiten' : 'Düzenle'],
+                    ] as [$link, $wort]) : ?>
+                      <div class="flex flex-wrap items-center gap-2 text-[0.72rem]">
+                        <span class="w-20 shrink-0 text-muted"><?= e($wort) ?></span>
+                        <a class="break-all text-ink underline decoration-sand-deep underline-offset-4"
+                           href="<?= e($link['path']) ?>" target="_blank"><?= e($link['url']) ?></a>
+                        <button type="button" data-copy="<?= e($link['url']) ?>"
+                                class="border border-sand-deep px-2 py-0.5 text-[0.62rem] uppercase tracking-[0.16em] text-muted hover:text-ink">
+                          <?= $de ? 'kopieren' : 'kopyala' ?>
+                        </button>
+                      </div>
+                    <?php endforeach; ?>
+                  </div>
+                </details>
+              <?php endif; ?>
             </div>
             <form method="post" class="flex items-center gap-3">
               <?= $hidden ?>
