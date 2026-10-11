@@ -151,7 +151,7 @@ final class Integrations
     }
 
     /**
-     * Zusatzschlüssel im Code lesen: Integrations::value('BREVO_API_KEY').
+     * Zusatzschlüssel im Code lesen: Integrations::value('RESEND_API_KEY').
      * Fällt auf den gleichnamigen Eintrag in config.php zurück.
      */
     public static function value(string $name): string

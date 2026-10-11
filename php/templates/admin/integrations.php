@@ -10,10 +10,13 @@
  * @var array<string,mixed> $settings
  * @var string $csrf
  * @var array{ok:bool,mode:string,message:string}|null $test
+ * @var array{ok:bool,an:string,weg:string,fehler:string}|null $mailTest
+ * @var string $mailWeg  'resend' | 'mail'
  */
 
 use function Atelier\e;
 use Atelier\I18n;
+use Atelier\Config;
 use Atelier\Integrations;
 
 $de = $locale === 'de';
@@ -259,6 +262,50 @@ $chip = static function (bool $on, string $name) : string {
     <?php endif; ?>
   </section>
 
+  <!-- ----------------------------- E-Mail-Test ----------------------------- -->
+  <section class="border border-sand-deep p-6">
+    <h3 class="font-display text-xl text-ink"><?= $de ? 'E-Mail-Versand prüfen' : 'E-posta gönderimini kontrol et' ?></h3>
+    <p class="<?= $hint ?>">
+      <?php if ($mailWeg === 'resend') : ?>
+        <?= $de
+            ? 'Versand über Resend (RESEND_API_KEY ist eingetragen).'
+            : 'Gönderim Resend üzerinden (RESEND_API_KEY girili).' ?>
+      <?php else : ?>
+        <?= $de
+            ? 'Noch kein RESEND_API_KEY: Mails gehen direkt vom Server hinaus und landen oft im Spam. Den Schlüssel unten unter „Weitere Schlüssel“ mit dem technischen Namen RESEND_API_KEY eintragen.'
+            : 'Henüz RESEND_API_KEY yok: e-postalar doğrudan sunucudan çıkıyor ve çoğu zaman spam’e düşüyor. Anahtarı aşağıda “Diğer anahtarlar” bölümüne teknik ad RESEND_API_KEY ile ekleyin.' ?>
+      <?php endif; ?>
+      <?= $de
+          ? 'Der Test schickt die Dankesmail an ein Beispielpaar – so, wie sie ein Paar nach dem Veröffentlichen bekommt. Absender:'
+          : 'Test, örnek bir çifte giden teşekkür e-postasını gönderir – bir çiftin yayından sonra aldığı haliyle. Gönderen:' ?>
+      <span class="font-mono"><?= e(Config::str('mail_from')) ?></span>
+    </p>
+
+    <form method="post" class="mt-6 grid gap-6 md:grid-cols-[1fr_auto] md:items-end">
+      <input type="hidden" name="csrf" value="<?= e($csrf) ?>">
+      <input type="hidden" name="was" value="mail-test">
+      <div>
+        <label class="<?= $label ?>" for="mail-test-an"><?= $de ? 'Empfänger' : 'Alıcı' ?></label>
+        <input id="mail-test-an" type="email" name="mail_test_an" class="<?= $input ?>"
+               value="<?= e($mailTest['an'] ?? '') ?>" placeholder="<?= e(Config::str('mail_to')) ?>">
+      </div>
+      <button class="border border-ink px-6 py-3 text-[0.66rem] uppercase tracking-[0.2em] text-ink transition-colors hover:bg-ink hover:text-cream">
+        <?= $de ? 'Test-Mail senden' : 'Deneme e-postası gönder' ?>
+      </button>
+    </form>
+
+    <?php if ($mailTest !== null) : ?>
+      <p class="mt-4 text-[0.82rem] <?= $mailTest['ok'] ? 'text-gold' : 'text-red-700' ?>">
+        <?php if ($mailTest['ok']) : ?>
+          <?= e(sprintf($de ? 'Abgeschickt an %s (%s). Auch im Spam-Ordner nachsehen.' : '%s adresine gönderildi (%s). Spam klasörüne de bakın.',
+              $mailTest['an'], $mailTest['weg'] === 'resend' ? 'Resend' : 'mail()')) ?>
+        <?php else : ?>
+          <?= e(($de ? 'Nicht abgeschickt: ' : 'Gönderilemedi: ') . ($mailTest['fehler'] !== '' ? $mailTest['fehler'] : '?')) ?>
+        <?php endif; ?>
+      </p>
+    <?php endif; ?>
+  </section>
+
   <!-- ---------------------------- Weitere Keys ---------------------------- -->
   <section class="space-y-6">
     <div>
@@ -317,11 +364,11 @@ $chip = static function (bool $on, string $name) : string {
       <div class="grid gap-7 md:grid-cols-[1fr_1fr_1.2fr]">
         <div>
           <label class="<?= $label ?>"><?= $de ? 'Anzeigename' : 'Görünen ad' ?></label>
-          <input name="label" class="<?= $input ?>" placeholder="Brevo API-Key">
+          <input name="label" class="<?= $input ?>" placeholder="Resend API-Key">
         </div>
         <div>
           <label class="<?= $label ?>"><?= $de ? 'Technischer Name' : 'Teknik ad' ?></label>
-          <input name="name" required class="<?= $input ?> font-mono" placeholder="BREVO_API_KEY">
+          <input name="name" required class="<?= $input ?> font-mono" placeholder="RESEND_API_KEY">
         </div>
         <div>
           <label class="<?= $label ?>"><?= $de ? 'Wert' : 'Değer' ?></label>

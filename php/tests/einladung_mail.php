@@ -53,19 +53,39 @@ $zwei = EinladungsMail::bauen([
 assert_contains($zwei['html'], '/de/v2/einladung/a/k3y/bearbeiten', 'Sammelmail: erste Einladung');
 assert_contains($zwei['html'], '/de/v2/einladung/b/k3y/bearbeiten', 'Sammelmail: zweite Einladung');
 
-/* --- Der Weg hinaus: Brevo, sonst mail() --- */
+/* --- Der Weg hinaus: Resend, sonst mail() --- */
 
-$koerper = json_decode(Mail::brevoBody('paar@example.com', 'Betreff', '<p>hi</p>', 'hi', 'web@example.com', 'hallo@example.com'), true);
-assert_same('paar@example.com', $koerper['to'][0]['email'] ?? null, 'Brevo: Empfaenger');
-assert_same('web@example.com', $koerper['sender']['email'] ?? null, 'Brevo: Absender');
-assert_same('Han Studio', $koerper['sender']['name'] ?? null, 'Brevo: Absendername');
-assert_same('<p>hi</p>', $koerper['htmlContent'] ?? null, 'Brevo: HTML');
-assert_same('hi', $koerper['textContent'] ?? null, 'Brevo: Text');
-assert_same('hallo@example.com', $koerper['replyTo']['email'] ?? null, 'Brevo: Antworten gehen an den Betrieb');
+$koerper = json_decode(Mail::resendBody('paar@example.com', 'Betreff', '<p>hi</p>', 'hi', 'web@example.com', 'hallo@example.com'), true);
+assert_same(['paar@example.com'], $koerper['to'] ?? null, 'Resend: Empfaenger');
+assert_same('Han Studio <web@example.com>', $koerper['from'] ?? null, 'Resend: Absender mit Name');
+assert_same('<p>hi</p>', $koerper['html'] ?? null, 'Resend: HTML');
+assert_same('hi', $koerper['text'] ?? null, 'Resend: Text');
+assert_same('hallo@example.com', $koerper['reply_to'] ?? null, 'Resend: Antworten gehen an den Betrieb');
+
+$ohneAntwort = json_decode(Mail::resendBody('paar@example.com', 'B', 'h', 't', 'web@example.com', ''), true);
+assert_true(!isset($ohneAntwort['reply_to']), 'Resend: ohne mail_to kein reply_to');
 
 $mailQuelle = (string) file_get_contents(__DIR__ . '/../src/Mail.php');
-assert_contains($mailQuelle, "Integrations::value('BREVO_API_KEY')", 'Mail: Brevo, wenn ein Schluessel da ist');
+assert_contains($mailQuelle, "Integrations::value('RESEND_API_KEY')", 'Mail: Resend, wenn ein Schluessel da ist');
+assert_contains($mailQuelle, 'https://api.resend.com/emails', 'Mail: Resend-Endpunkt');
+assert_contains($mailQuelle, 'Authorization: Bearer ', 'Mail: Resend will den Schluessel als Bearer');
+assert_contains($mailQuelle, 'CURLOPT_USERAGENT', 'Mail: Resend weist Anfragen ohne User-Agent ab');
+assert_not_contains($mailQuelle, 'brevo', 'Mail: Brevo ist raus');
 assert_contains($mailQuelle, 'multipart/alternative', 'Mail: sonst mail() mit HTML und Text');
+
+/* --- Test-Mail im Panel --- */
+
+$panel = (string) file_get_contents(__DIR__ . '/../templates/admin/integrations.php');
+assert_contains($panel, 'value="mail-test"', 'Panel: Knopf fuer die Test-Mail');
+assert_contains($panel, 'placeholder="RESEND_API_KEY"', 'Panel: Vorschlag fuer den technischen Namen');
+assert_contains($panel, "\$mailTest['fehler']", 'Panel: zeigt, warum der Versand scheiterte');
+
+$admin = (string) file_get_contents(__DIR__ . '/../src/Controllers/AdminController.php');
+assert_contains($admin, "\$was === 'mail-test'", 'Panel: Test-Mail wird verarbeitet');
+assert_contains($admin, 'Mail::letzterFehler()', 'Panel: Fehler von Resend kommt an');
+
+$check = (string) file_get_contents(__DIR__ . '/../src/Preflight.php');
+assert_contains($check, "Mail::weg() === 'resend'", 'Systemcheck: weiss, ob Resend eingerichtet ist');
 
 /* --- Der Assistent fragt nach der Adresse und schickt die Mail --- */
 

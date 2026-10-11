@@ -48,24 +48,26 @@ final class Mail
     /**
      * Eine gestaltete Mail an einen Kunden: HTML mit Textfassung.
      *
-     * Ueber Brevo, sobald im Panel (Integrationen) ein BREVO_API_KEY steht:
+     * Ueber Resend, sobald im Panel (Integrationen) ein RESEND_API_KEY steht:
      * eine Mail mit Bild, die vom VPS ueber mail() hinausgeht, landet sonst
      * meist im Spam. Ohne Schluessel bleibt mail() - lieber im Spam als gar
      * nicht. Antworten gehen an den Betrieb (mail_to).
      */
     public static function html(string $to, string $subject, string $html, string $text): bool
     {
+        self::$fehler = '';
         $to      = Security::singleLine($to);
         $from    = Security::singleLine(Config::str('mail_from'));
         $replyTo = Security::singleLine(Config::str('mail_to'));
 
         if ($from === '' || !filter_var($to, FILTER_VALIDATE_EMAIL)) {
+            self::$fehler = $from === '' ? 'mail_from fehlt in config.php' : 'Empfaenger ungueltig';
             return false;
         }
 
-        $schluessel = Integrations::value('BREVO_API_KEY');
+        $schluessel = Integrations::value('RESEND_API_KEY');
         if ($schluessel !== '') {
-            return self::brevo($schluessel, self::brevoBody($to, $subject, $html, $text, $from, $replyTo));
+            return self::resend($schluessel, self::resendBody($to, $subject, $html, $text, $from, $replyTo));
         }
 
         $grenze = 'hs-' . bin2hex(random_bytes(8));
@@ -86,65 +88,90 @@ final class Mail
             . chunk_split(base64_encode($html)) . "\r\n"
             . '--' . $grenze . "--\r\n";
 
-        return @mail(
+        $ok = @mail(
             $to,
             '=?UTF-8?B?' . base64_encode(Security::singleLine($subject)) . '?=',
             $koerper,
             implode("\r\n", $headers)
         );
+        if (!$ok) {
+            self::$fehler = 'mail() hat abgelehnt';
+        }
+
+        return $ok;
     }
 
     /** Der Absendername in jeder Mail. */
     public const ABSENDER = 'Han Studio';
 
+    /** Warum der letzte html()-Versand scheiterte - fuer den Test im Panel. */
+    private static string $fehler = '';
+
+    public static function letzterFehler(): string
+    {
+        return self::$fehler;
+    }
+
+    /** 'resend' oder 'mail' - fuer Panel und Systemcheck. */
+    public static function weg(): string
+    {
+        return Integrations::value('RESEND_API_KEY') !== '' ? 'resend' : 'mail';
+    }
+
     /**
-     * Der Rumpf fuer Brevos /v3/smtp/email. Eigene Funktion, damit die Tests
+     * Der Rumpf fuer Resends POST /emails. Eigene Funktion, damit die Tests
      * sehen, was hinausgeht, ohne dass etwas hinausgeht.
      */
-    public static function brevoBody(string $to, string $subject, string $html, string $text, string $from, string $replyTo): string
+    public static function resendBody(string $to, string $subject, string $html, string $text, string $from, string $replyTo): string
     {
         $rumpf = [
-            'sender'      => ['name' => self::ABSENDER, 'email' => $from],
-            'to'          => [['email' => $to]],
-            'subject'     => Security::singleLine($subject),
-            'htmlContent' => $html,
-            'textContent' => $text,
+            'from'    => self::ABSENDER . ' <' . $from . '>',
+            'to'      => [$to],
+            'subject' => Security::singleLine($subject),
+            'html'    => $html,
+            'text'    => $text,
         ];
         if ($replyTo !== '' && filter_var($replyTo, FILTER_VALIDATE_EMAIL)) {
-            $rumpf['replyTo'] = ['email' => $replyTo];
+            $rumpf['reply_to'] = $replyTo;
         }
 
         return (string) json_encode($rumpf, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     }
 
-    private static function brevo(string $schluessel, string $rumpf): bool
+    private static function resend(string $schluessel, string $rumpf): bool
     {
         if (!function_exists('curl_init')) {
-            error_log('[mail] Brevo: kein curl');
+            self::$fehler = 'kein curl';
+            error_log('[mail] Resend: kein curl');
             return false;
         }
 
-        $ch = curl_init('https://api.brevo.com/v3/smtp/email');
+        $ch = curl_init('https://api.resend.com/emails');
         curl_setopt_array($ch, [
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_POST           => true,
             CURLOPT_POSTFIELDS     => $rumpf,
             CURLOPT_HTTPHEADER     => [
-                'api-key: ' . $schluessel,
+                'Authorization: Bearer ' . $schluessel,
                 'Content-Type: application/json',
-                'Accept: application/json',
             ],
+            // Resend weist Anfragen ohne User-Agent ab.
+            CURLOPT_USERAGENT      => 'han-studio/1.0',
             CURLOPT_TIMEOUT        => 15,
             CURLOPT_CONNECTTIMEOUT => 5,
         ]);
         $antwort = curl_exec($ch);
         $status  = (int) curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
+        $netz    = curl_error($ch);
         curl_close($ch);
 
         if ($status < 200 || $status >= 300) {
             // Der Schluessel steht nicht im Log, die Antwort schon: sie sagt,
-            // was fehlt (Absender nicht bestaetigt, Kontingent, ...).
-            error_log('[mail] Brevo ' . $status . ': ' . substr((string) $antwort, 0, 300));
+            // was fehlt (Domain nicht bestaetigt, Schluessel falsch, ...).
+            $meldung = json_decode((string) $antwort, true);
+            self::$fehler = 'Resend ' . $status . ': '
+                . (is_array($meldung) && isset($meldung['message']) ? (string) $meldung['message'] : ($netz !== '' ? $netz : substr((string) $antwort, 0, 300)));
+            error_log('[mail] ' . self::$fehler);
             return false;
         }
 

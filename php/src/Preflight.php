@@ -260,16 +260,24 @@ final class Preflight
         $from = Config::str('mail_from');
         $can = function_exists('mail');
 
-        $state = $can && $to !== '' && $from !== '' ? self::OK : self::WARN;
+        $resend = Mail::weg() === 'resend';
+
+        // Ohne Resend gehen die Kundenmails (Dank, Links) ueber mail() und
+        // landen meist im Spam - laeuft, aber nicht gut: Warnung.
+        $state = $resend && $to !== '' && $from !== '' ? self::OK : self::WARN;
 
         return self::result('mail', $state, 'E-Mail',
-            $can ? ($to !== '' ? $to : ($de ? 'kein Empfänger' : 'alıcı yok')) : ($de ? 'mail() gesperrt' : 'mail() kapalı'),
-            $state === self::OK ? ($de
+            ($can || $resend ? ($to !== '' ? $to : ($de ? 'kein Empfänger' : 'alıcı yok')) : ($de ? 'mail() gesperrt' : 'mail() kapalı'))
+                . ' · ' . ($resend ? 'Resend' : 'mail()'),
+            $to !== '' && $from !== '' && !$resend ? ($de
+                ? 'Kein RESEND_API_KEY: Dankesmails an Paare landen oft im Spam. Unter Integrationen eintragen und dort eine Test-Mail schicken.'
+                : 'RESEND_API_KEY yok: çiftlere giden teşekkür e-postaları çoğu zaman spam’e düşer. Entegrasyonlar sayfasında ekleyin ve oradan deneme e-postası gönderin.')
+            : ($state === self::OK ? ($de
                 ? 'Nach dem Livegang einmal das Kontaktformular abschicken und prüfen, ob die Nachricht ankommt – auch im Spam-Ordner.'
                 : 'Yayından sonra iletişim formunu bir kez gönderip mesajın geldiğini kontrol edin – spam klasörüne de bakın.')
                 : ($de
                 ? 'mail_to und mail_from in config.php setzen. Absender sollte eine Adresse der eigenen Domain sein, sonst landet alles im Spam.'
-                : 'config.php içinde mail_to ve mail_from ayarlayın. Gönderen kendi alan adınızdan olmalı, yoksa her şey spam’e düşer.'));
+                : 'config.php içinde mail_to ve mail_from ayarlayın. Gönderen kendi alan adınızdan olmalı, yoksa her şey spam’e düşer.')));
     }
 
     private static function integrations(bool $de): array

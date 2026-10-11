@@ -4,14 +4,17 @@ declare(strict_types=1);
 namespace Atelier\Controllers;
 
 use Atelier\Admin;
+use Atelier\Config;
 use Atelier\Content;
 use Atelier\Db;
+use Atelier\EinladungsMail;
 use Atelier\Galleries;
 use Atelier\I18n;
 use Atelier\Images;
 use Atelier\Integrations;
 use Atelier\InvitationsV2;
 use Atelier\Leads;
+use Atelier\Mail;
 use Atelier\Paypal;
 use Atelier\Places;
 use Atelier\Preflight;
@@ -72,6 +75,7 @@ final class AdminController
     public function integrations(): void
     {
         $test = null;
+        $mailTest = null;
 
         if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
             Admin::checkCsrfOrFail();
@@ -80,6 +84,8 @@ final class AdminController
             if ($was === 'paypal-test') {
                 // Nicht umleiten: das Ergebnis soll direkt danebenstehen.
                 $test = Paypal::test();
+            } elseif ($was === 'mail-test') {
+                $mailTest = $this->sendTestMail();
             } elseif ($was === 'settings') {
                 $this->saveIntegrationSettings();
                 Admin::back($this->locale, '/integrationen');
@@ -98,7 +104,38 @@ final class AdminController
         $this->render('admin/integrations', '/integrationen', [
             'settings' => Integrations::all(),
             'test'     => $test,
+            'mailTest' => $mailTest,
+            'mailWeg'  => Mail::weg(),
         ]);
+    }
+
+    /**
+     * Die Dankesmail an ein Beispielpaar, an eine Adresse nach Wahl: so sieht
+     * man nach dem Eintragen des Resend-Schluessels sofort, ob er greift und
+     * wie die Mail im eigenen Posteingang aussieht.
+     *
+     * @return array{ok:bool,an:string,weg:string,fehler:string}
+     */
+    private function sendTestMail(): array
+    {
+        $an = strtolower(Security::clean($_POST['mail_test_an'] ?? '', 160));
+        if ($an === '') {
+            $an = Config::str('mail_to');
+        }
+
+        // Deutsch auch im tuerkischen Panel: so lesen es die Paare.
+        $daten = ['bride' => 'Ayşe', 'groom' => 'Mehmet', 'date' => date('Y-m-d', strtotime('+1 year')),
+                  'venue' => 'Han Studio', 'manageKey' => 'beispiel', 'locale' => 'de'];
+        $mail = EinladungsMail::bauen([[
+            'slug'  => 'beispiel',
+            'data'  => $daten,
+            'links' => InvitationsV2::links('beispiel', $daten),
+            'bild'  => '',
+        ]], $daten['locale']);
+
+        $ok = Mail::html($an, '[Test] ' . $mail['subject'], $mail['html'], $mail['text']);
+
+        return ['ok' => $ok, 'an' => $an, 'weg' => Mail::weg(), 'fehler' => $ok ? '' : Mail::letzterFehler()];
     }
 
     private function saveIntegrationSettings(): void
