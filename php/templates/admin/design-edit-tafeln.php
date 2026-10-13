@@ -314,6 +314,13 @@ foreach ($katalog as $art => $eintrag) {
               <input type="file" name="sec_bg_datei_<?= $i ?>" class="<?= $feld ?>"
                      accept="image/png,image/jpeg,image/webp,image/svg+xml"></label>
 
+            <div class="mt-3">
+              <?= \Atelier\View::partial('partials/stanze-wahl', [
+                  'name' => 'sec_bg_stanze_' . $i, 'wert' => '', 'sofort' => true,
+                  'tr' => $tr, 'label' => $label, 'feld' => $feld,
+              ]) ?>
+            </div>
+
             <label class="<?= $label ?> mt-3 block"><?= $tr ? 'ya da yol (boş bırakınca kalkar)' : 'oder Pfad (leer entfernt es)' ?>
               <input class="<?= $feld ?> font-mono text-[0.78rem]" name="sec_bg_<?= $i ?>"
                      value="<?= e((string) $blatt['bg']) ?>"></label>

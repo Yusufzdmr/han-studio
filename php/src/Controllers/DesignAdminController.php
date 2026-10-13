@@ -954,17 +954,22 @@ final class DesignAdminController
                     continue;
                 }
 
+                $art = (string) ($schema['kind'] ?? 'bild');
+                // Gruen/Schwarz herausnehmen: nur fuer diesen einen Speichervorgang
+                // (Rahmen, Kartenbild). Siehe stanzeFuerBild().
+                $stanze = $art === 'bild' ? (string) ($post['sec_setstanze_' . $schluessel . '_' . $i] ?? '') : '';
+
                 $datei = $_FILES['sec_setdatei_' . $schluessel . '_' . $i] ?? null;
                 if (!is_array($datei) || ((int) ($datei['error'] ?? UPLOAD_ERR_NO_FILE)) !== UPLOAD_ERR_OK) {
+                    $this->stanzeFuerBild($post, 'sec_set_' . $schluessel . '_' . $i, $stanze);
                     continue;
                 }
 
                 // Jede Pruefung sieht in die Datei und nicht auf ihren Namen.
-                $art = (string) ($schema['kind'] ?? 'bild');
                 $pfad = Media::nimm($datei, $art, static fn (array $f): ?string => match ($art) {
                     'audio' => Media::storeAudio($f, 'designs'),
                     'video' => Media::storeVideo($f, 'designs'),
-                    default => Media::storeGraphic($f, 'designs'),
+                    default => Media::storeGraphic($f, 'designs', $stanze),
                 });
 
                 if ($pfad !== null) {
@@ -994,21 +999,46 @@ final class DesignAdminController
                 }
             }
 
+            $blattStanze = (string) ($post['sec_bg_stanze_' . $i] ?? '');
             $blatt = $_FILES['sec_bg_datei_' . $i] ?? null;
             if (!is_array($blatt) || ((int) ($blatt['error'] ?? UPLOAD_ERR_NO_FILE)) !== UPLOAD_ERR_OK) {
+                $this->stanzeFuerBild($post, 'sec_bg_' . $i, $blattStanze);
                 continue;
             }
 
             // storeGraphic wie bei den Ebenen: SVG wird geputzt durchgereicht,
             // alles andere behaelt seinen Alphakanal - ein Blatt mit
             // durchsichtigen Raendern soll die Papierfarbe darunter zeigen.
-            $pfad = Media::nimm($blatt, 'bild', static fn (array $f): ?string => Media::storeGraphic($f, 'designs'));
+            $pfad = Media::nimm($blatt, 'bild', static fn (array $f): ?string => Media::storeGraphic($f, 'designs', $blattStanze));
             if ($pfad !== null) {
                 $post['sec_bg_' . $i] = $pfad;
             }
         }
 
         return $post;
+    }
+
+    /**
+     * Ohne neue Datei, aber mit Wahl: das Bild, das schon im Pfadfeld steht,
+     * freistellen und das Feld auf die neue Datei zeigen lassen.
+     *
+     * Die Wahl wird nicht gespeichert - sie ist ein Auftrag fuer dieses eine
+     * Speichern, und nach dem Neuladen steht sie wieder auf "hayir". Sonst
+     * wuerde jedes weitere Speichern dasselbe Bild noch einmal stanzen.
+     *
+     * @param array<string,mixed> $post
+     */
+    private function stanzeFuerBild(array &$post, string $feld, string $stanze): void
+    {
+        $alt = trim((string) ($post[$feld] ?? ''));
+        if ($stanze === '' || $alt === '') {
+            return;
+        }
+
+        $neu = Media::freistellenAbgelegt($alt, 'designs', $stanze);
+        if ($neu !== null) {
+            $post[$feld] = $neu;
+        }
     }
 
     /**

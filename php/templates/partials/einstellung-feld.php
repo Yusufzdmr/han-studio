@@ -62,6 +62,15 @@ use function Atelier\e;
                        name="sec_setdatei_<?= e((string) $schluessel) ?>_<?= $i ?>"
                        accept="<?= e($accept_) ?>"></label>
 
+              <?php if ($art_ === 'bild') : ?>
+                <div class="mt-2">
+                  <?= \Atelier\View::partial('partials/stanze-wahl', [
+                      'name' => 'sec_setstanze_' . $schluessel . '_' . $i, 'wert' => '', 'sofort' => true,
+                      'tr' => $tr, 'label' => $label, 'feld' => $feld,
+                  ]) ?>
+                </div>
+              <?php endif; ?>
+
               <?php /*
                  Der Spieler gehoert zum FELD, nicht zum Wert.
 

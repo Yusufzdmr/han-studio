@@ -13,6 +13,9 @@
  * @var bool   $tr
  * @var string $label
  * @var string $feld
+ * @var bool   $sofort  (optional) Wahl gilt nur fuer dieses Speichern und
+ *                      stellt auch ein schon hinterlegtes Bild frei
+ *                      (Blatt, Rahmen, Kartenbild).
  */
 
 use function Atelier\e;
@@ -28,5 +31,9 @@ use function Atelier\e;
     <?php endforeach; ?>
   </select>
   <span class="mt-1 block text-[0.7rem] normal-case tracking-normal opacity-70">
-    <?= $tr ? 'resimde: seçtikten sonra resmi yeniden yükleyin' : 'bei einem Bild: danach neu hochladen' ?>
+    <?php if (!empty($sofort)) : ?>
+      <?= $tr ? 'kaydedince yüklenen resme, yoksa mevcut resme uygulanır' : 'wirkt beim Speichern auf das neue, sonst auf das vorhandene Bild' ?>
+    <?php else : ?>
+      <?= $tr ? 'resimde: seçtikten sonra resmi yeniden yükleyin' : 'bei einem Bild: danach neu hochladen' ?>
+    <?php endif; ?>
   </span></label>

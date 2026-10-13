@@ -472,6 +472,51 @@ final class Media
                 : self::url(trim($folder, '/') . '/' . $name);
         }
 
+        return self::grafikAblegen($tmp, $folder, $stanze, true);
+    }
+
+    /**
+     * Ein schon abgelegtes Bild nachtraeglich freistellen.
+     *
+     * "fotograflardaki green screen duzeltmemissin" (12.10.2026): das Blatt
+     * eines Abschnitts lag mit Gruen schon auf dem Server, als es dort noch
+     * keine Wahl gab. Statt "noch einmal hochladen" reicht jetzt: Wahl
+     * treffen, speichern. Es entsteht eine NEUE Datei - die alte bleibt
+     * liegen, denn eine andere Vorlage oder Einladung kann sie noch tragen.
+     *
+     * Nur Rasterbilder im Upload-Ordner; alles andere (SVG, fremde Adresse,
+     * Platzhalter) gibt null, und das Pfadfeld bleibt, wie es war.
+     */
+    public static function freistellenAbgelegt(string $url, string $folder, string $stanze): ?string
+    {
+        if (!in_array($stanze, self::STANZEN, true)) {
+            return null;
+        }
+
+        $prefix = '/' . trim(Config::str('upload_dir', 'uploads'), '/') . '/';
+        if (!str_starts_with($url, $prefix)) {
+            return null;
+        }
+
+        $relative = substr($url, strlen($prefix));
+        if ($relative === '' || str_contains($relative, '..')) {
+            return null;
+        }
+
+        $pfad = self::dir() . '/' . $relative;
+        if (!is_file($pfad) || filesize($pfad) > 12 * 1024 * 1024) {
+            return null;
+        }
+
+        return self::grafikAblegen($pfad, $folder, $stanze, false);
+    }
+
+    /**
+     * Ein Rasterbild als WebP/PNG mit Alphakanal ablegen - aus einem frischen
+     * Upload ($hochgeladen) oder aus einer Datei, die schon im Ordner liegt.
+     */
+    private static function grafikAblegen(string $tmp, string $folder, string $stanze, bool $hochgeladen): ?string
+    {
         $info = @getimagesize($tmp);
         if ($info === false) {
             return null;
@@ -481,7 +526,9 @@ final class Media
         $mime = (string) ($info['mime'] ?? '');
 
         if (!function_exists('imagecreatefrompng')) {
-            return self::keep($tmp, $mime, $folder);
+            // Ohne GD laesst sich nichts freistellen; ein Upload wird wie
+            // bisher unveraendert abgelegt, eine abgelegte Datei bleibt.
+            return $hochgeladen ? self::keep($tmp, $mime, $folder) : null;
         }
 
         $image = match ($mime) {
