@@ -61,25 +61,14 @@ $values = array_slice((array) ($about['values'] ?? []), 0, 4);
     <div>
       <?= Ui::head(I18n::t('home.introTitle'), I18n::t('home.introEyebrow'), I18n::t('home.introText')) ?>
 
-      <?php
-      // Nur die Stats rendern, die tatsächlich einen Wert haben – sonst
-      // steht da nur noch ein Label ohne Zahl ("Google-Bewertung" ohne Sterne).
-      $statList = array_filter([
-          ['weddings', 'home.statsWeddings'],
-          ['years',    'home.statsYears'],
-          ['delivery', 'home.statsDelivery'],
-          ['rating',   'home.statsRating'],
-      ], static fn (array $s): bool => trim((string) ($stats[$s[0]] ?? '')) !== '');
-      ?>
-      <?php if ($statList !== []) : ?>
-        <?= Ui::revealOpen(150) ?>
-          <div class="mt-12 grid gap-8 sm:grid-cols-<?= min(count($statList), 4) ?> grid-cols-<?= count($statList) > 1 ? 2 : 1 ?>">
-            <?php foreach ($statList as [$key, $label]) : ?>
-              <?= Ui::stat((string) $stats[$key], I18n::t($label)) ?>
-            <?php endforeach; ?>
-          </div>
-        <?= Ui::revealClose() ?>
-      <?php endif; ?>
+      <?= Ui::revealOpen(150) ?>
+        <div class="mt-12 grid grid-cols-2 gap-8 sm:grid-cols-4">
+          <?= Ui::stat((string) ($stats['weddings'] ?? ''), I18n::t('home.statsWeddings')) ?>
+          <?= Ui::stat((string) ($stats['years'] ?? ''), I18n::t('home.statsYears')) ?>
+          <?= Ui::stat((string) ($stats['delivery'] ?? ''), I18n::t('home.statsDelivery')) ?>
+          <?= Ui::stat((string) ($stats['rating'] ?? ''), I18n::t('home.statsRating')) ?>
+        </div>
+      <?= Ui::revealClose() ?>
 
       <?php if ($values !== []) : ?>
         <?= Ui::revealOpen(220, 'mt-12 border-t border-sand-deep pt-11') ?>

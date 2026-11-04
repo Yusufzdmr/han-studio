@@ -34,21 +34,12 @@ $name = (string) ($about['name'] ?? '');
     <?= Ui::revealClose() ?>
   </div>
 
-  <?php
-  $aboutStats = array_filter([
-      ['weddings', 'home.statsWeddings'],
-      ['years',    'home.statsYears'],
-      ['delivery', 'home.statsDelivery'],
-      ['rating',   'home.statsRating'],
-  ], static fn (array $s): bool => trim((string) ($stats[$s[0]] ?? '')) !== '');
-  ?>
-  <?php if ($aboutStats !== []) : ?>
-    <?= Ui::revealOpen(100, 'mt-16 grid gap-8 border-y border-sand-deep py-10 sm:grid-cols-' . min(count($aboutStats), 4) . ' grid-cols-' . (count($aboutStats) > 1 ? 2 : 1)) ?>
-      <?php foreach ($aboutStats as [$key, $label]) : ?>
-        <?= Ui::stat((string) $stats[$key], I18n::t($label)) ?>
-      <?php endforeach; ?>
-    <?= Ui::revealClose() ?>
-  <?php endif; ?>
+  <?= Ui::revealOpen(100, 'mt-16 grid grid-cols-2 gap-8 border-y border-sand-deep py-10 sm:grid-cols-4') ?>
+    <?= Ui::stat((string) ($stats['weddings'] ?? ''), I18n::t('home.statsWeddings')) ?>
+    <?= Ui::stat((string) ($stats['years'] ?? ''), I18n::t('home.statsYears')) ?>
+    <?= Ui::stat((string) ($stats['delivery'] ?? ''), I18n::t('home.statsDelivery')) ?>
+    <?= Ui::stat((string) ($stats['rating'] ?? ''), I18n::t('home.statsRating')) ?>
+  <?= Ui::revealClose() ?>
 <?= Ui::sectionClose() ?>
 
 <?= Ui::sectionOpen('sand') ?>
