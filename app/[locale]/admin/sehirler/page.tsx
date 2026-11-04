@@ -22,8 +22,8 @@ export default async function AdminCities({ params }: { params: Promise<{ locale
         <h2 className="font-display text-xl text-ink">{de ? "Stadt- und Regionsseiten" : "Şehir ve bölge sayfaları"}</h2>
         <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted">
           {de
-            ? "Jede Stadt bekommt eine eigene Seite (Hochzeitsfotograf Stuttgart). Die Texte müssen sich unterscheiden – kopierte Stadtseiten wertet Google ab."
-            : "Her şehir kendi sayfasını alır (Stuttgart düğün fotoğrafçısı). Metinler birbirinden farklı olmalı – kopya şehir sayfalarını Google değersizleştirir."}
+            ? "Jede Stadt bekommt eine eigene Seite (z. B. Hochzeitsfotograf Ulm). Die Texte müssen sich unterscheiden – kopierte Stadtseiten wertet Google ab."
+            : "Her şehir kendi sayfasını alır (örn. Ulm düğün fotoğrafçısı). Metinler birbirinden farklı olmalı – kopya şehir sayfalarını Google değersizleştirir."}
         </p>
       </div>
 

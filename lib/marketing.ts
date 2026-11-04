@@ -69,12 +69,12 @@ export const seoPages: PageDef[] = [
     path: "/",
     label: { de: "Startseite", tr: "Ana sayfa" },
     title: {
-      de: "Hochzeitsfotograf Stuttgart – Foto & Video | Han Studio",
-      tr: "Stuttgart Düğün Fotoğrafçısı – Foto & Video | Han Studio",
+      de: "Hochzeitsfotograf Krumbach · Ulm · Memmingen · Augsburg | Han Studios",
+      tr: "Krumbach · Ulm · Memmingen · Augsburg Düğün Fotoğrafçısı | Han Studios",
     },
     description: {
-      de: "Dokumentarische Hochzeitsfotografie und Hochzeitsfilm in Stuttgart, Ludwigsburg, Esslingen und Umgebung. Private Kundengalerie mit Album-Auswahl und digitale Hochzeitseinladung inklusive.",
-      tr: "Stuttgart, Ludwigsburg, Esslingen ve çevresinde belgesel tarzda düğün fotoğrafçılığı ve düğün filmi. Albüm seçimli özel müşteri galerisi ve dijital düğün davetiyesi dahil.",
+      de: "Dokumentarische Hochzeitsfotografie und Hochzeitsfilm in Krumbach, Ulm, Neu-Ulm, Memmingen, Augsburg und Günzburg. Private Kundengalerie und digitale Hochzeitseinladung inklusive.",
+      tr: "Krumbach, Ulm, Neu-Ulm, Memmingen, Augsburg ve Günzburg'da belgesel tarzda düğün fotoğrafçılığı ve düğün filmi. Özel müşteri galerisi ve dijital düğün davetiyesi dahil.",
     },
   },
   {
@@ -82,12 +82,12 @@ export const seoPages: PageDef[] = [
     path: "/leistungen",
     label: { de: "Leistungen", tr: "Hizmetler" },
     title: {
-      de: "Leistungen – Hochzeitsfotografie & Hochzeitsfilm",
-      tr: "Hizmetler – düğün fotoğrafçılığı & düğün filmi",
+      de: "Leistungen – Hochzeitsfotografie & Hochzeitsfilm im Allgäu und in Schwaben",
+      tr: "Hizmetler – Allgäu ve Schwaben'de düğün fotoğrafçılığı ve düğün filmi",
     },
     description: {
-      de: "Hochzeitsreportage, Hochzeitsfilm in 4K, Standesamt, Henna-Abend und After-Wedding-Shooting in Stuttgart und Umgebung.",
-      tr: "Stuttgart ve çevresinde düğün çekimi, 4K düğün filmi, nikah, kına gecesi ve after-wedding çekimi.",
+      de: "Hochzeitsreportage, Hochzeitsfilm in 4K, Standesamt, Henna-Abend und After-Wedding-Shooting in Krumbach, Ulm, Memmingen und Augsburg.",
+      tr: "Krumbach, Ulm, Memmingen ve Augsburg'da düğün çekimi, 4K düğün filmi, nikah, kına gecesi ve after-wedding çekimi.",
     },
   },
   {
@@ -95,12 +95,12 @@ export const seoPages: PageDef[] = [
     path: "/preise",
     label: { de: "Preise", tr: "Fiyatlar" },
     title: {
-      de: "Preise Hochzeitsfotograf Stuttgart – ab 690 €",
-      tr: "Stuttgart düğün fotoğrafçısı fiyatları – 690 €'dan",
+      de: "Preise Hochzeitsfotograf – Pakete für Krumbach, Ulm & Augsburg",
+      tr: "Düğün fotoğrafçısı fiyatları – Krumbach, Ulm ve Augsburg paketleri",
     },
     description: {
-      de: "Transparente Pakete: Standesamt ab 690 €, Ganztagesreportage ab 1.890 €, Foto & Film ab 3.490 €. Anfahrt bis 60 km inklusive.",
-      tr: "Şeffaf paketler: nikah 690 €'dan, tam gün çekim 1.890 €'dan, foto & film 3.490 €'dan. 60 km'ye kadar ulaşım dahil.",
+      de: "Transparente Pakete für Standesamt, Ganztagesreportage und kombinierte Foto- und Filmbegleitung. Alles inklusive, keine versteckten Kosten.",
+      tr: "Nikah, tam gün çekim ve foto+film birlikte paketleri; şeffaf fiyatlar, gizli maliyet yok.",
     },
   },
   {
@@ -108,12 +108,12 @@ export const seoPages: PageDef[] = [
     path: "/portfolio",
     label: { de: "Portfolio", tr: "Portfolyo" },
     title: {
-      de: "Portfolio – echte Hochzeiten aus Stuttgart & Region",
-      tr: "Portfolyo – Stuttgart ve bölgeden gerçek düğünler",
+      de: "Portfolio – echte Hochzeiten aus Krumbach, Ulm und Augsburg",
+      tr: "Portfolyo – Krumbach, Ulm ve Augsburg'dan gerçek düğünler",
     },
     description: {
-      de: "Vier Hochzeitsreportagen aus Stuttgart, Ludwigsburg und Fellbach – Schloss, Kelter und große Eventhalle.",
-      tr: "Stuttgart, Ludwigsburg ve Fellbach'tan dört düğün çekimi – saray, şaraphane ve büyük etkinlik salonu.",
+      de: "Hochzeitsreportagen aus Krumbach, Ulm, Memmingen und Augsburg – dokumentarisch, ruhig und ehrlich.",
+      tr: "Krumbach, Ulm, Memmingen ve Augsburg'dan düğün çekimleri – belgesel, sakin ve dürüst.",
     },
   },
   {
@@ -121,12 +121,12 @@ export const seoPages: PageDef[] = [
     path: "/hochzeitslocations",
     label: { de: "Locations (Übersicht)", tr: "Mekânlar (liste)" },
     title: {
-      de: "Hochzeitslocations Stuttgart & Region – Fotograf mit Ortskenntnis",
-      tr: "Stuttgart ve çevresi düğün mekânları – mekânı tanıyan fotoğrafçı",
+      de: "Hochzeitslocations in Schwaben und im Allgäu – Fotograf mit Ortskenntnis",
+      tr: "Schwaben ve Allgäu'da düğün mekânları – mekânı tanıyan fotoğrafçı",
     },
     description: {
-      de: "Schloss, Festhalle, Eventlocation: Für die beliebtesten Hochzeitslocations der Region Stuttgart kennen wir Licht, Zeitplan und Hausregeln.",
-      tr: "Saray, düğün salonu, etkinlik mekânı: Stuttgart bölgesinin en çok tercih edilen düğün mekânlarında ışığı, zaman planını ve kuralları biliyoruz.",
+      de: "Schloss, Festsaal, Eventlocation: Für die beliebtesten Hochzeitslocations in Krumbach, Ulm, Memmingen, Augsburg und Günzburg kennen wir Licht, Zeitplan und Hausregeln.",
+      tr: "Saray, düğün salonu, etkinlik mekânı: Krumbach, Ulm, Memmingen, Augsburg ve Günzburg'daki en çok tercih edilen mekânların ışığını, zaman planını ve kurallarını biliyoruz.",
     },
   },
   {
@@ -134,12 +134,12 @@ export const seoPages: PageDef[] = [
     path: "/regionen",
     label: { de: "Regionen", tr: "Bölgeler" },
     title: {
-      de: "Hochzeitsfotograf in Stuttgart & Umgebung – alle Regionen",
-      tr: "Stuttgart ve çevresinde düğün fotoğrafçısı – tüm bölgeler",
+      de: "Hochzeitsfotograf zwischen Ulm, Memmingen und Augsburg – alle Regionen",
+      tr: "Ulm, Memmingen ve Augsburg arası düğün fotoğrafçısı – tüm bölgeler",
     },
     description: {
-      de: "Stuttgart, Ludwigsburg, Esslingen, Böblingen, Heilbronn, Tübingen und mehr: Hochzeitsfotograf und Videograf mit Ortskenntnis – Anfahrt bis 60 km inklusive.",
-      tr: "Stuttgart, Ludwigsburg, Esslingen, Böblingen, Heilbronn, Tübingen ve daha fazlası: bölgeyi tanıyan düğün fotoğrafçısı ve videografı – 60 km'ye kadar ulaşım dahil.",
+      de: "Krumbach, Ulm, Neu-Ulm, Memmingen, Augsburg und Günzburg: Hochzeitsfotograf und Videograf mit Ortskenntnis in Schwaben und im Allgäu.",
+      tr: "Krumbach, Ulm, Neu-Ulm, Memmingen, Augsburg ve Günzburg: Schwaben ve Allgäu'da bölgeyi tanıyan düğün fotoğrafçısı ve videografı.",
     },
   },
   {
@@ -166,12 +166,12 @@ export const seoPages: PageDef[] = [
     path: "/kontakt",
     label: { de: "Kontakt", tr: "İletişim" },
     title: {
-      de: "Kontakt – Hochzeitsfotograf Stuttgart anfragen",
-      tr: "İletişim – Stuttgart düğün fotoğrafçısı",
+      de: "Kontakt – Hochzeitsfotograf in Krumbach anfragen",
+      tr: "İletişim – Krumbach'ta düğün fotoğrafçısı",
     },
     description: {
-      de: "Fragt euer Hochzeitsdatum an. Antwort in der Regel innerhalb von 24 Stunden. Atelier in Stuttgart-Mitte.",
-      tr: "Düğün tarihinizi sorun. Genelde 24 saat içinde yanıt. Atölye Stuttgart merkezde.",
+      de: "Fragt euer Hochzeitsdatum an. Antwort in der Regel innerhalb von 24 Stunden. Atelier in Krumbach, Einzugsgebiet Ulm, Memmingen und Augsburg.",
+      tr: "Düğün tarihinizi sorun. Genelde 24 saat içinde yanıt. Atölye Krumbach'ta; Ulm, Memmingen ve Augsburg hizmet alanı.",
     },
   },
   {
@@ -183,8 +183,8 @@ export const seoPages: PageDef[] = [
       tr: "Dijital düğün davetiyesi oluştur – RSVP ve geri sayımlı",
     },
     description: {
-      de: "Eigene Einladungsseite in drei Minuten: Countdown, Google-Maps-Route, WhatsApp-Versand und Zusagen. Für Hochzeitspaare von Han Studio kostenlos.",
-      tr: "Üç dakikada kendi davetiye sayfanız: geri sayım, Google Maps yol tarifi, WhatsApp paylaşımı ve katılım bildirimi. Han Studio çiftlerine ücretsiz.",
+      de: "Eigene Einladungsseite in drei Minuten: Countdown, Google-Maps-Route, WhatsApp-Versand und Zusagen. Für Hochzeitspaare von Han Studios kostenlos.",
+      tr: "Üç dakikada kendi davetiye sayfanız: geri sayım, Google Maps yol tarifi, WhatsApp paylaşımı ve katılım bildirimi. Han Studios çiftlerine ücretsiz.",
     },
   },
   {
@@ -233,8 +233,8 @@ export const defaultMarketing = (): MarketingContent => ({
   ),
   templates: {
     city: {
-      de: "Hochzeitsfotograf {name} – Foto & Video ab 690 €",
-      tr: "{name} Düğün Fotoğrafçısı – Foto & Video 690 €'dan",
+      de: "Hochzeitsfotograf {name} – Foto & Video | Han Studios",
+      tr: "{name} Düğün Fotoğrafçısı – Foto & Video | Han Studios",
     },
     venue: {
       de: "{name} Hochzeitsfotograf – Erfahrung vor Ort",

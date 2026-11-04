@@ -16,17 +16,17 @@ const de = {
     cta: "Termin anfragen",
   },
   home: {
-    heroEyebrow: "Hochzeitsfotografie & Film · Stuttgart",
-    heroTitle: "Der Tag vergeht.\nDie Bilder bleiben.",
+    heroEyebrow: "Hochzeitsfotografie & Film · Krumbach · Ulm · Memmingen · Augsburg",
+    heroTitle: "Hochzeitsfotograf & Hochzeitsfilm\nin Krumbach, Ulm, Memmingen und Augsburg",
     heroText:
-      "Dokumentarische Hochzeitsfotografie und Film in Stuttgart und Umgebung. Ruhig gearbeitet, ehrlich erzählt – und pünktlich geliefert.",
+      "Dokumentarische Hochzeitsfotografie und Film in Schwaben und im Allgäu. Ruhig gearbeitet, ehrlich erzählt – und pünktlich geliefert.",
     heroCta: "Verfügbarkeit prüfen",
     heroCta2: "Portfolio ansehen",
     scroll: "Scrollen",
     introEyebrow: "Willkommen",
     introTitle: "Wir fotografieren keine Posen.\nWir fotografieren euch.",
     introText:
-      "Seit 2016 begleiten wir Hochzeiten in Baden-Württemberg – von der intimen Trauung mit 20 Gästen bis zur Feier mit 600. Immer mit derselben Haltung: leise arbeiten, nichts inszenieren, was nicht passiert wäre.",
+      "Wir begleiten Hochzeiten in Schwaben und im Allgäu – von der intimen Trauung mit 20 Gästen bis zur großen Feier. Immer mit derselben Haltung: leise arbeiten, nichts inszenieren, was nicht passiert wäre.",
     statsWeddings: "Hochzeiten begleitet",
     statsYears: "Jahre Erfahrung",
     statsDelivery: "Wochen bis zur Galerie",
@@ -51,7 +51,7 @@ const de = {
     citiesEyebrow: "Region",
     citiesTitle: "Wo wir fotografieren",
     citiesText:
-      "Stuttgart und 60 km Umkreis ohne Anfahrtskosten. Für jede Stadt kennen wir Trauorte, Lichtzeiten und die Wege dazwischen.",
+      "Krumbach und 60 km Umkreis ohne Anfahrtskosten. Für jede Stadt kennen wir Trauorte, Lichtzeiten und die Wege dazwischen.",
     venuesEyebrow: "Hochzeitslocations",
     venuesTitle: "Wir kennen eure Location",
     venuesText:
@@ -103,7 +103,7 @@ const de = {
   },
   about: {
     title: "Über mich",
-    lead: "Julian Roth, Fotograf aus Stuttgart.",
+    lead: "Ayhan Akyel, Hochzeitsfotograf aus Krumbach.",
   },
   contact: {
     title: "Kontakt",
@@ -350,13 +350,12 @@ const de = {
       "Wir stehen in keiner geschäftlichen Verbindung zu dieser Location. Die Angaben beruhen auf unserer eigenen Erfahrung vor Ort.",
   },
   footer: {
-    tagline: "Hochzeitsfotografie & Film in Stuttgart und Umgebung.",
+    tagline: "Hochzeitsfotografie & Film in Krumbach, Ulm, Memmingen und Augsburg.",
     nav: "Seiten",
     regions: "Regionen",
     legalTitle: "Rechtliches",
     contact: "Kontakt",
     rights: "Alle Rechte vorbehalten.",
-    demo: "Demo-Website. Bilder sind Platzhalter.",
   },
   common: {
     readMore: "Mehr erfahren",
@@ -385,17 +384,17 @@ const tr: typeof de = {
     cta: "Tarih sor",
   },
   home: {
-    heroEyebrow: "Düğün Fotoğrafçılığı & Film · Stuttgart",
-    heroTitle: "Gün geçer.\nKareler kalır.",
+    heroEyebrow: "Düğün Fotoğrafçılığı & Film · Krumbach · Ulm · Memmingen · Augsburg",
+    heroTitle: "Krumbach, Ulm, Memmingen ve Augsburg'da\ndüğün fotoğrafçısı ve düğün filmi",
     heroText:
-      "Stuttgart ve çevresinde belgesel tarzda düğün fotoğrafçılığı ve video. Sakin çalışılmış, dürüst anlatılmış – ve zamanında teslim edilmiş.",
+      "Schwaben ve Allgäu'da belgesel tarzda düğün fotoğrafçılığı ve film. Sakin çalışılmış, dürüst anlatılmış – ve zamanında teslim edilmiş.",
     heroCta: "Tarihinizi sorun",
     heroCta2: "Portfolyoyu gör",
     scroll: "Kaydır",
     introEyebrow: "Hoş geldiniz",
     introTitle: "Poz fotoğraflamıyoruz.\nSizi fotoğraflıyoruz.",
     introText:
-      "2016'dan beri Baden-Württemberg'de düğün çekiyoruz – 20 kişilik samimi nikahlardan 600 kişilik düğünlere kadar. Her zaman aynı yaklaşımla: sessiz çalışmak, olmayacak hiçbir şeyi kurgulamamak.",
+      "Schwaben ve Allgäu'da düğün çekiyoruz – 20 kişilik samimi nikahlardan büyük düğünlere kadar. Her zaman aynı yaklaşımla: sessiz çalışmak, olmayacak hiçbir şeyi kurgulamamak.",
     statsWeddings: "çekilen düğün",
     statsYears: "yıl tecrübe",
     statsDelivery: "haftada galeri",
@@ -420,7 +419,7 @@ const tr: typeof de = {
     citiesEyebrow: "Bölge",
     citiesTitle: "Nerelerde çekim yapıyoruz",
     citiesText:
-      "Stuttgart ve 60 km çevresi yol ücreti olmadan. Her şehir için nikah mekânlarını, ışık saatlerini ve aradaki yolları biliyoruz.",
+      "Krumbach ve 60 km çevresi yol ücreti olmadan. Her şehir için nikah mekânlarını, ışık saatlerini ve aradaki yolları biliyoruz.",
     venuesEyebrow: "Düğün mekânları",
     venuesTitle: "Mekânınızı zaten tanıyoruz",
     venuesText:
@@ -472,7 +471,7 @@ const tr: typeof de = {
   },
   about: {
     title: "Hakkımda",
-    lead: "Julian Roth, Stuttgart'tan fotoğrafçı.",
+    lead: "Ayhan Akyel, Krumbach'tan düğün fotoğrafçısı.",
   },
   contact: {
     title: "İletişim",
@@ -718,13 +717,12 @@ const tr: typeof de = {
       "Bu mekânla ticari bir bağımız yoktur. Buradaki bilgiler kendi çekim deneyimimize dayanmaktadır.",
   },
   footer: {
-    tagline: "Stuttgart ve çevresinde düğün fotoğrafçılığı ve film.",
+    tagline: "Krumbach, Ulm, Memmingen ve Augsburg'da düğün fotoğrafçılığı ve film.",
     nav: "Sayfalar",
     regions: "Bölgeler",
     legalTitle: "Yasal",
     contact: "İletişim",
     rights: "Tüm hakları saklıdır.",
-    demo: "Demo web sitesi. Görseller temsilidir.",
   },
   common: {
     readMore: "Devamını oku",

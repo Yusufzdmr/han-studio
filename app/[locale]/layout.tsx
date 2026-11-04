@@ -27,12 +27,12 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   const l: Locale = isLocale(locale) ? locale : "de";
   const title =
     l === "de"
-      ? "Hochzeitsfotograf Stuttgart | Foto & Video | Han Studio"
-      : "Stuttgart Düğün Fotoğrafçısı | Foto & Video | Han Studio";
+      ? "Hochzeitsfotograf Krumbach · Ulm · Memmingen · Augsburg | Han Studios"
+      : "Krumbach · Ulm · Memmingen · Augsburg Düğün Fotoğrafçısı | Han Studios";
   const description =
     l === "de"
-      ? "Hochzeitsfotograf & Videograf in Stuttgart und Umgebung. Dokumentarische Reportagen, Hochzeitsfilm, private Kundengalerie und digitale Einladung."
-      : "Stuttgart ve çevresinde düğün fotoğrafçısı ve videografı. Belgesel tarzda çekim, düğün filmi, özel müşteri galerisi ve dijital davetiye.";
+      ? "Hochzeitsfotograf & Videograf in Krumbach, Ulm, Neu-Ulm, Memmingen, Augsburg und Günzburg. Dokumentarische Reportagen, Hochzeitsfilm, private Kundengalerie und digitale Einladung."
+      : "Krumbach, Ulm, Neu-Ulm, Memmingen, Augsburg ve Günzburg'da düğün fotoğrafçısı ve videografı. Belgesel tarzda çekim, düğün filmi, özel müşteri galerisi ve dijital davetiye.";
 
   // Bestaetigungscodes der Suchmaschinen kommen aus dem Admin-Bereich.
   const v = await verificationTags();

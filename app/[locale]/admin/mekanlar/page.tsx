@@ -58,19 +58,19 @@ export default async function AdminVenues({ params }: { params: Promise<{ locale
         <div className="mt-6 space-y-6">
           <div>
             <label className={label}>{de ? "Name" : "Ad"} *</label>
-            <input name="name" required className={input} placeholder="Schloss Solitude" />
+            <input name="name" required className={input} placeholder="z. B. Schloss Hürben" />
           </div>
           <div>
             <label className={label}>URL</label>
-            <input name="slug" className={input} placeholder="schloss-solitude" />
+            <input name="slug" className={input} placeholder="schloss-huerben" />
           </div>
           <div>
             <label className={label}>{de ? "Stadt" : "Şehir"}</label>
-            <input name="city" className={input} placeholder="Stuttgart" />
+            <input name="city" className={input} placeholder="z. B. Krumbach" />
           </div>
           <div>
             <label className={label}>{de ? "Region (verknüpfte Stadtseite)" : "Bölge (bağlı şehir sayfası)"}</label>
-            <select name="citySlug" className={input} defaultValue="stuttgart">
+            <select name="citySlug" className={input} defaultValue="krumbach">
               {cities.map((c) => (
                 <option key={c.slug} value={c.slug}>
                   {c.name}

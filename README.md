@@ -334,14 +334,12 @@ Veritabanı erişilemezse site 500 vermez, varsayılan içerikle ayakta kalır (
 Aşağıdakiler ilanda istenen ya da müşteriye söz verilen ama demoda **henüz olmayan** kalemler.
 Sırasıyla yapılacak.
 
-1. **Bölge içeriği: Stuttgart → Krumbach ve çevresi**
-   Demo Baden-Württemberg üzerine kurulu (Stuttgart, Ludwigsburg, Esslingen, Böblingen,
-   Heilbronn, Tübingen, Pforzheim… + Schloss Solitude, SI-Centrum gibi mekânlar).
-   Müşteri **Krumbach**'ta; hedefi Ulm, Neu-Ulm, Günzburg, Memmingen, Augsburg, München,
-   sonrasında Stuttgart, Friedrichshafen, Bregenz, St. Gallen.
-   Panelden değiştirilebilir ama iş tıklamak değil: **10 şehir + 7 mekân için sıfırdan
-   benzersiz Almanca SEO metni** yazılacak (doorway page riski taşımamalı).
-   Mekân listesi müşteriden gelecek. Teslim süresi tahmininde bu kalem ayrıca hesaplanmalı.
+1. **Bölge içeriği: Krumbach ve çevresi** *(2026-11 — tamam)*
+   Varsayılan şehir seti Krumbach, Günzburg, Ulm, Neu-Ulm, Memmingen, Augsburg olarak
+   kuruldu; her biri yerel çekim noktaları, yağmur planı SSS'si ve karşılıklı komşu
+   bağlantılarıyla yazıldı (`lib/cities.ts`). Stuttgart bölgesi mekânları `lib/venues.ts`
+   içinden silindi — gerçek mekânlar panelden eklenecek. Sonraki hedefler: München,
+   Friedrichshafen, Bregenz, St. Gallen.
 
 ### Müşteriden / dışarıdan bekleyenler
 

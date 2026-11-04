@@ -20,6 +20,7 @@ import { posts as defaultPosts, type Post } from "./posts";
 import { defaultMarketing, seoPages, type MarketingContent, type SeoEntry } from "./marketing";
 import { site } from "./site";
 import type { L } from "./i18n";
+import { completeSiteContent } from "./complete-content";
 
 /**
  * Redaktionell änderbare Inhalte.
@@ -39,7 +40,7 @@ export type PackageContent = {
 };
 
 export type SiteContent = {
-  hero: { title: L; text: L; eyebrow: L };
+  hero: { title: L; subtitle: L; text: L; eyebrow: L };
   stats: { weddings: string; years: string; delivery: string; rating: string };
   contact: {
     phone: string;
@@ -84,16 +85,24 @@ export type SiteContent = {
 export const defaultContent = (): SiteContent => ({
   hero: {
     eyebrow: {
-      de: "Hochzeitsfotografie & Film · Stuttgart",
-      tr: "Düğün Fotoğrafçılığı & Film · Stuttgart",
+      de: "Hochzeitsfotografie & Film · Krumbach · Ulm · Memmingen · Augsburg",
+      tr: "Düğün Fotoğrafçılığı & Film · Krumbach · Ulm · Memmingen · Augsburg",
     },
-    title: { de: "Der Tag vergeht.\nDie Bilder bleiben.", tr: "Gün geçer.\nKareler kalır." },
+    title: {
+      de: "Hochzeitsfotograf & Hochzeitsfilm in Krumbach, Ulm, Memmingen und Augsburg",
+      tr: "Krumbach, Ulm, Memmingen ve Augsburg'da düğün fotoğrafçısı ve düğün filmi",
+    },
+    subtitle: {
+      de: "Der Tag vergeht. Die Bilder bleiben.",
+      tr: "Gün geçer. Kareler kalır.",
+    },
     text: {
-      de: "Dokumentarische Hochzeitsfotografie und Film in Stuttgart und Umgebung. Ruhig gearbeitet, ehrlich erzählt – und pünktlich geliefert.",
-      tr: "Stuttgart ve çevresinde belgesel tarzda düğün fotoğrafçılığı ve video. Sakin çalışılmış, dürüst anlatılmış – ve zamanında teslim edilmiş.",
+      de: "Dokumentarische Hochzeitsfotografie und Film in Schwaben und im Allgäu. Ruhig gearbeitet, ehrlich erzählt – und pünktlich geliefert.",
+      tr: "Schwaben ve Allgäu'da belgesel tarzda düğün fotoğrafçılığı ve film. Sakin çalışılmış, dürüst anlatılmış – ve zamanında teslim edilmiş.",
     },
   },
-  stats: { weddings: "180+", years: "9", delivery: "3", rating: "4,9 ★" },
+  // Zahlen werden im Admin gepflegt – keine fingierten Angaben als Default.
+  stats: { weddings: "", years: "", delivery: "3", rating: "" },
   contact: {
     phone: site.phone,
     phoneHuman: site.phoneHuman,
@@ -144,6 +153,7 @@ export async function getContent(): Promise<SiteContent> {
   }
 
   const d = defaultContent();
+  stored = completeSiteContent(stored, d);
   let patched = false;
   const fill = <K extends keyof SiteContent>(key: K) => {
     if (stored[key] === undefined || stored[key] === null) {

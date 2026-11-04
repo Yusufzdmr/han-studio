@@ -99,7 +99,13 @@ export async function templateMeta(opts: {
 export async function localBusinessLd(locale: Locale) {
   // Anschrift, Telefon und Bewertung kommen aus dem Admin – sonst zeigt
   // Google noch die alte Adresse, wenn der Betrieb umzieht.
-  const { contact, stats } = await getContent();
+  const { contact } = await getContent();
+
+  // Leere Social-Links nicht als sameAs an Google schicken – sonst denkt die
+  // Suche, wir hätten Profile unter „https://instagram.com/" o. ä.
+  const sameAs = [contact.instagram, site.vimeo, site.googleProfile].filter(
+    (u): u is string => typeof u === "string" && u.trim().length > 0
+  );
 
   return {
     "@context": "https://schema.org",
@@ -112,7 +118,7 @@ export async function localBusinessLd(locale: Locale) {
     email: contact.email,
     image: img("lumiere-hero-main", 1200, 630),
     priceRange: site.priceRange,
-    foundingDate: site.founded,
+    ...(site.founded ? { foundingDate: site.founded } : {}),
     address: {
       "@type": "PostalAddress",
       streetAddress: contact.street,
@@ -125,20 +131,7 @@ export async function localBusinessLd(locale: Locale) {
     // Einzugsgebiet = die im Admin gepflegten Stadtseiten
     areaServed: (await getCities()).map((c) => c.name),
     knowsLanguage: ["de", "tr", "en"],
-    sameAs: [contact.instagram, site.vimeo, site.googleProfile],
-    aggregateRating: {
-      "@type": "AggregateRating",
-      ratingValue: stats.rating.replace(",", ".").replace(/[^\d.]/g, "") || "4.9",
-      reviewCount: "87",
-    },
-    openingHoursSpecification: [
-      {
-        "@type": "OpeningHoursSpecification",
-        dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
-        opens: "10:00",
-        closes: "18:00",
-      },
-    ],
+    ...(sameAs.length ? { sameAs } : {}),
   };
 }
 

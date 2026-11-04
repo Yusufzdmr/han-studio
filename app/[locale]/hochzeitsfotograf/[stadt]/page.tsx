@@ -34,8 +34,8 @@ export async function generateMetadata({
     vars: { name: city.name },
     title:
       l === "de"
-        ? `Hochzeitsfotograf ${city.name} – Foto & Video ab 690 €`
-        : `${city.name} Düğün Fotoğrafçısı – Foto & Video 690 €'dan`,
+        ? `Hochzeitsfotograf ${city.name} – Foto & Video | Han Studios`
+        : `${city.name} Düğün Fotoğrafçısı – Foto & Video | Han Studios`,
     description: city.lead[l].slice(0, 158),
   });
 }

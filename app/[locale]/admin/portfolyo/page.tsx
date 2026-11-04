@@ -257,7 +257,7 @@ export default async function AdminPortfolio({ params }: { params: Promise<{ loc
           </div>
           <div>
             <label className={label}>{de ? "Location-Text" : "Mekân yazısı"}</label>
-            <input name="venue_de" className={input} placeholder="Schloss Solitude, Stuttgart" />
+            <input name="venue_de" className={input} placeholder="z. B. Schloss Hürben, Krumbach" />
           </div>
         </div>
         <button className="mt-7 bg-ink px-8 py-3.5 text-[0.68rem] uppercase tracking-[0.2em] text-cream hover:bg-gold">

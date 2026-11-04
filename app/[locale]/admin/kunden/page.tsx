@@ -139,7 +139,7 @@ export default async function AdminCustomers({
             </div>
             <div>
               <label className={label}>Location</label>
-              <input name="venue" className={input} placeholder="Schloss Solitude, Stuttgart" />
+              <input name="venue" className={input} placeholder="z. B. Schloss Hürben, Krumbach" />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>

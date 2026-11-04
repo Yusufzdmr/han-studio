@@ -71,7 +71,7 @@ export default function Header({ locale }: { locale: Locale }) {
               className="h-9 w-auto sm:h-11"
             />
             <span className="mt-1 hidden text-[0.6rem] uppercase tracking-[0.32em] text-muted xl:block">
-              Hochzeitsfotografie · Stuttgart
+              Hochzeitsfotografie · Krumbach · Ulm · Memmingen
             </span>
           </Link>
 
@@ -104,6 +104,24 @@ export default function Header({ locale }: { locale: Locale }) {
           </nav>
 
           <div className="flex items-center gap-3">
+            <div className="hidden items-center gap-3 xl:flex">
+              <a
+                href={`tel:${site.phone}`}
+                className="whitespace-nowrap text-[0.72rem] uppercase tracking-[0.14em] text-ink-soft transition-colors hover:text-gold"
+                aria-label={`Telefon ${site.phoneHuman}`}
+              >
+                {site.phoneHuman}
+              </a>
+              <a
+                href={`https://wa.me/${site.whatsapp}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="whitespace-nowrap text-[0.72rem] uppercase tracking-[0.14em] text-ink-soft transition-colors hover:text-gold"
+              >
+                WhatsApp
+              </a>
+            </div>
+
             <div className="hidden items-center gap-1 sm:flex">
               {locales.map((l) => (
                 <Link
@@ -166,7 +184,24 @@ export default function Header({ locale }: { locale: Locale }) {
             ))}
           </nav>
 
-          <div className="mt-8 flex items-center justify-between">
+          <div className="mt-8 flex flex-wrap items-center gap-4">
+            <a
+              href={`tel:${site.phone}`}
+              className="text-sm uppercase tracking-[0.18em] text-ink hover:text-gold"
+            >
+              {site.phoneHuman}
+            </a>
+            <a
+              href={`https://wa.me/${site.whatsapp}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm uppercase tracking-[0.18em] text-ink hover:text-gold"
+            >
+              WhatsApp
+            </a>
+          </div>
+
+          <div className="mt-6 flex items-center justify-between">
             <div className="flex gap-3">
               {locales.map((l) => (
                 <Link

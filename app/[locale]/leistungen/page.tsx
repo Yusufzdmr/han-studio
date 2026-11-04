@@ -138,7 +138,7 @@ export default async function ServicesPage({ params }: { params: Promise<{ local
       <JsonLd
         data={[
           ...services.map((s) =>
-            serviceLd({ locale: l, name: s.title[l], description: s.short[l], area: "Stuttgart", path: "/leistungen" })
+            serviceLd({ locale: l, name: s.title[l], description: s.short[l], area: "Krumbach, Ulm, Memmingen, Augsburg", path: "/leistungen" })
           ),
           breadcrumbLd(l, [
             { name: "Home", path: "/" },

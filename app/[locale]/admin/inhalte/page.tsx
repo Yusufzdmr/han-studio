@@ -35,12 +35,20 @@ export default async function AdminTexts({ params }: { params: Promise<{ locale:
             <input name="hero_eyebrow_tr" defaultValue={c.hero.eyebrow.tr} className={input} />
           </div>
           <div>
-            <label className={label}>{de ? "Überschrift (DE)" : "Başlık (DE)"}</label>
+            <label className={label}>{de ? "Überschrift H1 (DE)" : "Başlık H1 (DE)"}</label>
             <textarea name="hero_title_de" rows={2} defaultValue={c.hero.title.de} className={`${input} resize-none`} />
           </div>
           <div>
-            <label className={label}>{de ? "Überschrift (TR)" : "Başlık (TR)"}</label>
+            <label className={label}>{de ? "Überschrift H1 (TR)" : "Başlık H1 (TR)"}</label>
             <textarea name="hero_title_tr" rows={2} defaultValue={c.hero.title.tr} className={`${input} resize-none`} />
+          </div>
+          <div>
+            <label className={label}>{de ? "Untertitel / Slogan (DE)" : "Alt başlık / slogan (DE)"}</label>
+            <input name="hero_subtitle_de" defaultValue={c.hero.subtitle?.de ?? ""} className={input} />
+          </div>
+          <div>
+            <label className={label}>{de ? "Untertitel / Slogan (TR)" : "Alt başlık / slogan (TR)"}</label>
+            <input name="hero_subtitle_tr" defaultValue={c.hero.subtitle?.tr ?? ""} className={input} />
           </div>
           <div>
             <label className={label}>{de ? "Text (DE)" : "Metin (DE)"}</label>

@@ -19,12 +19,16 @@ export default async function Footer({ locale }: { locale: Locale }) {
             <div className="font-display text-2xl font-light tracking-[0.16em]">HAN STUDIO</div>
             <p className="mt-4 max-w-xs text-sm leading-relaxed text-cream/60">{t.footer.tagline}</p>
             <div className="mt-6 flex gap-4 text-[0.7rem] uppercase tracking-[0.2em] text-cream/60">
-              <a href={c.instagram} className="hover:text-gold" rel="noopener noreferrer" target="_blank">
-                Instagram
-              </a>
-              <a href={site.vimeo} className="hover:text-gold" rel="noopener noreferrer" target="_blank">
-                Vimeo
-              </a>
+              {c.instagram ? (
+                <a href={c.instagram} className="hover:text-gold" rel="noopener noreferrer" target="_blank">
+                  Instagram
+                </a>
+              ) : null}
+              {site.vimeo ? (
+                <a href={site.vimeo} className="hover:text-gold" rel="noopener noreferrer" target="_blank">
+                  Vimeo
+                </a>
+              ) : null}
             </div>
           </div>
 
@@ -76,6 +80,16 @@ export default async function Footer({ locale }: { locale: Locale }) {
                 </a>
               </div>
               <div>
+                <a
+                  href={`https://wa.me/${site.whatsapp}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-gold"
+                >
+                  WhatsApp
+                </a>
+              </div>
+              <div>
                 <a href={`mailto:${c.email}`} className="hover:text-gold">
                   {c.email}
                 </a>
@@ -103,11 +117,8 @@ export default async function Footer({ locale }: { locale: Locale }) {
           </div>
         </div>
 
-        <div className="mt-14 flex flex-col gap-3 border-t border-cream/10 pt-7 text-xs text-cream/40 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            © {new Date().getFullYear()} {site.legalName}. {t.footer.rights}
-          </div>
-          <div>{t.footer.demo}</div>
+        <div className="mt-14 border-t border-cream/10 pt-7 text-xs text-cream/40">
+          © {new Date().getFullYear()} {site.legalName}. {t.footer.rights}
         </div>
       </div>
     </footer>

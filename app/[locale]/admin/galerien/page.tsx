@@ -81,7 +81,7 @@ export default async function AdminGalleries({ params }: { params: Promise<{ loc
           </div>
           <div>
             <label className={label}>Location</label>
-            <input name="venue" className={input} placeholder="Schloss Solitude, Stuttgart" />
+            <input name="venue" className={input} placeholder="z. B. Schloss Hürben, Krumbach" />
           </div>
           <div>
             <label className={label}>{de ? "Erreichbar bis" : "Erişim bitişi"}</label>

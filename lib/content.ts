@@ -264,120 +264,9 @@ export type Story = {
   videoUrl?: string;
 };
 
-export const stories: Story[] = [
-  {
-    slug: "elif-marco-schloss-solitude",
-    couple: "Elif & Marco",
-    venue: { de: "Schloss Solitude, Stuttgart", tr: "Schloss Solitude, Stuttgart" },
-    citySlug: "stuttgart",
-    venueSlug: "schloss-solitude",
-    month: { de: "Juni", tr: "Haziran" },
-    guests: "120",
-    seeds: ["story-elif-1", "story-elif-2", "story-elif-3", "story-elif-4", "story-elif-5", "story-elif-6"],
-    intro: {
-      de: "Eine deutsch-türkische Hochzeit auf Schloss Solitude – mit Sonnenuntergang auf der Sichtachse und Feier bis halb zwei.",
-      tr: "Schloss Solitude'da Türk-Alman düğünü – eksende gün batımı ve gece bir buçuğa kadar kutlama.",
-    },
-    body: {
-      de: [
-        "Elif und Marco wollten zwei Traditionen in einen Tag bringen, ohne dass sich eine davon wie ein Programmpunkt anfühlt. Der Morgen gehörte der Familie, der Nachmittag der Trauung im Weißen Saal, der Abend dem Fest.",
-        "Für uns war das ein Tag mit vielen kleinen Übergängen – und genau die machen so eine Reportage aus. Das schönste Bild entstand nicht beim Shooting, sondern als Elifs Großmutter ihr kurz vor dem Einzug die Hand hielt.",
-      ],
-      tr: [
-        "Elif ve Marco iki geleneği tek güne sığdırmak istiyordu, ama hiçbiri program maddesi gibi durmasın diye. Sabah aileye, öğleden sonra Beyaz Salon'daki nikaha, akşam da düğüne ayrıldı.",
-        "Bizim için bu, çok sayıda küçük geçişin olduğu bir gündü – ve böyle bir çekimi asıl bunlar oluşturur. En güzel kare çekim sırasında değil, girişten hemen önce Elif'in babaannesi elini tuttuğunda çıktı.",
-      ],
-    },
-    quote: {
-      de: "Wir haben euch den ganzen Tag kaum gesehen – und trotzdem ist alles auf den Bildern.",
-      tr: "Sizi gün boyu neredeyse hiç görmedik – ama her şey karelerde var.",
-    },
-  },
-  {
-    slug: "sarah-daniel-alte-kelter",
-    couple: "Sarah & Daniel",
-    venue: { de: "Alte Kelter, Fellbach", tr: "Alte Kelter, Fellbach" },
-    citySlug: "waiblingen",
-    venueSlug: "alte-kelter-fellbach",
-    month: { de: "September", tr: "Eylül" },
-    guests: "260",
-    seeds: ["story-sarah-1", "story-sarah-2", "story-sarah-3", "story-sarah-4", "story-sarah-5", "story-sarah-6"],
-    intro: {
-      de: "Weinberge, warmes Holz und eine Feier, die um 19:30 Uhr für 30 Minuten in den Kappelberg ausgewichen ist.",
-      tr: "Bağlar, sıcak ahşap ve 19:30'da otuz dakikalığına Kappelberg'e çıkan bir düğün.",
-    },
-    body: {
-      de: [
-        "Bei 260 Gästen bleibt selten Zeit für Portraits. Wir haben deshalb im Vorgespräch ein festes Fenster vereinbart: 19:30 Uhr, 30 Minuten, Rebhänge. Der Rest des Abends gehörte der Reportage.",
-        "Die Bilder aus dieser halben Stunde sind die, die heute im Wohnzimmer hängen – und trotzdem hat niemand gemerkt, dass das Brautpaar kurz weg war.",
-      ],
-      tr: [
-        "260 kişide portreye nadiren zaman kalır. Bu yüzden ön görüşmede sabit bir aralık belirledik: 19:30, 30 dakika, bağlar. Akşamın kalanı belgesel çekime kaldı.",
-        "Bugün oturma odasında asılı olan kareler o yarım saatten – yine de kimse çiftin kısa süre ayrıldığını fark etmedi.",
-      ],
-    },
-    quote: {
-      de: "Die halbe Stunde in den Weinbergen war die beste Entscheidung des Tages.",
-      tr: "Bağlardaki o yarım saat günün en iyi kararıydı.",
-    },
-  },
-  {
-    slug: "aylin-emre-si-centrum",
-    couple: "Aylin & Emre",
-    venue: { de: "SI-Centrum, Stuttgart", tr: "SI-Centrum, Stuttgart" },
-    citySlug: "stuttgart",
-    venueSlug: "si-centrum-stuttgart",
-    month: { de: "August", tr: "Ağustos" },
-    guests: "600",
-    seeds: ["story-aylin-1", "story-aylin-2", "story-aylin-3", "story-aylin-4", "story-aylin-5", "story-aylin-6"],
-    intro: {
-      de: "600 Gäste, Bühnenprogramm, Konfetti – eine große Feier, die trotzdem ruhige Bilder zulässt.",
-      tr: "600 kişi, sahne programı, konfeti – buna rağmen sakin kareler veren büyük bir düğün.",
-    },
-    body: {
-      de: [
-        "Große Hallen sind eine Lichtfrage. Wir haben zwei Blitzstative gesetzt, das Video-Team hat mit Gimbal gearbeitet, und der Einzug wurde aus zwei Perspektiven gleichzeitig aufgenommen.",
-        "Für das Paarshooting sind wir um 16:00 Uhr raus, bevor die Gäste kamen – 25 Minuten, die den Unterschied gemacht haben.",
-      ],
-      tr: [
-        "Büyük salonlar bir ışık meselesidir. İki flaş ayağı kurduk, video ekibi gimbal ile çalıştı ve giriş aynı anda iki açıdan kaydedildi.",
-        "Çift çekimi için misafirler gelmeden 16:00'da dışarı çıktık – farkı yaratan 25 dakika.",
-      ],
-    },
-    quote: {
-      de: "Wir hatten Angst, dass die Bilder im dunklen Saal nichts werden. Das Gegenteil ist passiert.",
-      tr: "Karanlık salonda kareler olmaz diye korkuyorduk. Tam tersi oldu.",
-    },
-  },
-  {
-    slug: "lena-jonas-residenzschloss",
-    couple: "Lena & Jonas",
-    venue: { de: "Residenzschloss, Ludwigsburg", tr: "Residenzschloss, Ludwigsburg" },
-    citySlug: "ludwigsburg",
-    venueSlug: "residenzschloss-ludwigsburg",
-    month: { de: "Mai", tr: "Mayıs" },
-    guests: "90",
-    seeds: ["story-lena-1", "story-lena-2", "story-lena-3", "story-lena-4", "story-lena-5", "story-lena-6"],
-    intro: {
-      de: "Barocke Innenhöfe, ein Shooting im Blühenden Barock und zehn Minuten blaue Stunde an der Fassade.",
-      tr: "Barok iç avlular, Blühendes Barock'ta çekim ve cephede on dakikalık mavi saat.",
-    },
-    body: {
-      de: [
-        "Lena und Jonas hatten eine klare Vorstellung: wenig Inszenierung, viel Familie. Wir haben den Tag entsprechend leicht gehalten und nur zwei feste Blöcke gesetzt – das Shooting im Park und die blaue Stunde.",
-        "Die Genehmigung für das Blühende Barock haben wir vier Wochen vorher beantragt. Das ist der Punkt, an dem Erfahrung Zeit spart.",
-      ],
-      tr: [
-        "Lena ve Jonas'ın net bir isteği vardı: az kurgu, çok aile. Günü buna göre hafif tuttuk ve sadece iki sabit blok koyduk – parktaki çekim ve mavi saat.",
-        "Blühendes Barock iznini dört hafta önceden aldık. Tecrübenin zaman kazandırdığı nokta tam burası.",
-      ],
-    },
-    quote: {
-      de: "Ihr habt den Zeitplan gerettet, bevor wir überhaupt gemerkt haben, dass es einen gibt.",
-      tr: "Bir program olduğunu biz fark etmeden siz o programı kurtardınız.",
-    },
-  },
-];
+// Keine fingierten Reportagen. Echte Hochzeiten werden im Admin unter
+// "Portfolio" nach schriftlicher Freigabe der Paare veröffentlicht.
+export const stories: Story[] = [];
 
 export const storyBySlug = (slug: string) => stories.find((s) => s.slug === slug);
 
@@ -424,32 +313,9 @@ export const processSteps: ProcessStep[] = [
 
 export type Testimonial = { name: string; city: L; text: L };
 
-export const testimonials: Testimonial[] = [
-  {
-    name: "Elif & Marco",
-    city: { de: "Stuttgart", tr: "Stuttgart" },
-    text: {
-      de: "Wir haben euch den ganzen Tag kaum bemerkt – und dann waren da 600 Bilder, auf denen alles drauf ist, was uns wichtig war.",
-      tr: "Gün boyu sizi neredeyse fark etmedik – sonra bizim için önemli olan her şeyin olduğu 600 kare çıktı.",
-    },
-  },
-  {
-    name: "Sarah & Daniel",
-    city: { de: "Fellbach", tr: "Fellbach" },
-    text: {
-      de: "Die Online-Galerie war für unsere Familien perfekt. Meine Mutter in Izmir hat die Bilder am selben Abend gesehen.",
-      tr: "Online galeri ailelerimiz için mükemmeldi. Annem İzmir'de kareleri aynı akşam gördü.",
-    },
-  },
-  {
-    name: "Aylin & Emre",
-    city: { de: "Ludwigsburg", tr: "Ludwigsburg" },
-    text: {
-      de: "Der Film hat meinen Vater zum Weinen gebracht. Mehr muss man dazu nicht sagen.",
-      tr: "Film babamı ağlattı. Daha fazla söze gerek yok.",
-    },
-  },
-];
+// Keine fingierten Kundenstimmen. Echte Zitate werden im Admin unter
+// "Über mich & Stimmen" nach schriftlicher Freigabe der Paare eingepflegt.
+export const testimonials: Testimonial[] = [];
 
 export type FaqItem = { q: L; a: L };
 

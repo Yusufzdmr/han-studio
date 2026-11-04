@@ -31,7 +31,7 @@ export default async function VenuesIndex({ params }: { params: Promise<{ locale
     <>
       <PageHero
         eyebrow={t.home.venuesEyebrow}
-        title={l === "de" ? "Hochzeitslocations in der Region Stuttgart" : "Stuttgart bölgesinde düğün mekânları"}
+        title={l === "de" ? "Hochzeitslocations in Schwaben und im Allgäu" : "Schwaben ve Allgäu'da düğün mekânları"}
         text={t.venue.lead}
         seed="venues-index"
       />

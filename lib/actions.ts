@@ -98,6 +98,9 @@ export async function saveTexts(formData: FormData) {
   c.hero.eyebrow.tr = str(formData, "hero_eyebrow_tr");
   c.hero.title.de = str(formData, "hero_title_de");
   c.hero.title.tr = str(formData, "hero_title_tr");
+  c.hero.subtitle ??= { de: "", tr: "" };
+  c.hero.subtitle.de = str(formData, "hero_subtitle_de");
+  c.hero.subtitle.tr = str(formData, "hero_subtitle_tr");
   c.hero.text.de = str(formData, "hero_text_de");
   c.hero.text.tr = str(formData, "hero_text_tr");
 

@@ -21,8 +21,8 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   return pageMeta({ locale: l, page: "ueber-mich", fallback: {
       title:
         l === "de"
-          ? `Über mich – ${a.name}, Hochzeitsfotograf Stuttgart`
-          : `Hakkımda – ${a.name}, Stuttgart düğün fotoğrafçısı`,
+          ? `Über mich – ${a.name}, Hochzeitsfotograf aus Krumbach`
+          : `Hakkımda – ${a.name}, Krumbach düğün fotoğrafçısı`,
       description: a.lead[l],
     } });
 }

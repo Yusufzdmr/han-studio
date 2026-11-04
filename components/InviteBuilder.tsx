@@ -499,7 +499,7 @@ export default function InviteBuilder({ locale }: { locale: Locale }) {
                     <label className={label}>
                       {t.venue} {i === 0 ? "*" : ""}
                     </label>
-                    <input className={field} value={ev.venue} onChange={(e) => setEvent(i, { venue: e.target.value })} placeholder="Alte Kelter Fellbach" />
+                    <input className={field} value={ev.venue} onChange={(e) => setEvent(i, { venue: e.target.value })} placeholder="z. B. Schloss Hürben, Krumbach" />
                   </div>
                   <div>
                     <label className={label}>{t.address}</label>
@@ -507,7 +507,7 @@ export default function InviteBuilder({ locale }: { locale: Locale }) {
                       className={field}
                       value={ev.address}
                       onChange={(e) => setEvent(i, { address: e.target.value })}
-                      placeholder="Kelterweg 1, 70734 Fellbach"
+                      placeholder="z. B. Marktplatz 1, 86381 Krumbach"
                     />
                   </div>
                 </div>

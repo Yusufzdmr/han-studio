@@ -42,7 +42,7 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
         <div className="absolute inset-0 animate-kenburns">
           <Image
             src={img("lumiere-hero-main", 1920, 1280)}
-            alt="Hochzeitsfotografie Stuttgart"
+            alt="Hochzeitsfotografie Krumbach, Ulm und Augsburg"
             fill
             priority
             sizes="100vw"
@@ -58,11 +58,19 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
             {cms.hero.eyebrow[l]}
           </div>
           <h1
-            className="anim-up headline mt-6 max-w-3xl text-5xl text-cream sm:text-6xl md:text-7xl"
+            className="anim-up headline mt-6 max-w-4xl text-4xl text-cream sm:text-5xl md:text-6xl"
             style={{ whiteSpace: "pre-line", animationDelay: "0.4s" }}
           >
             {cms.hero.title[l]}
           </h1>
+          {cms.hero.subtitle?.[l] ? (
+            <p
+              className="anim-up font-display mt-5 max-w-2xl text-xl font-light italic text-cream/85 sm:text-2xl"
+              style={{ animationDelay: "0.55s" }}
+            >
+              {cms.hero.subtitle[l]}
+            </p>
+          ) : null}
           <p className="anim-up mt-7 max-w-xl text-[1rem] leading-relaxed text-cream/75" style={{ animationDelay: "0.65s" }}>
             {cms.hero.text[l]}
           </p>
@@ -87,14 +95,16 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
         <div className="grid gap-14 lg:grid-cols-[1.1fr_1fr] lg:gap-20">
           <div>
             <SectionHead eyebrow={t.home.introEyebrow} title={t.home.introTitle} text={t.home.introText} />
-            <Reveal delay={150}>
-              <div className="mt-12 grid grid-cols-2 gap-8 sm:grid-cols-4">
-                <Stat value={cms.stats.weddings} label={t.home.statsWeddings} />
-                <Stat value={cms.stats.years} label={t.home.statsYears} />
-                <Stat value={cms.stats.delivery} label={t.home.statsDelivery} />
-                <Stat value={cms.stats.rating} label={t.home.statsRating} />
-              </div>
-            </Reveal>
+            {(cms.stats.weddings || cms.stats.years || cms.stats.delivery || cms.stats.rating) && (
+              <Reveal delay={150}>
+                <div className="mt-12 grid grid-cols-2 gap-8 sm:grid-cols-4">
+                  {cms.stats.weddings && <Stat value={cms.stats.weddings} label={t.home.statsWeddings} />}
+                  {cms.stats.years && <Stat value={cms.stats.years} label={t.home.statsYears} />}
+                  {cms.stats.delivery && <Stat value={cms.stats.delivery} label={t.home.statsDelivery} />}
+                  {cms.stats.rating && <Stat value={cms.stats.rating} label={t.home.statsRating} />}
+                </div>
+              </Reveal>
+            )}
 
             {/* Arbeitsweise – gepflegt unter Admin > Über mich & Stimmen */}
             {about.values.length > 0 && (
@@ -119,7 +129,7 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
             )}
           </div>
           <Reveal delay={200} mask>
-            <Photo seed="lumiere-intro" alt="Brautpaar Stuttgart" ratio="4/5" sizes="(max-width: 1024px) 100vw, 45vw" />
+            <Photo seed="lumiere-intro" alt="Brautpaar in Schwaben" ratio="4/5" sizes="(max-width: 1024px) 100vw, 45vw" />
           </Reveal>
         </div>
       </Section>
@@ -142,7 +152,8 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
         </div>
       </Section>
 
-      {/* ---------------- Portfolio ---------------- */}
+      {/* ---------------- Portfolio (nur rendern, wenn Reportagen vorhanden) ---------------- */}
+      {stories.length > 0 && (
       <Section>
         <div className="flex flex-wrap items-end justify-between gap-6">
           <SectionHead eyebrow={t.home.portfolioEyebrow} title={t.home.portfolioTitle} />
@@ -177,6 +188,7 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
           ))}
         </div>
       </Section>
+      )}
 
       {/* ---------------- Ablauf ---------------- */}
       <Section tone="sand">
@@ -225,7 +237,8 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
         </div>
       </Section>
 
-      {/* ---------------- Locations ---------------- */}
+      {/* ---------------- Locations (nur rendern, wenn Locations gepflegt sind) ---------------- */}
+      {venues.length > 0 && (
       <Section>
         <SectionHead eyebrow={t.home.venuesEyebrow} title={t.home.venuesTitle} text={t.home.venuesText} />
         <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
@@ -253,6 +266,7 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
           </Link>
         </Reveal>
       </Section>
+      )}
 
       {/* ---------------- Regionen ---------------- */}
       <Section tone="sand">
@@ -272,23 +286,25 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
         </Reveal>
       </Section>
 
-      {/* ---------------- Stimmen ---------------- */}
-      <Section>
-        <SectionHead eyebrow={t.home.testimonialsEyebrow} title={t.home.testimonialsTitle} align="center" />
-        <div className="mt-14 grid gap-10 md:grid-cols-3">
-          {testimonials.map((r, i) => (
-            <Reveal key={r.name} delay={i * 110}>
-              <div className="flex h-full flex-col">
-                <div className="font-display text-4xl leading-none text-gold/50">&ldquo;</div>
-                <p className="font-display mt-3 flex-1 text-lg font-light leading-relaxed text-ink">{r.text[l]}</p>
-                <div className="mt-6 text-[0.68rem] uppercase tracking-[0.18em] text-muted">
-                  {r.name} · {r.city[l]}
+      {/* ---------------- Stimmen (nur rendern, wenn vorhanden) ---------------- */}
+      {testimonials.length > 0 && (
+        <Section>
+          <SectionHead eyebrow={t.home.testimonialsEyebrow} title={t.home.testimonialsTitle} align="center" />
+          <div className="mt-14 grid gap-10 md:grid-cols-3">
+            {testimonials.map((r, i) => (
+              <Reveal key={r.name} delay={i * 110}>
+                <div className="flex h-full flex-col">
+                  <div className="font-display text-4xl leading-none text-gold/50">&ldquo;</div>
+                  <p className="font-display mt-3 flex-1 text-lg font-light leading-relaxed text-ink">{r.text[l]}</p>
+                  <div className="mt-6 text-[0.68rem] uppercase tracking-[0.18em] text-muted">
+                    {r.name} · {r.city[l]}
+                  </div>
                 </div>
-              </div>
-            </Reveal>
-          ))}
-        </div>
-      </Section>
+              </Reveal>
+            ))}
+          </div>
+        </Section>
+      )}
 
       {/* ---------------- FAQ ---------------- */}
       <Section tone="sand">
