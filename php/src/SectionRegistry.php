@@ -643,8 +643,8 @@ final class SectionRegistry
                 'credit' => [
                     'type'    => 'bool',
                     'default' => false,
-                    'label'   => ['de' => 'Hinweis auf Han Studio',
-                                  'tr' => 'Altta Han Studio yönlendirmesi'],
+                    'label'   => ['de' => 'Hinweis auf Han Studios',
+                                  'tr' => 'Altta Han Studios yönlendirmesi'],
                 ],
             ],
             'inputs' => [

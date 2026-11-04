@@ -51,7 +51,7 @@ const de = {
     citiesEyebrow: "Region",
     citiesTitle: "Wo wir fotografieren",
     citiesText:
-      "Krumbach und 60 km Umkreis ohne Anfahrtskosten. Für jede Stadt kennen wir Trauorte, Lichtzeiten und die Wege dazwischen.",
+      "Krumbach und 80 km Umkreis ohne Anfahrtskosten. Für jede Stadt kennen wir Trauorte, Lichtzeiten und die Wege dazwischen.",
     venuesEyebrow: "Hochzeitslocations",
     venuesTitle: "Wir kennen eure Location",
     venuesText:
@@ -73,7 +73,7 @@ const de = {
   },
   prices: {
     title: "Preise & Pakete",
-    lead: "Transparente Pakete ohne versteckte Kosten. Anfahrt innerhalb von 60 km ist immer inklusive.",
+    lead: "Transparente Pakete ohne versteckte Kosten. Anfahrt innerhalb von 80 km ist immer inklusive.",
     popular: "Am häufigsten gebucht",
     from: "ab",
     addonsTitle: "Zusatzleistungen",
@@ -419,7 +419,7 @@ const tr: typeof de = {
     citiesEyebrow: "Bölge",
     citiesTitle: "Nerelerde çekim yapıyoruz",
     citiesText:
-      "Krumbach ve 60 km çevresi yol ücreti olmadan. Her şehir için nikah mekânlarını, ışık saatlerini ve aradaki yolları biliyoruz.",
+      "Krumbach ve 80 km çevresi yol ücreti olmadan. Her şehir için nikah mekânlarını, ışık saatlerini ve aradaki yolları biliyoruz.",
     venuesEyebrow: "Düğün mekânları",
     venuesTitle: "Mekânınızı zaten tanıyoruz",
     venuesText:
@@ -441,7 +441,7 @@ const tr: typeof de = {
   },
   prices: {
     title: "Fiyatlar & paketler",
-    lead: "Gizli maliyeti olmayan şeffaf paketler. 60 km'ye kadar ulaşım her zaman dahil.",
+    lead: "Gizli maliyeti olmayan şeffaf paketler. 80 km'ye kadar ulaşım her zaman dahil.",
     popular: "En çok tercih edilen",
     from: "başlangıç",
     addonsTitle: "Ek hizmetler",

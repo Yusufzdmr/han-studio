@@ -145,7 +145,7 @@ $row = static function (array $entry) use ($de, $locale): string {
         </div>
         <div>
           <label class="<?= $label ?>" for="k-venue">Location</label>
-          <input id="k-venue" name="venue" class="<?= $input ?>" placeholder="Schloss Solitude, Stuttgart">
+          <input id="k-venue" name="venue" class="<?= $input ?>" placeholder="z. B. Schloss Hürben, Krumbach">
         </div>
         <div class="grid grid-cols-2 gap-4">
           <div>

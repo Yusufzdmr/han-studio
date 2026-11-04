@@ -15,7 +15,7 @@ $de = $locale === 'de';
 ?>
 <?= Ui::pageHero(
     'venues-index',
-    $de ? 'Hochzeitslocations in der Region Stuttgart' : 'Wedding venues in the Stuttgart region',
+    $de ? 'Hochzeitslocations in Schwaben und im Allgäu' : 'Wedding venues in Swabia and the Allgäu',
     I18n::t('home.venuesEyebrow'),
     I18n::t('venue.lead')
 ) ?>

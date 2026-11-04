@@ -3202,8 +3202,8 @@ final class DesignSections
         if (($abschnitt['settings']['credit'] ?? false)) {
             $out .= '<p class="d-sec-credit"><a href="' . e(I18n::path('/', $locale)) . '">'
                 . e($locale === 'de'
-                    ? 'Gestaltet mit Han Studio'
-                    : 'Made with Han Studio')
+                    ? 'Gestaltet mit Han Studios'
+                    : 'Made with Han Studios')
                 . '</a></p>';
         }
 

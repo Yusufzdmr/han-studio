@@ -77,12 +77,12 @@ $fest = !empty($fest);
           ? 'is-solid bg-cream/95 backdrop-blur-md border-b border-sand-deep/40 py-3'
           : 'bg-transparent py-6' ?>">
   <div class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 sm:px-8">
-    <a href="<?= e($p('')) ?>" class="group flex flex-col leading-none" aria-label="Han Studio">
+    <a href="<?= e($p('')) ?>" class="group flex flex-col leading-none" aria-label="Han Studios">
       <span class="relative block h-9 sm:h-11" style="aspect-ratio: 984 / 303;">
-        <img src="/assets/logo.png" alt="Han Studio" class="hdr-logo hdr-logo-dark absolute inset-0 h-full w-full object-contain transition-opacity duration-500">
+        <img src="/assets/logo.png" alt="Han Studios" class="hdr-logo hdr-logo-dark absolute inset-0 h-full w-full object-contain transition-opacity duration-500">
         <img src="/assets/logo-light.png" alt="" aria-hidden="true" class="hdr-logo hdr-logo-light absolute inset-0 h-full w-full object-contain opacity-0 transition-opacity duration-500">
       </span>
-      <span class="hdr-sub mt-1 hidden text-[0.6rem] uppercase tracking-[0.32em] text-muted transition-colors xl:block"><?= $locale === 'de' ? 'Hochzeitsfotografie' : 'Wedding photography' ?> · <?= e((string) (\Atelier\Content::get('contact')['city'] ?? '')) ?></span>
+      <span class="hdr-sub mt-1 hidden text-[0.6rem] uppercase tracking-[0.32em] text-muted transition-colors xl:block"><?= $locale === 'de' ? 'Hochzeitsfotografie' : 'Wedding photography' ?> · Krumbach · Ulm · Memmingen</span>
     </a>
 
     <nav class="hidden items-center gap-5 lg:flex xl:gap-6">
@@ -105,15 +105,21 @@ $fest = !empty($fest);
         <?php endforeach; ?>
       </div>
 
-      <a href="<?= e($adminPath) ?>" rel="nofollow"
-         title="<?= e(I18n::t('nav.admin')) ?>" aria-label="<?= e(I18n::t('nav.admin')) ?>"
-         class="hdr-link hidden items-center p-1.5 text-muted transition-colors hover:text-gold sm:flex">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
-             stroke-linecap="round" stroke-linejoin="round" class="h-[15px] w-[15px]" aria-hidden="true">
-          <rect x="4.5" y="10.5" width="15" height="10" rx="1.6"></rect>
-          <path d="M8 10.5V7a4 4 0 0 1 8 0v3.5"></path>
-        </svg>
-      </a>
+      <?php
+      /*
+       * Telefon ve WhatsApp (xl: masaüstü). Numara Impressum ile birebir
+       * aynı; Google İşletme profilinde de aynı yazılacak (NAP tutarlılığı).
+       */
+      $phoneRaw = '+491743283263';
+      $phoneHuman = '0174 3283263';
+      $waNumber = '491743283263';
+      ?>
+      <div class="hidden items-center gap-3 xl:flex">
+        <a href="tel:<?= e($phoneRaw) ?>" aria-label="Telefon <?= e($phoneHuman) ?>"
+           class="hdr-link whitespace-nowrap text-[0.72rem] uppercase tracking-[0.14em] text-ink-soft transition-colors hover:text-gold"><?= e($phoneHuman) ?></a>
+        <a href="https://wa.me/<?= e($waNumber) ?>" target="_blank" rel="noopener noreferrer"
+           class="hdr-link whitespace-nowrap text-[0.72rem] uppercase tracking-[0.14em] text-ink-soft transition-colors hover:text-gold">WhatsApp</a>
+      </div>
 
       <a href="<?= e($p('/kontakt')) ?>" class="hdr-cta hidden whitespace-nowrap border border-ink px-5 py-2.5 text-[0.7rem] uppercase tracking-[0.16em] text-ink transition-colors hover:bg-ink hover:text-cream md:inline-block"><?= e(I18n::t('nav.cta')) ?></a>
 
@@ -136,24 +142,19 @@ $fest = !empty($fest);
       <?php endforeach; ?>
     </nav>
 
-    <div class="mt-8 flex items-center justify-between">
+    <div class="mt-8 flex flex-wrap items-center gap-4">
+      <a href="tel:<?= e($phoneRaw) ?>" class="text-sm uppercase tracking-[0.18em] text-ink hover:text-gold"><?= e($phoneHuman) ?></a>
+      <a href="https://wa.me/<?= e($waNumber) ?>" target="_blank" rel="noopener noreferrer"
+         class="text-sm uppercase tracking-[0.18em] text-ink hover:text-gold">WhatsApp</a>
+    </div>
+
+    <div class="mt-6 flex items-center justify-between">
       <div class="flex gap-3">
         <?php foreach (I18n::LOCALES as $l) : ?>
           <a href="<?= e($otherPath($l)) ?>" class="text-xs uppercase tracking-[0.22em] <?= $l === $locale ? 'text-gold' : 'text-muted' ?>"><?= $l === 'de' ? 'Deutsch' : 'English' ?></a>
         <?php endforeach; ?>
       </div>
-      <div class="flex items-center gap-4">
-        <a href="<?= e($adminPath) ?>" rel="nofollow"
-           title="<?= e(I18n::t('nav.admin')) ?>" aria-label="<?= e(I18n::t('nav.admin')) ?>"
-           class="flex items-center p-1.5 text-muted transition-colors hover:text-gold">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
-               stroke-linecap="round" stroke-linejoin="round" class="h-[15px] w-[15px]" aria-hidden="true">
-            <rect x="4.5" y="10.5" width="15" height="10" rx="1.6"></rect>
-            <path d="M8 10.5V7a4 4 0 0 1 8 0v3.5"></path>
-          </svg>
-        </a>
-        <a href="<?= e($p('/kontakt')) ?>" class="bg-ink px-6 py-3 text-[0.72rem] uppercase tracking-[0.2em] text-cream"><?= e(I18n::t('nav.cta')) ?></a>
-      </div>
+      <a href="<?= e($p('/kontakt')) ?>" class="bg-ink px-6 py-3 text-[0.72rem] uppercase tracking-[0.2em] text-cream"><?= e(I18n::t('nav.cta')) ?></a>
     </div>
   </div>
 </div>

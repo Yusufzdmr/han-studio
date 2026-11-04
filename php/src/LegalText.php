@@ -67,13 +67,13 @@ final class LegalText
         $c = Content::get('contact');
 
         return [
-            'legalName' => 'Han Studio Hochzeitsfotografie',
-            'owner'     => 'Julian Roth',
-            'street'    => (string) ($c['street'] ?? ''),
-            'zip'       => (string) ($c['zip'] ?? ''),
-            'city'      => (string) ($c['city'] ?? ''),
-            'email'     => (string) ($c['email'] ?? ''),
-            'phone'     => (string) ($c['phoneHuman'] ?? ''),
+            'legalName' => 'Han Studios – Ayhan Akyel',
+            'owner'     => 'Ayhan Akyel',
+            'street'    => (string) ($c['street'] ?? 'Dr.-Sprandelstraße 1'),
+            'zip'       => (string) ($c['zip'] ?? '86381'),
+            'city'      => (string) ($c['city'] ?? 'Krumbach'),
+            'email'     => (string) ($c['email'] ?? 'info@hanstudio.de'),
+            'phone'     => (string) ($c['phoneHuman'] ?? '0174 3283263'),
         ];
     }
 

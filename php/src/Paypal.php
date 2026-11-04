@@ -125,7 +125,7 @@ final class Paypal
                 'payment_source' => [
                     'paypal' => [
                         'experience_context' => [
-                            'brand_name'  => 'Han Studio',
+                            'brand_name'  => 'Han Studios',
                             'locale'      => 'de-DE',
                             'user_action' => 'PAY_NOW',
                             'return_url'  => $returnUrl,

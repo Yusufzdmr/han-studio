@@ -102,7 +102,7 @@ final class Mail
     }
 
     /** Der Absendername in jeder Mail. */
-    public const ABSENDER = 'Han Studio';
+    public const ABSENDER = 'Han Studios';
 
     /** Warum der letzte html()-Versand scheiterte - fuer den Test im Panel. */
     private static string $fehler = '';

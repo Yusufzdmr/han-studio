@@ -239,7 +239,7 @@ export const addons: AddOn[] = [
   { name: { de: "After-Wedding-Shooting (2 Std.)", tr: "After-Wedding çekimi (2 saat)" }, price: "+ 390 €" },
   { name: { de: "Fotoalbum 30×30 cm, 40 Seiten", tr: "Fotoğraf albümü 30×30 cm, 40 sayfa" }, price: "+ 590 €" },
   { name: { de: "Digitale Einladung mit RSVP", tr: "RSVP'li dijital davetiye" }, price: "79 €" },
-  { name: { de: "Anfahrt über 60 km", tr: "60 km üzeri yol" }, price: "0,40 €/km" },
+  { name: { de: "Anfahrt über 80 km", tr: "80 km üzeri yol" }, price: "0,40 €/km" },
 ];
 
 /* ------------------------------------------------------------------ */

@@ -29,7 +29,7 @@ $values = array_slice((array) ($about['values'] ?? []), 0, 4);
 <section class="relative h-[100svh] min-h-[600px] w-full overflow-hidden">
   <div class="absolute inset-0 animate-kenburns">
     <img src="<?= e(Images::img('lumiere-hero-main', 1920, 1280)) ?>"
-         alt="<?= e(Images::alt('lumiere-hero-main', 'Hochzeitsfotografie Stuttgart')) ?>"
+         alt="<?= e(Images::alt('lumiere-hero-main', 'Hochzeitsfotografie Krumbach, Ulm und Augsburg')) ?>"
          class="h-full w-full object-cover" fetchpriority="high" decoding="async">
   </div>
   <div class="absolute inset-0 bg-gradient-to-t from-ink/85 via-ink/35 to-ink/45"></div>
@@ -84,7 +84,7 @@ $values = array_slice((array) ($about['values'] ?? []), 0, 4);
     </div>
 
     <?= Ui::revealOpen(200, '', true) ?>
-      <?= Ui::photo('lumiere-intro', 'Brautpaar Stuttgart', '4/5', '', '(max-width: 1024px) 100vw, 45vw', 900, 1125) ?>
+      <?= Ui::photo('lumiere-intro', 'Brautpaar in Schwaben', '4/5', '', '(max-width: 1024px) 100vw, 45vw', 900, 1125) ?>
     <?= Ui::revealClose() ?>
   </div>
 <?= Ui::sectionClose() ?>

@@ -119,7 +119,7 @@ final class EinladungsMail
         $text[] = $w['aufbewahren'];
         $text[] = $w['verloren'] . ' ' . $verloren;
         $text[] = '';
-        $text[] = 'Han Studio';
+        $text[] = 'Han Studios';
 
         return [
             'subject' => $subject,
@@ -177,7 +177,7 @@ final class EinladungsMail
             . '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:' . self::SAND . '">'
             . '<tr><td align="center" style="padding:32px 12px">'
             . '<table role="presentation" width="600" cellpadding="0" cellspacing="0" style="width:100%;max-width:600px;background:' . self::PAPIER . '">'
-            . '<tr><td style="padding:28px 32px 0;font-family:Georgia,serif;font-size:11px;letter-spacing:4px;text-transform:uppercase;color:' . self::GOLD . ';text-align:center">Han Studio</td></tr>'
+            . '<tr><td style="padding:28px 32px 0;font-family:Georgia,serif;font-size:11px;letter-spacing:4px;text-transform:uppercase;color:' . self::GOLD . ';text-align:center">Han Studios</td></tr>'
             . '<tr><td style="padding:12px 32px 36px">'
             . '<table role="presentation" width="100%" cellpadding="0" cellspacing="0">' . $zeilen . '</table>'
             . '</td></tr></table></td></tr></table></body></html>';

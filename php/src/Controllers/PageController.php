@@ -335,8 +335,8 @@ final class PageController
         View::page('pages/about', $this->base('/ueber-mich', [
             'meta' => Seo::forPage('ueber-mich', [
                 'title'       => I18n::isDe()
-                    ? 'Über mich – ' . (string) ($about['name'] ?? '') . ', Hochzeitsfotograf Stuttgart'
-                    : 'About me – ' . (string) ($about['name'] ?? '') . ', wedding photographer in Stuttgart',
+                    ? 'Über mich – ' . (string) ($about['name'] ?? '') . ', Hochzeitsfotograf aus Krumbach'
+                    : 'About me – ' . (string) ($about['name'] ?? '') . ', wedding photographer in Krumbach',
                 'description' => I18n::pick($about['lead'] ?? null),
                 'jsonLd'      => [Seo::breadcrumb([
                     ['name' => 'Home', 'path' => '/'],
@@ -541,7 +541,7 @@ final class PageController
             'datePublished' => (string) ($post['date'] ?? ''),
             'dateModified'  => (string) ($post['date'] ?? ''),
             'inLanguage'    => I18n::locale(),
-            'author'        => ['@type' => 'Person', 'name' => 'Julian Roth'],
+            'author'        => ['@type' => 'Person', 'name' => 'Ayhan Akyel'],
             'publisher'     => ['@id' => Config::url() . '/#business'],
             'mainEntityOfPage' => Config::url() . I18n::path('/ratgeber/' . $slug),
         ];

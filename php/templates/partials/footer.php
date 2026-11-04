@@ -48,12 +48,14 @@ $navLinks = [
   <div class="mx-auto max-w-7xl px-5 py-16 sm:px-8 sm:py-20">
     <div class="grid gap-12 md:grid-cols-3">
       <div class="md:col-span-1">
-        <div class="font-display text-2xl font-light tracking-[0.16em]">HAN STUDIO</div>
+        <div class="font-display text-2xl font-light tracking-[0.16em]">HAN STUDIOS</div>
         <p class="mt-4 max-w-xs text-sm leading-relaxed text-cream/60"><?= e(I18n::t('footer.tagline')) ?></p>
-        <div class="mt-6 flex gap-4 text-[0.7rem] uppercase tracking-[0.2em] text-cream/60">
-          <a href="<?= e((string) ($c['instagram'] ?? '#')) ?>" class="hover:text-gold" rel="noopener noreferrer" target="_blank">Instagram</a>
-          <a href="https://vimeo.com/" class="hover:text-gold" rel="noopener noreferrer" target="_blank">Vimeo</a>
-        </div>
+        <?php $ig = (string) ($c['instagram'] ?? ''); ?>
+        <?php if ($ig !== '' && $ig !== '#') : ?>
+          <div class="mt-6 flex gap-4 text-[0.7rem] uppercase tracking-[0.2em] text-cream/60">
+            <a href="<?= e($ig) ?>" class="hover:text-gold" rel="noopener noreferrer" target="_blank">Instagram</a>
+          </div>
+        <?php endif; ?>
       </div>
 
       <div>
@@ -74,6 +76,9 @@ $navLinks = [
             <a href="tel:<?= e((string) ($c['phone'] ?? '')) ?>" class="hover:text-gold"><?= e((string) ($c['phoneHuman'] ?? '')) ?></a>
           </div>
           <div>
+            <a href="https://wa.me/491743283263" target="_blank" rel="noopener noreferrer" class="hover:text-gold">WhatsApp</a>
+          </div>
+          <div>
             <a href="mailto:<?= e((string) ($c['email'] ?? '')) ?>" class="hover:text-gold"><?= e((string) ($c['email'] ?? '')) ?></a>
           </div>
           <div class="pt-2 text-cream/50"><?= e(I18n::pick($c['hours'] ?? null, $locale)) ?></div>
@@ -92,9 +97,8 @@ $navLinks = [
       </div>
     </div>
 
-    <div class="mt-14 flex flex-col gap-3 border-t border-cream/10 pt-7 text-xs text-cream/40 sm:flex-row sm:items-center sm:justify-between">
-      <div>© <?= date('Y') ?> Han Studio Hochzeitsfotografie. <?= e(I18n::t('footer.rights')) ?></div>
-      <div><?= e(I18n::t('footer.demo')) ?></div>
+    <div class="mt-14 border-t border-cream/10 pt-7 text-xs text-cream/40">
+      © <?= date('Y') ?> Han Studios – Ayhan Akyel. <?= e(I18n::t('footer.rights')) ?>
     </div>
   </div>
 </footer>

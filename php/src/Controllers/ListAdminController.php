@@ -320,8 +320,8 @@ final class ListAdminController
         ];
 
         $this->handle('/staedte', $de ? 'Städte' : 'Şehirler', $de
-            ? 'Jede Stadt bekommt eine eigene Seite („Hochzeitsfotograf Stuttgart“). Die Texte müssen sich unterscheiden.'
-            : 'Her şehir kendi sayfasını alır („Stuttgart düğün fotoğrafçısı“). Metinler birbirinden farklı olmalı.', [$spec]);
+            ? 'Jede Stadt bekommt eine eigene Seite (z. B. „Hochzeitsfotograf Ulm"). Die Texte müssen sich unterscheiden.'
+            : 'Her şehir kendi sayfasını alır (örn. „Ulm düğün fotoğrafçısı"). Metinler birbirinden farklı olmalı.', [$spec]);
     }
 
     /* -------------------------------- Locations ------------------------------ */

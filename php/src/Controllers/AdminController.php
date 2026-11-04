@@ -125,7 +125,7 @@ final class AdminController
 
         // Deutsch auch im tuerkischen Panel: so lesen es die Paare.
         $daten = ['bride' => 'Ayşe', 'groom' => 'Mehmet', 'date' => date('Y-m-d', strtotime('+1 year')),
-                  'venue' => 'Han Studio', 'manageKey' => 'beispiel', 'locale' => 'de'];
+                  'venue' => 'Han Studios', 'manageKey' => 'beispiel', 'locale' => 'de'];
         $mail = EinladungsMail::bauen([[
             'slug'  => 'beispiel',
             'data'  => $daten,

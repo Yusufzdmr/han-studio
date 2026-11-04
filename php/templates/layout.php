@@ -12,7 +12,7 @@ use function Atelier\e;
 use Atelier\Config;
 use Atelier\I18n;
 
-$title = (string) ($meta['title'] ?? 'Han Studio');
+$title = (string) ($meta['title'] ?? 'Han Studios');
 $description = (string) ($meta['description'] ?? '');
 $canonical = (string) ($meta['canonical'] ?? Config::url() . $path);
 $image = (string) ($meta['image'] ?? '');
@@ -45,7 +45,7 @@ $bare = preg_replace('#^/(de|en)#', '', $path) ?? '';
   <link rel="alternate" hreflang="x-default" href="<?= e(Config::url() . '/de' . $bare) ?>">
 
   <meta property="og:type" content="<?= e($ogType) ?>">
-  <meta property="og:site_name" content="Han Studio">
+  <meta property="og:site_name" content="Han Studios">
   <meta property="og:locale" content="<?= e(I18n::ogLocale()) ?>">
   <meta property="og:title" content="<?= e($title) ?>">
   <meta property="og:description" content="<?= e($description) ?>">
