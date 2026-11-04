@@ -36,8 +36,12 @@ $values = array_slice((array) ($about['values'] ?? []), 0, 4);
 
   <div class="relative z-10 mx-auto flex h-full max-w-7xl flex-col justify-end px-5 pb-28 sm:px-8 sm:pb-32">
     <div class="anim-up eyebrow text-gold-soft" style="animation-delay: .2s"><?= e(I18n::pick($hero['eyebrow'] ?? null, $locale)) ?></div>
-    <h1 class="anim-up headline mt-6 max-w-3xl text-5xl text-cream sm:text-6xl md:text-7xl"
+    <h1 class="anim-up headline mt-6 max-w-4xl text-4xl text-cream sm:text-5xl md:text-6xl"
         style="white-space: pre-line; animation-delay: .4s"><?= e(I18n::pick($hero['title'] ?? null, $locale)) ?></h1>
+    <?php $slogan = I18n::pick($hero['subtitle'] ?? null, $locale); ?>
+    <?php if ($slogan !== '') : ?>
+      <p class="anim-up font-display mt-5 max-w-2xl text-xl font-light italic text-cream/85 sm:text-2xl" style="animation-delay: .55s"><?= e($slogan) ?></p>
+    <?php endif; ?>
     <p class="anim-up mt-7 max-w-xl text-[1rem] leading-relaxed text-cream/75" style="animation-delay: .65s"><?= e(I18n::pick($hero['text'] ?? null, $locale)) ?></p>
     <div class="anim-up mt-10 flex flex-wrap gap-3" style="animation-delay: .85s">
       <?= Ui::btn($p('/kontakt'), I18n::t('home.heroCta'), 'solid', '!bg-cream !text-ink hover:!bg-gold hover:!text-cream') ?>
