@@ -22,7 +22,8 @@ param(
   [string]$User = 'f0190c47',
   [string]$RemoteBase = '/hanstudios.de',
   [switch]$NurTrocken,
-  [switch]$NurMigration
+  [switch]$NurMigration,
+  [string]$Rm      # z.B. "public/migrate-krumbach-live.php" – nur loeschen, kein Upload
 )
 
 $ErrorActionPreference = 'Stop'
@@ -53,7 +54,17 @@ $local = Join-Path $repo 'php'
 # set net:limit-rate 150000:150000
 $dryRun = if ($NurTrocken) { '--dry-run' } else { '' }
 
-if ($NurMigration) {
+if ($Rm) {
+  # Einzelne Datei loeschen – nach Migration die Spur beseitigen.
+  $script = @"
+set ftp:ssl-protect-data true
+set ftp:ssl-force true
+set ssl:verify-certificate no
+open -u "$User","$pass" "$Host"
+rm "$RemoteBase/$Rm"
+bye
+"@
+} elseif ($NurMigration) {
   # Nur die einmalige Migrationsdatei senden
   $script = @"
 set ftp:ssl-protect-data true
