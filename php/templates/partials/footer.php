@@ -70,7 +70,6 @@ $navLinks = [
       <div>
         <h3 class="text-[0.7rem] uppercase tracking-[0.24em] text-gold"><?= e(I18n::t('footer.contact')) ?></h3>
         <address class="mt-5 space-y-2.5 text-sm not-italic text-cream/70">
-          <div><?= e((string) ($c['street'] ?? '')) ?></div>
           <div><?= e((string) ($c['zip'] ?? '')) ?> <?= e((string) ($c['city'] ?? '')) ?></div>
           <div class="pt-2">
             <a href="tel:<?= e((string) ($c['phone'] ?? '')) ?>" class="hover:text-gold"><?= e((string) ($c['phoneHuman'] ?? '')) ?></a>
