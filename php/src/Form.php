@@ -90,7 +90,18 @@ final class Form
         if ($type === 'check' && $value === null) {
             $value = (bool) ($field['default'] ?? false);
         }
-        $label = '<label class="' . (str_ends_with((string) $field['path'], '.en') ? self::LABEL_EN : self::LABEL) . '" for="' . e($name) . '">' . e($field['label']) . '</label>';
+        $labelClass = str_ends_with((string) $field['path'], '.en') ? self::LABEL_EN : self::LABEL;
+        $labelText = '<label class="' . $labelClass . '" for="' . e($name) . '">' . e($field['label']) . '</label>';
+        if (!empty($field['labelHref'])) {
+            // „+ Yeni" linki: yoksa, buradan hemen ekleyebilsin diye.
+            $linkText = (string) ($field['labelHrefText'] ?? '+ Neu');
+            $linkHtml = '<a href="' . e((string) $field['labelHref'])
+                . '" class="text-[0.6rem] uppercase tracking-[0.14em] text-[#B08D57] hover:underline">'
+                . e($linkText) . '</a>';
+            $label = '<div class="flex items-baseline justify-between gap-2">' . $labelText . $linkHtml . '</div>';
+        } else {
+            $label = $labelText;
+        }
         $hint = isset($field['hint'])
             ? '<p class="mt-2 text-[0.72rem] leading-relaxed text-muted">' . e($field['hint']) . '</p>'
             : '';
