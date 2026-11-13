@@ -596,11 +596,10 @@ final class Admin
     }
 
     /**
-     * "Şifremi unuttum" akışı: rastgele yeni parola üret, hash olarak kaydet,
-     * düz metni mail_to adresine yolla. Spam korumasi: IP başına saatte 2.
-     *
-     * Parolayı hiçbir yerde göstermiyoruz — sadece e-postaya. Giriş ekranında
-     * "parolanız gönderildi" mesajı çıkar.
+     * "Şifremi unuttum" akışı: tek-kullanımlık token üret, e-posta ile linkini
+     * yolla. Parolayı değiştirmez — ancak kullanıcı linke tıklayıp yeni
+     * parolayı girince değişir. Mail gitmezse de parola korunur.
+     * Spam korumasi: IP başına saatte 2.
      */
     public static function handleForgot(string $locale): never
     {
@@ -614,26 +613,84 @@ final class Admin
             exit;
         }
 
-        $neu = self::randomPassword();
-        Credentials::save($neu, null, null);
+        $token = PasswordReset::create('admin');
+        $link = Config::url() . I18n::path('/admin/parola-sifirla', $locale) . '?token=' . $token;
 
         $de = $locale === 'de';
-        $subject = $de ? 'Neues Admin-Passwort' : 'Yeni yönetici parolası';
+        $subject = $de ? 'Admin-Passwort zuruecksetzen' : 'Yönetici parola sıfırlama';
         $lines = [
-            $de ? 'Für den Adminbereich wurde ein neues Passwort erstellt:' : 'Yönetim paneli için yeni parola oluşturuldu:',
+            $de
+                ? 'Für den Adminbereich wurde eine Passwortruecksetzung angefordert. Ueber diesen Link setzt du ein neues Passwort:'
+                : 'Yönetim paneli için parola sıfırlama talep edildi. Bu bağlantıdan yeni parola belirleyebilirsin:',
             '',
-            '    ' . $neu,
+            $link,
             '',
             $de
-                ? 'Damit einloggen und bei Bedarf unter „Zugangsdaten" aendern.'
-                : 'Bu parolayla giriş yap; istersen „Parolalar" sekmesinden değiştir.',
-            '',
-            Config::url() . I18n::path('/admin', $locale),
+                ? 'Der Link ist 60 Minuten gueltig und kann genau einmal verwendet werden. Bis du ihn benutzt, bleibt dein altes Passwort gueltig.'
+                : 'Bağlantı 60 dakika geçerli, tek kullanımlık. Sen tıklayana kadar eski parola geçerli kalır.',
         ];
 
         $sent = Mail::toStudio($subject, $lines);
 
-        header('Location: ' . I18n::path('/admin', $locale) . ($sent ? '?parola=gonderildi' : '?parola=hata'), true, 303);
+        header('Location: ' . I18n::path('/admin', $locale) . ($sent ? '?parola=link' : '?parola=hata'), true, 303);
+        exit;
+    }
+
+    /**
+     * Reset linkinin arka tarafı. GET: formu göster. POST: tokeni tüket,
+     * yeni parolayı kaydet, giriş ekranına yönlendir.
+     */
+    public static function handleReset(string $locale): never
+    {
+        $token = (string) ($_GET['token'] ?? $_POST['token'] ?? '');
+
+        if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
+            if (!Security::checkCsrf($_POST['csrf'] ?? null)) {
+                http_response_code(403);
+                exit('Sitzung abgelaufen. Bitte die Seite neu laden.');
+            }
+
+            $pass = (string) ($_POST['password'] ?? '');
+            $pass2 = (string) ($_POST['password_repeat'] ?? '');
+
+            if ($pass === '' || $pass !== $pass2 || mb_strlen($pass) < 8) {
+                self::renderReset($locale, $token, 'mismatch');
+            }
+
+            $kind = PasswordReset::consume($token);
+            if ($kind !== 'admin') {
+                self::renderReset($locale, '', 'invalid');
+            }
+
+            Credentials::save($pass, null, null);
+
+            header('Location: ' . I18n::path('/admin', $locale) . '?parola=degisti', true, 303);
+            exit;
+        }
+
+        $kind = PasswordReset::peek($token);
+        self::renderReset($locale, $token, $kind === 'admin' ? '' : 'invalid');
+    }
+
+    /**
+     * Reset formunu basıp çıkar. Hata ise "invalid" durumu ile aynı şablonu
+     * gösteriyoruz; formu çizmeyip mesaj göstermek şablonun sorumluluğunda.
+     *
+     * @return never
+     */
+    private static function renderReset(string $locale, string $token, string $status): void
+    {
+        View::page('admin/reset', [
+            'layout' => 'admin/layout',
+            'locale' => $locale,
+            'path'   => I18n::path('/admin/parola-sifirla', $locale),
+            'meta'   => ['title' => 'Admin', 'noindex' => true],
+            'nav'    => false,
+            'token'  => $token,
+            'status' => $status,
+            'csrf'   => Security::csrf(),
+            'kind'   => 'admin',
+        ]);
         exit;
     }
 

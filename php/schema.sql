@@ -42,6 +42,18 @@ CREATE TABLE IF NOT EXISTS admin_remember (
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- "Şifremi unuttum" tek kullanımlık tokenları. Mail'e giden link bu tokenı
+-- taşır, kullanıcı tıklayıp yeni parolayı girince kayıt silinir. 60 dakika
+-- geçerli — eski parola bu süre boyunca HÂLÂ GEÇERLİ, token kullanılana kadar
+-- hiçbir şey değişmez (mail gitmezse de kullanıcı kilitlenmez).
+CREATE TABLE IF NOT EXISTS password_resets (
+  token_hash CHAR(64) NOT NULL PRIMARY KEY,
+  kind       VARCHAR(16) NOT NULL,
+  expires_at DATETIME NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  INDEX pw_reset_expires (expires_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- Kundenakte: Zugang, Auftragsdaten, Gutschein
 CREATE TABLE IF NOT EXISTS customers (
   code       VARCHAR(64) NOT NULL PRIMARY KEY,

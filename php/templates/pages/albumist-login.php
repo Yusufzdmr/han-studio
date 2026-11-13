@@ -23,11 +23,17 @@ $flash = (string) ($_GET['parola'] ?? '');
           : 'Bu bölüm herkese açık değildir. Lütfen giriş yapın.' ?>
     </p>
 
-    <?php if ($flash === 'gonderildi') : ?>
+    <?php if ($flash === 'link') : ?>
       <p class="mt-5 border border-gold/60 bg-gold/10 px-4 py-3 text-[0.82rem] text-ink">
         <?= $de
-            ? 'Ein neues Passwort wurde per E-Mail verschickt. Posteingang prüfen.'
-            : 'Yeni parola e-posta ile gönderildi. Gelen kutunuzu kontrol edin.' ?>
+            ? 'Ein Link zum Zuruecksetzen wurde per E-Mail verschickt. 60 Minuten gueltig.'
+            : 'Sıfırlama bağlantısı e-posta ile gönderildi. 60 dakika geçerli.' ?>
+      </p>
+    <?php elseif ($flash === 'degisti') : ?>
+      <p class="mt-5 border border-gold/60 bg-gold/10 px-4 py-3 text-[0.82rem] text-ink">
+        <?= $de
+            ? 'Passwort geaendert. Mit dem neuen Passwort anmelden.'
+            : 'Parola değiştirildi. Yeni parolayla giriş yapabilirsin.' ?>
       </p>
     <?php elseif ($flash === 'gec') : ?>
       <p class="mt-5 border border-red-700/60 bg-red-100/40 px-4 py-3 text-[0.82rem] text-ink">

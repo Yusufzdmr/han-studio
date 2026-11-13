@@ -86,8 +86,8 @@ final class Albumist
     }
 
     /**
-     * "Şifremi unuttum" — admin'in akışıyla aynı: yeni rastgele parola, hash,
-     * mail. Albümcünün kullanıcı adı dokunulmaz, sadece parolası yenilenir.
+     * "Şifremi unuttum" — tek kullanımlık token, mail'de link. Parola ancak
+     * kullanıcı linke tıklayıp yeni parolayı girince değişir.
      * Spam korumasi: IP başına saatte 2.
      */
     public static function handleForgot(string $locale): never
@@ -102,26 +102,76 @@ final class Albumist
             exit;
         }
 
-        $neu = Admin::randomPassword();
-        Credentials::save(null, null, $neu);
+        $token = PasswordReset::create('albumist');
+        $link = Config::url() . I18n::path('/albumcu/parola-sifirla', $locale) . '?token=' . $token;
 
-        $user = Credentials::albumistUser();
         $de = $locale === 'de';
-        $subject = $de ? 'Neues Albumhersteller-Passwort' : 'Yeni albümcü parolası';
+        $subject = $de ? 'Albumhersteller-Passwort zuruecksetzen' : 'Albümcü parola sıfırlama';
         $lines = [
-            $de ? 'Für den Albumhersteller-Zugang wurde ein neues Passwort erstellt:' : 'Albümcü girişi için yeni parola oluşturuldu:',
+            $de
+                ? 'Für den Albumhersteller-Zugang wurde eine Passwortruecksetzung angefordert. Ueber diesen Link setzt du ein neues Passwort:'
+                : 'Albümcü girişi için parola sıfırlama talep edildi. Bu bağlantıdan yeni parola belirleyebilirsin:',
             '',
-            '    ' . ($de ? 'Benutzername' : 'Kullanıcı adı') . ': ' . ($user !== '' ? $user : 'albumcu'),
-            '    ' . ($de ? 'Passwort' : 'Parola') . ': ' . $neu,
+            $link,
             '',
-            $de ? 'Dem Albumhersteller weitergeben.' : 'Albümcüye ilet.',
-            '',
-            Config::url() . I18n::path('/albumcu', $locale),
+            $de
+                ? 'Der Link ist 60 Minuten gueltig und kann genau einmal verwendet werden. Bis du ihn benutzt, bleibt das alte Passwort gueltig.'
+                : 'Bağlantı 60 dakika geçerli, tek kullanımlık. Tıklayana kadar eski parola geçerli kalır.',
         ];
 
         $sent = Mail::toStudio($subject, $lines);
 
-        header('Location: ' . I18n::path('/albumcu', $locale) . ($sent ? '?parola=gonderildi' : '?parola=hata'), true, 303);
+        header('Location: ' . I18n::path('/albumcu', $locale) . ($sent ? '?parola=link' : '?parola=hata'), true, 303);
+        exit;
+    }
+
+    /**
+     * Reset linkinin arka tarafı. GET: formu göster. POST: tokeni tüket,
+     * yeni albümcü parolasını kaydet, giriş ekranına yönlendir.
+     */
+    public static function handleReset(string $locale): never
+    {
+        $token = (string) ($_GET['token'] ?? $_POST['token'] ?? '');
+
+        if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
+            if (!Security::checkCsrf($_POST['csrf'] ?? null)) {
+                http_response_code(403);
+                exit('Sitzung abgelaufen. Bitte die Seite neu laden.');
+            }
+
+            $pass = (string) ($_POST['password'] ?? '');
+            $pass2 = (string) ($_POST['password_repeat'] ?? '');
+
+            if ($pass === '' || $pass !== $pass2 || mb_strlen($pass) < 6) {
+                self::renderReset($locale, $token, 'mismatch');
+            }
+
+            $kind = PasswordReset::consume($token);
+            if ($kind !== 'albumist') {
+                self::renderReset($locale, '', 'invalid');
+            }
+
+            Credentials::save(null, null, $pass);
+
+            header('Location: ' . I18n::path('/albumcu', $locale) . '?parola=degisti', true, 303);
+            exit;
+        }
+
+        $kind = PasswordReset::peek($token);
+        self::renderReset($locale, $token, $kind === 'albumist' ? '' : 'invalid');
+    }
+
+    /** @return never */
+    private static function renderReset(string $locale, string $token, string $status): void
+    {
+        View::page('pages/albumist-reset', [
+            'locale' => $locale,
+            'path'   => I18n::path('/albumcu/parola-sifirla', $locale),
+            'meta'   => ['title' => 'Albümcü', 'noindex' => true, 'bare' => true],
+            'token'  => $token,
+            'status' => $status,
+            'csrf'   => Security::csrf(),
+        ]);
         exit;
     }
 
