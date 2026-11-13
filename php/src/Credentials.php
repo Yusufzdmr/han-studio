@@ -17,11 +17,11 @@ final class Credentials
     /** @var array<string,string>|null */
     private static ?array $cache = null;
 
-    /** @return array{admin_key:string,albumist_user:string,albumist_key:string} */
+    /** @return array{admin_key:string,albumist_user:string,albumist_key:string,admin_email:string} */
     private static function all(): array
     {
         if (self::$cache !== null) {
-            /** @var array{admin_key:string,albumist_user:string,albumist_key:string} */
+            /** @var array{admin_key:string,albumist_user:string,albumist_key:string,admin_email:string} */
             return self::$cache;
         }
 
@@ -39,6 +39,7 @@ final class Credentials
             'admin_key'     => (string) ($row['admin_key'] ?? ''),
             'albumist_user' => (string) ($row['albumist_user'] ?? ''),
             'albumist_key'  => (string) ($row['albumist_key'] ?? ''),
+            'admin_email'   => (string) ($row['admin_email'] ?? ''),
         ];
         return self::$cache;
     }
@@ -78,12 +79,27 @@ final class Credentials
     }
 
     /**
+     * Admin bildirimlerinin gideceği e-posta. Panelde set edilen değer kazanır,
+     * yoksa config.php'deki `mail_to`. Mail::toStudio bunu okuyor.
+     */
+    public static function adminEmail(): string
+    {
+        $stored = self::all()['admin_email'];
+        return $stored !== '' ? $stored : Config::str('mail_to', '');
+    }
+
+    public static function hasStoredAdminEmail(): bool
+    {
+        return self::all()['admin_email'] !== '';
+    }
+
+    /**
      * Parolayı güvenli biçimde saklar. Boş parola = alanı değiştirme.
      *
      * Kullanıcı adı boş gelirse de dokunulmaz — "sadece admin parolasını değiştir"
-     * gibi kısmi güncellemeler bu sayede mümkün.
+     * gibi kısmi güncellemeler bu sayede mümkün. Admin e-posta ayrı argüman.
      */
-    public static function save(?string $adminKey, ?string $albumistUser, ?string $albumistKey): void
+    public static function save(?string $adminKey, ?string $albumistUser, ?string $albumistKey, ?string $adminEmail = null): void
     {
         $current = self::all();
 
@@ -95,6 +111,9 @@ final class Credentials
         }
         if ($albumistKey !== null && $albumistKey !== '') {
             $current['albumist_key'] = password_hash($albumistKey, PASSWORD_DEFAULT);
+        }
+        if ($adminEmail !== null && trim($adminEmail) !== '') {
+            $current['admin_email'] = trim($adminEmail);
         }
 
         self::ensureTable();

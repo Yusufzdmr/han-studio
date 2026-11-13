@@ -178,9 +178,13 @@ final class Mail
         return true;
     }
 
-    /** Die Adresse des Betriebs – Kontaktformular, Galerieauswahl. */
+    /**
+     * Die Adresse des Betriebs – Kontaktformular, Galerieauswahl,
+     * Passwort-Erinnerungen. Panelde ("Parolalar → Admin e-posta") set edilen
+     * değer kazanır, yoksa config.php'deki `mail_to`.
+     */
     public static function toStudio(string $subject, array $lines, string $replyTo = ''): bool
     {
-        return self::send(Config::str('mail_to'), $subject, $lines, $replyTo);
+        return self::send(Credentials::adminEmail(), $subject, $lines, $replyTo);
     }
 }

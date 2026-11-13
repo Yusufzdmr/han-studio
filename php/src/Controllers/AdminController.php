@@ -758,16 +758,21 @@ final class AdminController
             $adminKeyRepeat = (string) ($_POST['admin_key_repeat'] ?? '');
             $albumistUser = Security::clean($_POST['albumist_user'] ?? '', 64);
             $albumistKey = (string) ($_POST['albumist_key'] ?? '');
+            $adminEmail = Security::clean($_POST['admin_email'] ?? '', 160);
 
-            // İki kez girilen admin parolası uyuşmuyorsa hiçbirini değiştirmeyiz —
-            // kullanıcı yanlış tuşa basmışsa panelden kilitlenmesin.
-            if ($adminKey !== '' && $adminKey !== $adminKeyRepeat) {
+            // Boş olmayan e-posta geçerli görünmüyorsa reddet.
+            if ($adminEmail !== '' && !filter_var($adminEmail, FILTER_VALIDATE_EMAIL)) {
+                $saved = 'email';
+            } elseif ($adminKey !== '' && $adminKey !== $adminKeyRepeat) {
+                // İki kez girilen admin parolası uyuşmuyorsa hiçbirini değiştirmeyiz —
+                // kullanıcı yanlış tuşa basmışsa panelden kilitlenmesin.
                 $saved = 'mismatch';
             } else {
                 Credentials::save(
                     $adminKey !== '' ? $adminKey : null,
                     $albumistUser !== '' ? $albumistUser : null,
-                    $albumistKey !== '' ? $albumistKey : null
+                    $albumistKey !== '' ? $albumistKey : null,
+                    $adminEmail !== '' ? $adminEmail : null
                 );
                 $saved = 'ok';
             }
@@ -779,6 +784,7 @@ final class AdminController
             'hasAdminKey'    => Credentials::hasStoredAdminKey(),
             'hasAlbumistKey' => Credentials::hasStoredAlbumistKey(),
             'albumistUser'   => Credentials::albumistUser(),
+            'adminEmail'     => Credentials::adminEmail(),
             'flash'          => (string) ($_GET['gespeichert'] ?? ''),
         ]);
     }

@@ -10,6 +10,7 @@
  * @var bool $hasAdminKey
  * @var bool $hasAlbumistKey
  * @var string $albumistUser
+ * @var string $adminEmail
  * @var string $csrf
  * @var string $flash
  */
@@ -48,10 +49,33 @@ $box = 'border border-sand-deep p-6';
           ? 'Die beiden Admin-Passwörter waren nicht gleich – nichts wurde geändert.'
           : 'İki admin parolası aynı değildi — hiçbir şey değiştirilmedi.' ?>
     </div>
+  <?php elseif ($flash === 'email') : ?>
+    <div class="border border-red-700/60 bg-red-100/40 px-5 py-3 text-sm text-ink">
+      <?= $de
+          ? 'Die E-Mail-Adresse sieht nicht gültig aus – nichts wurde geändert.'
+          : 'E-posta adresi geçerli görünmüyor — hiçbir şey değiştirilmedi.' ?>
+    </div>
   <?php endif; ?>
 
   <form method="post" class="space-y-10" autocomplete="off">
     <input type="hidden" name="csrf" value="<?= e($csrf) ?>">
+
+    <!-- --------------------------- E-Mail des Admins -------------------------- -->
+    <section class="<?= $box ?>">
+      <h3 class="font-display text-xl text-ink"><?= $de ? 'E-Mail-Adresse' : 'E-posta adresi' ?></h3>
+      <p class="<?= $hint ?>">
+        <?= $de
+            ? 'Hierhin gehen Anfragen aus dem Kontaktformular, Galerieauswahlen und Passwort-Erinnerungen von „Passwort vergessen".'
+            : 'İletişim formundan gelen talepler, galeri seçimleri ve „Şifremi unuttum" mailleri bu adrese gider.' ?>
+      </p>
+
+      <div class="mt-6">
+        <label class="<?= $label ?>" for="admin_email"><?= $de ? 'Adresse' : 'Adres' ?></label>
+        <input id="admin_email" name="admin_email" type="email" autocomplete="email"
+               value="<?= e($adminEmail) ?>" class="<?= $input ?>"
+               placeholder="ornek@eposta.com">
+      </div>
+    </section>
 
     <!-- ------------------------------ Admin ------------------------------ -->
     <section class="<?= $box ?>">
