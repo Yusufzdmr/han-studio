@@ -143,6 +143,11 @@ $router->get('/{locale}/galerie/beispiel', $page_(static fn (array $p) => (new G
 $router->any('/{locale}/galerie/{code}/tercihler', $page_(static fn (array $p) => (new GalleryController())->preferences($p)));
 $router->any('/{locale}/galerie/{code}', $page_(static fn (array $p) => (new GalleryController())->show($p)));
 
+// Giriş öncesi "şifremi unuttum" — admin/albümcü her ikisinde. Login kontrolü
+// yok, çünkü girişi olmayan kullanıcı tetikler.
+$router->post('/{locale}/admin/parola-unuttum', $admin_(static fn (array $p) => \Atelier\Admin::handleForgot($p['locale'])));
+$router->post('/{locale}/albumcu/parola-unuttum', $admin_(static fn (array $p) => \Atelier\Albumist::handleForgot($p['locale'])));
+
 $router->any('/{locale}/admin', $admin_(static fn (array $p) => (new AdminController($p['locale']))->overview()));
 $router->get('/{locale}/admin/karte', $admin_(static fn (array $p) => (new AdminController($p['locale']))->map()));
 $router->get('/{locale}/admin/abmelden', $admin_(static fn (array $p) => (new AdminController($p['locale']))->logout()));

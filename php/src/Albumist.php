@@ -86,6 +86,46 @@ final class Albumist
     }
 
     /**
+     * "Şifremi unuttum" — admin'in akışıyla aynı: yeni rastgele parola, hash,
+     * mail. Albümcünün kullanıcı adı dokunulmaz, sadece parolası yenilenir.
+     * Spam korumasi: IP başına saatte 2.
+     */
+    public static function handleForgot(string $locale): never
+    {
+        if (!Security::checkCsrf($_POST['csrf'] ?? null)) {
+            http_response_code(403);
+            exit('Sitzung abgelaufen. Bitte die Seite neu laden.');
+        }
+
+        if (Security::throttle('albumist-forgot', 2, 3600)) {
+            header('Location: ' . I18n::path('/albumcu', $locale) . '?parola=gec', true, 303);
+            exit;
+        }
+
+        $neu = Admin::randomPassword();
+        Credentials::save(null, null, $neu);
+
+        $user = Credentials::albumistUser();
+        $de = $locale === 'de';
+        $subject = $de ? 'Neues Albumhersteller-Passwort' : 'Yeni albümcü parolası';
+        $lines = [
+            $de ? 'Für den Albumhersteller-Zugang wurde ein neues Passwort erstellt:' : 'Albümcü girişi için yeni parola oluşturuldu:',
+            '',
+            '    ' . ($de ? 'Benutzername' : 'Kullanıcı adı') . ': ' . ($user !== '' ? $user : 'albumcu'),
+            '    ' . ($de ? 'Passwort' : 'Parola') . ': ' . $neu,
+            '',
+            $de ? 'Dem Albumhersteller weitergeben.' : 'Albümcüye ilet.',
+            '',
+            Config::url() . I18n::path('/albumcu', $locale),
+        ];
+
+        $sent = Mail::toStudio($subject, $lines);
+
+        header('Location: ' . I18n::path('/albumcu', $locale) . ($sent ? '?parola=gonderildi' : '?parola=hata'), true, 303);
+        exit;
+    }
+
+    /**
      * Wird von AlbumistController als Erstes aufgerufen. Ohne Anmeldung wird
      * das Anmeldeformular gezeigt und die Ausführung beendet.
      */

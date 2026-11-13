@@ -595,6 +595,63 @@ final class Admin
         return '';
     }
 
+    /**
+     * "Şifremi unuttum" akışı: rastgele yeni parola üret, hash olarak kaydet,
+     * düz metni mail_to adresine yolla. Spam korumasi: IP başına saatte 2.
+     *
+     * Parolayı hiçbir yerde göstermiyoruz — sadece e-postaya. Giriş ekranında
+     * "parolanız gönderildi" mesajı çıkar.
+     */
+    public static function handleForgot(string $locale): never
+    {
+        if (!Security::checkCsrf($_POST['csrf'] ?? null)) {
+            http_response_code(403);
+            exit('Sitzung abgelaufen. Bitte die Seite neu laden.');
+        }
+
+        if (Security::throttle('admin-forgot', 2, 3600)) {
+            header('Location: ' . I18n::path('/admin', $locale) . '?parola=gec', true, 303);
+            exit;
+        }
+
+        $neu = self::randomPassword();
+        Credentials::save($neu, null, null);
+
+        $de = $locale === 'de';
+        $subject = $de ? 'Neues Admin-Passwort' : 'Yeni yönetici parolası';
+        $lines = [
+            $de ? 'Für den Adminbereich wurde ein neues Passwort erstellt:' : 'Yönetim paneli için yeni parola oluşturuldu:',
+            '',
+            '    ' . $neu,
+            '',
+            $de
+                ? 'Damit einloggen und bei Bedarf unter „Zugangsdaten" aendern.'
+                : 'Bu parolayla giriş yap; istersen „Parolalar" sekmesinden değiştir.',
+            '',
+            Config::url() . I18n::path('/admin', $locale),
+        ];
+
+        $sent = Mail::toStudio($subject, $lines);
+
+        header('Location: ' . I18n::path('/admin', $locale) . ($sent ? '?parola=gonderildi' : '?parola=hata'), true, 303);
+        exit;
+    }
+
+    /**
+     * Rastgele 12 karakter: karışık harf + rakam, ayırt edilmesi zor karakterler
+     * (0/O, 1/l/I) dışarıda. E-postadan elle yazılması gerekebilir.
+     */
+    public static function randomPassword(): string
+    {
+        $alphabet = 'abcdefghjkmnpqrstuvwxyz23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
+        $len = strlen($alphabet);
+        $out = '';
+        for ($i = 0; $i < 12; $i++) {
+            $out .= $alphabet[random_int(0, $len - 1)];
+        }
+        return $out;
+    }
+
     /** Schutz vor fremden Formularen; bricht mit 403 ab. */
     public static function checkCsrfOrFail(): void
     {

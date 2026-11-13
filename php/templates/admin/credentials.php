@@ -15,6 +15,7 @@
  */
 
 use function Atelier\e;
+use Atelier\Http;
 
 $de = $locale === 'de';
 $input = 'w-full border-b border-sand-deep bg-transparent px-0 py-2.5 text-[0.92rem] text-ink outline-none focus:border-gold';
@@ -69,11 +70,17 @@ $box = 'border border-sand-deep p-6';
       <div class="mt-6 grid gap-7 md:grid-cols-2">
         <div>
           <label class="<?= $label ?>" for="admin_key"><?= $de ? 'Neues Passwort' : 'Yeni parola' ?></label>
-          <input id="admin_key" name="admin_key" type="password" autocomplete="new-password" minlength="8" class="<?= $input ?>">
+          <div class="relative">
+            <input id="admin_key" name="admin_key" type="password" autocomplete="new-password" minlength="8" class="<?= $input ?> pr-10">
+            <button type="button" data-pw-toggle="admin_key" class="absolute right-0 top-1/2 -translate-y-1/2 px-2 py-1 text-[0.68rem] uppercase tracking-[0.14em] text-muted hover:text-gold"><?= $de ? 'zeigen' : 'göster' ?></button>
+          </div>
         </div>
         <div>
           <label class="<?= $label ?>" for="admin_key_repeat"><?= $de ? 'Noch einmal' : 'Tekrar' ?></label>
-          <input id="admin_key_repeat" name="admin_key_repeat" type="password" autocomplete="new-password" minlength="8" class="<?= $input ?>">
+          <div class="relative">
+            <input id="admin_key_repeat" name="admin_key_repeat" type="password" autocomplete="new-password" minlength="8" class="<?= $input ?> pr-10">
+            <button type="button" data-pw-toggle="admin_key_repeat" class="absolute right-0 top-1/2 -translate-y-1/2 px-2 py-1 text-[0.68rem] uppercase tracking-[0.14em] text-muted hover:text-gold"><?= $de ? 'zeigen' : 'göster' ?></button>
+          </div>
         </div>
       </div>
     </section>
@@ -105,7 +112,10 @@ $box = 'border border-sand-deep p-6';
         </div>
         <div>
           <label class="<?= $label ?>" for="albumist_key"><?= $de ? 'Neues Passwort' : 'Yeni parola' ?></label>
-          <input id="albumist_key" name="albumist_key" type="password" autocomplete="new-password" minlength="6" class="<?= $input ?>">
+          <div class="relative">
+            <input id="albumist_key" name="albumist_key" type="password" autocomplete="new-password" minlength="6" class="<?= $input ?> pr-10">
+            <button type="button" data-pw-toggle="albumist_key" class="absolute right-0 top-1/2 -translate-y-1/2 px-2 py-1 text-[0.68rem] uppercase tracking-[0.14em] text-muted hover:text-gold"><?= $de ? 'zeigen' : 'göster' ?></button>
+          </div>
           <p class="<?= $hint ?>">
             <?= $de
                 ? 'Sagt man dem Albumhersteller einmalig – idealerweise per Telefon, nicht per E-Mail.'
@@ -122,3 +132,19 @@ $box = 'border border-sand-deep p-6';
     </div>
   </form>
 </div>
+
+<script nonce="<?= e(Http::nonce()) ?>">
+  // "göster/gizle" düğmesi: her kutuya kendi butonu.
+  (() => {
+    const labels = { show: <?= $de ? "'zeigen'" : "'göster'" ?>, hide: <?= $de ? "'verbergen'" : "'gizle'" ?> };
+    document.querySelectorAll('button[data-pw-toggle]').forEach((btn) => {
+      const inp = document.getElementById(btn.getAttribute('data-pw-toggle'));
+      if (!inp) return;
+      btn.addEventListener('click', () => {
+        const show = inp.type === 'password';
+        inp.type = show ? 'text' : 'password';
+        btn.textContent = show ? labels.hide : labels.show;
+      });
+    });
+  })();
+</script>
