@@ -72,6 +72,7 @@ final class Admin
         ['href' => '/designs', 'group' => 'einladung', 'de' => 'Designs', 'tr' => 'Tasarımlar'],
 
         ['href' => '/integrationen', 'group' => 'technik', 'de' => 'Integrationen', 'tr' => 'Entegrasyonlar'],
+        ['href' => '/zugang', 'group' => 'technik', 'de' => 'Zugangsdaten', 'tr' => 'Parolalar'],
         ['href' => '/systemcheck', 'group' => 'technik', 'de' => 'Vor dem Livegang', 'tr' => 'Yayın kontrolü'],
     ];
 
@@ -361,7 +362,11 @@ final class Admin
             return false;
         }
 
-        $expected = Config::str('admin_key', 'demo');
+        // Panelde kayıtlı değer varsa o geçer, yoksa config.php'deki anahtar.
+        $expected = Credentials::adminKey();
+        if ($expected === '') {
+            $expected = 'demo';
+        }
         $password = trim($password);
 
         if ($expected === '' || $password === '') {
@@ -453,7 +458,7 @@ final class Admin
      */
     public static function passwordWarning(string $locale): string
     {
-        $key = Config::str('admin_key', '');
+        $key = Credentials::adminKey();
         $de = $locale === 'de';
 
         // Ein Hash ist in Ordnung, egal wie er aussieht.
@@ -465,8 +470,8 @@ final class Admin
 
         if ($key === '' || in_array(mb_strtolower($key), $weak, true)) {
             return $de
-                ? 'Der Adminbereich hat noch das Standardpasswort. Vor dem Livegang in der config.php ändern – am besten als Hash.'
-                : 'Yönetim paneli hâlâ varsayılan parolayı kullanıyor. Yayına almadan önce config.php içinde değiştirin – tercihen hash olarak.';
+                ? 'Der Adminbereich hat noch das Standardpasswort. Vor dem Livegang unter „Zugangsdaten“ oder in der config.php ändern.'
+                : 'Yönetim paneli hâlâ varsayılan parolayı kullanıyor. Yayına almadan önce „Parolalar“ sekmesinden veya config.php içinden değiştirin.';
         }
 
         if (mb_strlen($key) < 12) {

@@ -45,8 +45,9 @@ final class Albumist
             return false;
         }
 
-        $expectedUser = Config::str('albumist_user', '');
-        $expectedKey = Config::str('albumist_key', '');
+        // Panelde kayıtlı değerler varsa o geçer, yoksa config.php.
+        $expectedUser = Credentials::albumistUser();
+        $expectedKey = Credentials::albumistKey();
         $user = trim($user);
         $password = trim($password);
 

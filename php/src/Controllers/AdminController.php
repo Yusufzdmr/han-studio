@@ -6,6 +6,7 @@ namespace Atelier\Controllers;
 use Atelier\Admin;
 use Atelier\Config;
 use Atelier\Content;
+use Atelier\Credentials;
 use Atelier\Db;
 use Atelier\EinladungsMail;
 use Atelier\Galleries;
@@ -734,6 +735,51 @@ final class AdminController
             'slots'  => Images::SLOTS,
             'own'    => is_array($bilder) ? $bilder : [],
             'title'  => $de ? 'Bilder der Website' : 'Site görselleri',
+        ]);
+    }
+
+    /* ------------------------------ Zugangsdaten ---------------------------- */
+
+    /**
+     * Admin ve albümcü parolalarını panelden değiştirmek.
+     *
+     * İki parola: adminin kendi parolası (buraya girdiği) ve albümcü girişinin
+     * parolası. Boş alan = "değiştirme". Kaydederken parola hash'lenir —
+     * düz metin olarak hiçbir yere yazılmaz.
+     */
+    public function credentials(): void
+    {
+        $saved = null;
+
+        if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
+            Admin::checkCsrfOrFail();
+
+            $adminKey = (string) ($_POST['admin_key'] ?? '');
+            $adminKeyRepeat = (string) ($_POST['admin_key_repeat'] ?? '');
+            $albumistUser = Security::clean($_POST['albumist_user'] ?? '', 64);
+            $albumistKey = (string) ($_POST['albumist_key'] ?? '');
+
+            // İki kez girilen admin parolası uyuşmuyorsa hiçbirini değiştirmeyiz —
+            // kullanıcı yanlış tuşa basmışsa panelden kilitlenmesin.
+            if ($adminKey !== '' && $adminKey !== $adminKeyRepeat) {
+                $saved = 'mismatch';
+            } else {
+                Credentials::save(
+                    $adminKey !== '' ? $adminKey : null,
+                    $albumistUser !== '' ? $albumistUser : null,
+                    $albumistKey !== '' ? $albumistKey : null
+                );
+                $saved = 'ok';
+            }
+
+            Admin::back($this->locale, '/zugang', $saved);
+        }
+
+        $this->render('admin/credentials', '/zugang', [
+            'hasAdminKey'    => Credentials::hasStoredAdminKey(),
+            'hasAlbumistKey' => Credentials::hasStoredAlbumistKey(),
+            'albumistUser'   => Credentials::albumistUser(),
+            'flash'          => (string) ($_GET['gespeichert'] ?? ''),
         ]);
     }
 

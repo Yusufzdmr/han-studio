@@ -160,6 +160,7 @@ $router->any('/{locale}/admin/portfolio', $admin_(static fn (array $p) => (new L
 $router->any('/{locale}/admin/ratgeber', $admin_(static fn (array $p) => (new ListAdminController($p['locale']))->posts()));
 $router->any('/{locale}/admin/galeri-tercihleri', $admin_(static fn (array $p) => (new ListAdminController($p['locale']))->galleryPreferences()));
 $router->any('/{locale}/admin/kunden', $admin_(static fn (array $p) => (new CustomerAdminController($p['locale']))->index()));
+$router->post('/{locale}/admin/kunden/{code}/foto-ekle', $admin_(static fn (array $p) => (new CustomerAdminController($p['locale']))->uploadPhoto($p)));
 $router->any('/{locale}/admin/kunden/{code}', $admin_(static fn (array $p) => (new CustomerAdminController($p['locale']))->show($p)));
 $router->any('/{locale}/admin/einladungen', $admin_(static fn (array $p) => (new InviteAdminController($p['locale']))->index()));
 $router->any('/{locale}/admin/themen', $admin_(static fn (array $p) => (new AdminController($p['locale']))->themes()));
@@ -175,6 +176,7 @@ $router->post('/{locale}/admin/designs/{slug}/seite', $admin_(static fn (array $
 $router->any('/{locale}/admin/designs/{slug}', $admin_(static fn (array $p) => (new DesignAdminController())->edit($p)));
 $router->any('/{locale}/admin/systemcheck', $admin_(static fn (array $p) => (new AdminController($p['locale']))->preflight()));
 $router->any('/{locale}/admin/integrationen', $admin_(static fn (array $p) => (new AdminController($p['locale']))->integrations()));
+$router->any('/{locale}/admin/zugang', $admin_(static fn (array $p) => (new AdminController($p['locale']))->credentials()));
 
 // Albümcü: kalıcı giriş, sadece hazır galerileri gösterir. "abmelden" ve
 // "zip" {code} tek-parça deseninden ÖNCE kayıtlı — yoksa "abmelden" bir

@@ -15,6 +15,7 @@
 
 use function Atelier\e;
 use Atelier\Dates;
+use Atelier\Http;
 use Atelier\I18n;
 
 $de = $locale === 'de';
@@ -67,7 +68,9 @@ $hidden = '<input type="hidden" name="csrf" value="' . e($csrf) . '">';
   <div class="grid gap-8 lg:grid-cols-[1fr_360px]">
     <!-- ------------------------------ Bilder ------------------------------ -->
     <div class="space-y-6">
-      <form method="post" enctype="multipart/form-data" class="flex flex-wrap items-end gap-4 <?= $box ?>">
+      <form id="g-fotos-form" method="post" enctype="multipart/form-data"
+            data-upload-url="<?= e(I18n::path('/admin/kunden/' . $customer['code'] . '/foto-ekle', $locale)) ?>"
+            class="flex flex-wrap items-end gap-4 <?= $box ?>">
         <?= $hidden ?>
         <input type="hidden" name="was" value="fotos">
         <div class="min-w-[16rem] flex-1">
@@ -80,10 +83,98 @@ $hidden = '<input type="hidden" name="csrf" value="' . e($csrf) . '">';
               : 'Aynı anda birden çok seçebilirsiniz. Fotoğraflar sunucuda 1600 piksele küçültülür.' ?>
           </p>
         </div>
-        <button class="border border-ink px-6 py-3 text-[0.66rem] uppercase tracking-[0.18em] text-ink transition-colors hover:bg-ink hover:text-cream">
+        <button id="g-fotos-btn" class="border border-ink px-6 py-3 text-[0.66rem] uppercase tracking-[0.18em] text-ink transition-colors hover:bg-ink hover:text-cream">
           <?= $de ? 'Hochladen' : 'Yükle' ?>
         </button>
       </form>
+
+      <!--
+        JS açıkken: bir bir yüklenen her fotoğraf için ayrı satır. "Yükleniyor",
+        "bitti" ya da "hata" — büyük toplu seçimde ekran takılı kalmasın.
+        JS kapalıysa yukarıdaki form tek seferde her şeyi gönderir (eski yol).
+      -->
+      <ul id="g-fotos-status" class="hidden space-y-1 text-[0.78rem]"></ul>
+
+      <script nonce="<?= e(Http::nonce()) ?>">
+        (() => {
+          const form = document.getElementById('g-fotos-form');
+          const input = document.getElementById('g-fotos');
+          const btn = document.getElementById('g-fotos-btn');
+          const list = document.getElementById('g-fotos-status');
+          if (!form || !input || !btn || !list) return;
+
+          const url = form.getAttribute('data-upload-url');
+          const csrf = form.querySelector('input[name="csrf"]').value;
+          const texts = {
+            pending: <?= $de ? "'wartet'" : "'sırada'" ?>,
+            uploading: <?= $de ? "'wird hochgeladen…'" : "'yükleniyor…'" ?>,
+            ok: <?= $de ? "'fertig'" : "'bitti'" ?>,
+            error: <?= $de ? "'Fehler'" : "'hata'" ?>,
+            done: <?= $de ? "'Alle Bilder hochgeladen. Seite wird neu geladen…'" : "'Tüm fotoğraflar yüklendi. Sayfa yenileniyor…'" ?>,
+          };
+
+          form.addEventListener('submit', async (ev) => {
+            const files = Array.from(input.files || []);
+            if (files.length === 0) return;
+            ev.preventDefault();
+            btn.disabled = true;
+            btn.style.opacity = '0.5';
+            list.classList.remove('hidden');
+            list.innerHTML = '';
+
+            const rows = files.map((f) => {
+              const li = document.createElement('li');
+              li.className = 'flex items-center justify-between gap-3 border-b border-sand-deep/50 py-1';
+              const name = document.createElement('span');
+              name.className = 'truncate text-ink';
+              name.textContent = f.name;
+              const status = document.createElement('span');
+              status.className = 'shrink-0 text-muted';
+              status.textContent = texts.pending;
+              li.append(name, status);
+              list.append(li);
+              return status;
+            });
+
+            let anyError = false;
+            for (let i = 0; i < files.length; i++) {
+              rows[i].textContent = texts.uploading;
+              rows[i].className = 'shrink-0 text-gold';
+              const fd = new FormData();
+              fd.append('csrf', csrf);
+              fd.append('foto', files[i]);
+              try {
+                const res = await fetch(url, { method: 'POST', body: fd, credentials: 'same-origin' });
+                const data = await res.json().catch(() => ({ ok: false }));
+                if (res.ok && data.ok) {
+                  rows[i].textContent = '✓ ' + texts.ok;
+                  rows[i].className = 'shrink-0 text-ink';
+                } else {
+                  anyError = true;
+                  rows[i].textContent = '✗ ' + texts.error + (data.error ? ' (' + data.error + ')' : '');
+                  rows[i].className = 'shrink-0 text-red-700';
+                }
+              } catch (e) {
+                anyError = true;
+                rows[i].textContent = '✗ ' + texts.error;
+                rows[i].className = 'shrink-0 text-red-700';
+              }
+            }
+
+            if (!anyError) {
+              const info = document.createElement('li');
+              info.className = 'pt-2 text-ink';
+              info.textContent = texts.done;
+              list.append(info);
+              setTimeout(() => { window.location.reload(); }, 600);
+            } else {
+              // Hata varsa butonu tekrar aç — kullanıcı tekrar deneyebilsin.
+              btn.disabled = false;
+              btn.style.opacity = '';
+            }
+          });
+        })();
+      </script>
 
       <?php if ($selection !== null) : ?>
         <div class="border border-gold/50 bg-sand/30 p-5">

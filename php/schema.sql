@@ -24,6 +24,15 @@ CREATE TABLE IF NOT EXISTS integrations (
   updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- Giriş parolaları (admin ve albümcü). Panelden değiştirilebilir — WebFTP ile
+-- config.php açmaya gerek kalmıyor. Kayıt yoksa config.php'ye düşer.
+-- Değerler hash olarak saklanır (`password_hash`).
+CREATE TABLE IF NOT EXISTS credentials (
+  id         TINYINT UNSIGNED NOT NULL PRIMARY KEY DEFAULT 1,
+  data       LONGTEXT NOT NULL CHECK (JSON_VALID(data)),
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- Kundenakte: Zugang, Auftragsdaten, Gutschein
 CREATE TABLE IF NOT EXISTS customers (
   code       VARCHAR(64) NOT NULL PRIMARY KEY,

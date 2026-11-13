@@ -155,6 +155,70 @@ final class CustomerAdminController
     }
 
     /**
+     * Tek dosyalık yükleme — tarayıcıdan her bir resim ayrı isteğe ayrılıyor.
+     * Dönüşte JSON; sayfa yenilenmiyor, fotoğraf eklendiğine dair geri bildirim
+     * anında. Çoklu POST (`fotos[]`) hâlâ çalışıyor: JS kapalıysa eski yol.
+     *
+     * @param array<string,string> $params
+     */
+    public function uploadPhoto(array $params): void
+    {
+        header('Content-Type: application/json; charset=utf-8');
+
+        $code = Customers::code($params['code'] ?? '');
+        $customer = Customers::find($code);
+
+        if ($customer === null) {
+            http_response_code(404);
+            echo json_encode(['ok' => false, 'error' => 'customer']);
+            return;
+        }
+
+        if (!Security::checkCsrf($_POST['csrf'] ?? null)) {
+            http_response_code(403);
+            echo json_encode(['ok' => false, 'error' => 'csrf']);
+            return;
+        }
+
+        $file = $_FILES['foto'] ?? null;
+        if (!is_array($file)) {
+            http_response_code(400);
+            echo json_encode(['ok' => false, 'error' => 'missing']);
+            return;
+        }
+
+        $url = Media::store([
+            'name'     => (string) ($file['name'] ?? ''),
+            'type'     => (string) ($file['type'] ?? ''),
+            'tmp_name' => (string) ($file['tmp_name'] ?? ''),
+            'error'    => (int) ($file['error'] ?? UPLOAD_ERR_NO_FILE),
+            'size'     => (int) ($file['size'] ?? 0),
+        ], 'galerien/' . $code);
+
+        if ($url === null) {
+            http_response_code(422);
+            echo json_encode(['ok' => false, 'error' => 'store']);
+            return;
+        }
+
+        Galleries::addPhotos($code, [$url]);
+
+        // Yeni fotoğrafın sıra numarasını geri döndür — JS, üstteki ızgaraya
+        // şıpın koymak için kullanabilir. Sayım en son durum: addPhotos'tan
+        // sonra Galleries::find yeni listeye bakar.
+        $gallery = Galleries::find($code);
+        $uploads = (array) ($gallery['uploads'] ?? []);
+        $nr = count($uploads);
+
+        echo json_encode([
+            'ok'   => true,
+            'url'  => $url,
+            'nr'   => $nr,
+            'name' => (string) ($file['name'] ?? ''),
+        ]);
+    }
+
+    /**
      * Eine Änderung an der Akte ausführen und danach umleiten.
      *
      * @param array<string,mixed> $customer
