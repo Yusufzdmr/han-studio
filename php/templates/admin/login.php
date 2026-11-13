@@ -34,6 +34,12 @@ $de = $locale === 'de';
       <p class="text-sm text-red-700"><?= $de ? 'Passwort falsch.' : 'Parola hatalı.' ?></p>
     <?php endif; ?>
 
+    <label class="flex items-center gap-2.5 text-[0.78rem] text-muted">
+      <input type="checkbox" name="remember" value="1"
+             class="h-4 w-4 border-sand-deep accent-ink">
+      <?= $de ? 'Angemeldet bleiben (30 Tage)' : '30 gün boyunca girişi hatırla' ?>
+    </label>
+
     <button class="w-full bg-ink px-7 py-3.5 text-[0.68rem] uppercase tracking-[0.2em] text-cream transition-colors hover:bg-gold">
       <?= $de ? 'Anmelden' : 'Giriş yap' ?>
     </button>

@@ -335,24 +335,121 @@ final class Admin
     /** Und spaetestens dann in jedem Fall, auch bei Betrieb. */
     private const LIFETIME = 12 * 3600;
 
+    /** "Beni hatırla" kutusu işaretliyse çerezin ömrü — 30 gün. */
+    private const REMEMBER_DAYS = 30;
+
+    /** Çerez adı — admin'e özel, albümcüyle karışmasın. */
+    private const REMEMBER_COOKIE = 'hs_admin_remember';
+
     public static function isLoggedIn(): bool
     {
         Security::session();
-        if (empty($_SESSION['admin'])) {
+
+        if (!empty($_SESSION['admin'])) {
+            $now = time();
+            $seen = (int) ($_SESSION['adminSeen'] ?? 0);
+            $since = (int) ($_SESSION['adminSince'] ?? 0);
+
+            if (($now - $seen) > self::IDLE || ($now - $since) > self::LIFETIME) {
+                self::logout();
+                return false;
+            }
+
+            $_SESSION['adminSeen'] = $now;
+            return true;
+        }
+
+        // Oturum bitmiş — "Beni hatırla" çerezi var mı?
+        return self::resumeFromCookie();
+    }
+
+    /**
+     * Çerezden oturumu diril. Token DB'de hash olarak duruyor; her kullanımda
+     * döner (rotation) — çalınan çerez ikinci kullanımda geçersiz.
+     */
+    private static function resumeFromCookie(): bool
+    {
+        $raw = (string) ($_COOKIE[self::REMEMBER_COOKIE] ?? '');
+        if ($raw === '' || !preg_match('/^[a-f0-9]{64}$/', $raw)) {
             return false;
         }
 
-        $now = time();
-        $seen = (int) ($_SESSION['adminSeen'] ?? 0);
-        $since = (int) ($_SESSION['adminSince'] ?? 0);
+        try {
+            $hash = hash('sha256', $raw);
+            $row = Db::json('SELECT data FROM admin_remember WHERE token_hash = ?', [$hash]);
+            if (!is_array($row)) {
+                return false;
+            }
 
-        if (($now - $seen) > self::IDLE || ($now - $since) > self::LIFETIME) {
-            self::logout();
+            $expires = (int) ($row['expires'] ?? 0);
+            if ($expires <= time()) {
+                Db::run('DELETE FROM admin_remember WHERE token_hash = ?', [$hash]);
+                self::clearRememberCookie();
+                return false;
+            }
+
+            // Token rotasyonu: çerez bir kez daha kullanıldıysa yenisi verilir.
+            Db::run('DELETE FROM admin_remember WHERE token_hash = ?', [$hash]);
+            self::setRememberCookie();
+
+            Security::session();
+            session_regenerate_id(true);
+            $_SESSION['admin'] = true;
+            $_SESSION['adminSince'] = time();
+            $_SESSION['adminSeen'] = time();
+            return true;
+        } catch (\Throwable $_) {
+            // Tablo yoksa yoktur — "beni hatırla" devre dışı kalır, normal giriş ister.
             return false;
         }
+    }
 
-        $_SESSION['adminSeen'] = $now;
-        return true;
+    /** Yeni token üret, DB'ye yaz, çerezi kur. 30 gün. */
+    private static function setRememberCookie(): void
+    {
+        self::ensureRememberTable();
+
+        $raw = bin2hex(random_bytes(32)); // 64 hex char
+        $hash = hash('sha256', $raw);
+        $expires = time() + self::REMEMBER_DAYS * 86400;
+
+        Db::run(
+            'INSERT INTO admin_remember (token_hash, data) VALUES (?, ?)',
+            [$hash, Db::encode(['expires' => $expires])]
+        );
+
+        setcookie(self::REMEMBER_COOKIE, $raw, [
+            'expires'  => $expires,
+            'path'     => '/',
+            'secure'   => ($_SERVER['HTTPS'] ?? '') === 'on' || ($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https',
+            'httponly' => true,
+            'samesite' => 'Lax',
+        ]);
+
+        $_COOKIE[self::REMEMBER_COOKIE] = $raw;
+    }
+
+    private static function clearRememberCookie(): void
+    {
+        setcookie(self::REMEMBER_COOKIE, '', [
+            'expires'  => time() - 3600,
+            'path'     => '/',
+            'secure'   => ($_SERVER['HTTPS'] ?? '') === 'on' || ($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https',
+            'httponly' => true,
+            'samesite' => 'Lax',
+        ]);
+        unset($_COOKIE[self::REMEMBER_COOKIE]);
+    }
+
+    private static function ensureRememberTable(): void
+    {
+        Db::run(
+            'CREATE TABLE IF NOT EXISTS admin_remember (
+                token_hash CHAR(64) NOT NULL PRIMARY KEY,
+                data       LONGTEXT NOT NULL CHECK (JSON_VALID(data)),
+                created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci'
+        );
     }
 
     /** @return bool true bei erfolgreicher Anmeldung */
@@ -398,6 +495,16 @@ final class Admin
         Security::session();
         unset($_SESSION['admin'], $_SESSION['adminSince'], $_SESSION['adminSeen']);
         session_regenerate_id(true);
+
+        // "Beni hatırla" çerezini de iptal et: çıkış demek çıkış demek.
+        $raw = (string) ($_COOKIE[self::REMEMBER_COOKIE] ?? '');
+        if ($raw !== '' && preg_match('/^[a-f0-9]{64}$/', $raw)) {
+            try {
+                Db::run('DELETE FROM admin_remember WHERE token_hash = ?', [hash('sha256', $raw)]);
+            } catch (\Throwable $_) {
+            }
+            self::clearRememberCookie();
+        }
     }
 
     /**
@@ -421,6 +528,11 @@ final class Admin
         $error = false;
         if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && isset($_POST['password'])) {
             if (Security::checkCsrf($_POST['csrf'] ?? null) && self::login((string) $_POST['password'])) {
+                // "Beni hatırla" işaretliyse 30 günlük çerez kurulur.
+                if (!empty($_POST['remember'])) {
+                    self::setRememberCookie();
+                }
+
                 // Nach der Anmeldung dieselbe Adresse erneut aufrufen, damit ein
                 // Neuladen kein Formular noch einmal abschickt. Geprueft wird
                 // sie trotzdem: „//fremde-seite“ waere sonst ein gueltiges Ziel.

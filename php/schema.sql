@@ -33,6 +33,15 @@ CREATE TABLE IF NOT EXISTS credentials (
   updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- "Beni hatırla" çerezlerinin kayıtları. Her giriş sonrası tazelenir, 30 gün
+-- geçerli, kullanıldıktan sonra rotasyonla yenisi verilir — çalınan çerez
+-- ikinci kullanımda geçersiz. Çıkış yapınca ilgili kayıt silinir.
+CREATE TABLE IF NOT EXISTS admin_remember (
+  token_hash CHAR(64) NOT NULL PRIMARY KEY,
+  data       LONGTEXT NOT NULL CHECK (JSON_VALID(data)),
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- Kundenakte: Zugang, Auftragsdaten, Gutschein
 CREATE TABLE IF NOT EXISTS customers (
   code       VARCHAR(64) NOT NULL PRIMARY KEY,
